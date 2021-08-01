@@ -46,20 +46,32 @@ namespace GoldRateConsole
             
             if(args[0] == "/backtrack")
             {
-                int cnt = 211;
+                if(args.Length != 3)
+                {
+                    Console.WriteLine("Must supply date to start and # of days to go backwards, eg: /backtrack 2021-07-01 30");
+                    Console.WriteLine("This /backtrack switch works backwards. So it will go from July 31,2021 back 30 days to June 21st (see next notes).");
+                    Console.WriteLine("Weekend days are skipped, and not included in the count. If you say 14, it will get the last 14 M-F rates.");
+                    Console.WriteLine("So if you want the last 2 weeks, you would specify 10, not 14.");
+                    return;
+                }
+                int cnt = int.Parse(args[2]);
                 DateTime dt = DateTime.Parse(args[1]);
-                Console.WriteLine("Getting rates starting from {0} to {1}", args[1], dt.AddDays(-211).ToString("yyyy-MM-dd"));
+                Console.WriteLine("Getting rates starting from {0} to {1}", args[1], dt.AddDays(-cnt - 1).ToString("yyyy-MM-dd"));
                 while(cnt != 0)
                 {
+                    if(dt.DayOfWeek != DayOfWeek.Sunday && dt.DayOfWeek != DayOfWeek.Saturday)
+                    {
+                        string fullURL = url + gold + dt.ToString("yyyyMMdd");
+                        var client = new RestClient(fullURL);
+                        var request = new RestRequest(Method.GET);
+                        request.AddHeader("x-access-token", token);
+                        request.AddHeader("Content-Type", "application/json");
+                        IRestResponse response = client.Execute(request);
+                        _goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+                        Save(_goldPrice);
+                        cnt--;
+                    }
                     dt = dt.AddDays(-1);
-                    var client = new RestClient(url + gold + dt.ToString("yyyyMMdd"));
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("x-access-token", token);
-                    request.AddHeader("Content-Type", "application/json");
-                    IRestResponse response = client.Execute(request);
-                    _goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
-                    Save(_goldPrice);
-                    cnt--;
                 }
                 return;
             }
@@ -163,6 +175,7 @@ namespace GoldRateConsole
                         break;
                 }
                 cnt++;
+		Console.WriteLine("Count: {0}", cnt);
             }
             return canRun;
         }
