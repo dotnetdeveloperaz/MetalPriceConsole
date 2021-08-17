@@ -123,7 +123,7 @@ namespace GoldRateConsole
         static void Save(GoldPrice goldPrice)
         {
             MySqlConnection sqlConnection = new MySqlConnection(connectionString);
-            MySqlCommand sqlCommand = new MySqlCommand("sp_AddGoldRate", sqlConnection);
+            MySqlCommand sqlCommand = new MySqlCommand("usp_AddGoldPrice", sqlConnection);
             sqlCommand.CommandType = CommandType.StoredProcedure;
             try
             {
