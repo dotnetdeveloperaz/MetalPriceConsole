@@ -122,6 +122,8 @@ namespace GoldRateConsole
 
         static void Save(GoldPrice goldPrice)
         {
+	    if(goldPrice.date.Year < 1900)
+		return;
             MySqlConnection sqlConnection = new MySqlConnection(connectionString);
             MySqlCommand sqlCommand = new MySqlCommand("usp_AddGoldPrice", sqlConnection);
             sqlCommand.CommandType = CommandType.StoredProcedure;
