@@ -1,4 +1,4 @@
-# Project Title
+# Gold Price Console
 
 ## Table of Contents
 

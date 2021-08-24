@@ -1,5 +1,5 @@
 using System;
-namespace GoldRateConsole
+namespace GoldPriceConsole
 {
     public class GoldPrice
     {

@@ -7,7 +7,7 @@ using MySqlConnector;
 using Newtonsoft.Json;
 using RestSharp;
 
-namespace GoldRateConsole
+namespace GoldPriceConsole
 {
     class Program
     {
