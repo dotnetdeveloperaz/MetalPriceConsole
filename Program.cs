@@ -35,11 +35,12 @@ namespace GoldPriceConsole
             var config = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json")
-                //.AddUserSecrets<Program>()
+                .AddUserSecrets("49b2ab55-a5d6-4a2a-a7dd-ef3bd5e67ab1")
                 .Build();
-
-            connectionString = config.GetConnectionString("DefaultDB");
+            
+            connectionString = config.GetSection("DefaultDB").Value;
             //Console.WriteLine("DB String: {0}", connectionString);
+            //return;
             token = config.GetSection("Token").Value;
             url = config.GetSection("BaseURL").Value;
             gold = config.GetSection("DefaultMetal").Value;
@@ -168,7 +169,7 @@ namespace GoldPriceConsole
                         canRun = true;
                         getAccount = true;
                         break;
-                    case "/rate":
+                    case "/rate": case "/price":
                         canRun = true;
                         getRate = true;
                         break;
