@@ -102,7 +102,7 @@ status - Gets the status of the third party web service, which is true (1) or fa
 
 acct - Gets details of your account (like sample above) at the third party web service.
 
-price - Gets yesterdays Gold rate (and saves to the configured database if passing --save
+price - Gets yesterday's (Prices are available for previous days close) Gold rate (and saves to the configured database if passing --save
 
 price --date YYYY-MM-DD to get a specific date instead of yesterday's (default) close price.
 
