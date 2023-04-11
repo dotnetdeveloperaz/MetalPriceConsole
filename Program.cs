@@ -40,87 +40,104 @@ class Program
     {
         Console.Clear();
         var titleTable = new Table().Centered();
-        titleTable.AddColumn(new TableColumn(new Markup("[yellow]Gold :pick:  Price Console[/] \r\n[green bold italic]Copyright © 2023 Scott Glasgow[/]")).Centered());
+        titleTable.AddColumn(
+            new TableColumn(
+                new Markup(
+                    "[yellow]Gold :pick:  Price Console[/] \r\n[green bold italic]Copyright © 2023 Scott Glasgow[/]"
+                )
+            ).Centered()
+        );
         titleTable.BorderColor(Color.Yellow);
         titleTable.Border(TableBorder.Rounded);
         titleTable.Expand();
 
         AnsiConsole.Write(titleTable);
-    
-                // Configuration
-                var config = new ConfigurationBuilder()
-                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                    .AddJsonFile("appsettings.json")
-                    .AddUserSecrets<Program>()
-                    .Build();
-                connectionString = config.GetSection("DefaultDB").Value;
-                token = config.GetSection("Token").Value;
-                url = config.GetSection("BaseURL").Value;
-                gold = config.GetSection("DefaultMetal").Value;
-                int allowance;
-                if(int.TryParse(config.GetSection("MonthlyAllowance").Value, out allowance))
-                    monthlyAllowance = allowance;
 
-                // Configure Spectre Cli
-                var app = new CommandApp();
-                app.Configure(config =>
-                {
-                    config.ValidateExamples();
+        // Configuration
+        var config = new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json")
+            .AddUserSecrets<Program>()
+            .Build();
+        connectionString = config.GetSection("DefaultDB").Value;
+        token = config.GetSection("Token").Value;
+        url = config.GetSection("BaseURL").Value;
+        gold = config.GetSection("DefaultMetal").Value;
+        int allowance;
+        if (int.TryParse(config.GetSection("MonthlyAllowance").Value, out allowance))
+            monthlyAllowance = allowance;
 
-                    config
-                        .AddCommand<AccountCommand>("account")
-                        .WithDescription("Gets account information.");
+        // Configure Spectre Cli
+        var app = new CommandApp();
+        app.Configure(config =>
+        {
+            config.ValidateExamples();
 
-                    config
-                        .AddDelegate<BacktrackCommand.Settings>("backtrack", BackTrack)
-                        .WithDescription(
-                            "Backtracks historical gold prices. Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
-                        )
-                        .WithExample(
-                            new[]
-                            { "backtrack", "--start", "YYYY-MM-DD", "--end", "YYYY-MM-DD", "--debug", "--hidden" });
+            config
+                .AddCommand<AccountCommand>("account")
+                .WithDescription("Gets account information.");
 
-                    config
-                        .AddDelegate<PriceCommand.Settings>("price", GetPrice)
-                        .WithDescription(
-                            "Gets the current gold price. Use --save to save to database. Weekends and holidays are skipped."
-                        )
-                        .WithExample(new[] { "price", "--date", "YYYY-MM-DD", "--save", "--debug", "--hidden" });
+            config
+                .AddDelegate<BacktrackCommand.Settings>("backtrack", BackTrack)
+                .WithDescription(
+                    "Backtracks historical gold prices. Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
+                )
+                .WithExample(
+                    new[]
+                    {
+                        "backtrack",
+                        "--start",
+                        "YYYY-MM-DD",
+                        "--end",
+                        "YYYY-MM-DD",
+                        "--debug",
+                        "--hidden"
+                    }
+                );
 
-                    config
-                        .AddDelegate<AccountCommand.Settings>("acct", GetAccount)
-                        .WithDescription("Gets Account Statistics.")
-                        .WithExample(new[] { "acct", "--debug", "--hidden" });
+            config
+                .AddDelegate<PriceCommand.Settings>("price", GetPrice)
+                .WithDescription(
+                    "Gets the current gold price. Use --save to save to database. Weekends and holidays are skipped."
+                )
+                .WithExample(
+                    new[] { "price", "--date", "YYYY-MM-DD", "--save", "--debug", "--hidden" }
+                );
 
-                    config
-                        .AddDelegate<StatusCommand.Settings>("status", GetStatus)
-                        .WithDescription("Gets WebApi Status.")
-                        .WithExample(new[] { "status", "--debug", "--hidden" });
+            config
+                .AddDelegate<AccountCommand.Settings>("acct", GetAccount)
+                .WithDescription("Gets Account Statistics.")
+                .WithExample(new[] { "acct", "--debug", "--hidden" });
 
-                    config.PropagateExceptions();
-                });
-                try
-                {
-                    await app.RunAsync(args);
-                }
-                catch (Exception ex)
-                {
-                    AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
-                    return;
-                }
-        if(args.Length == 0)
+            config
+                .AddDelegate<StatusCommand.Settings>("status", GetStatus)
+                .WithDescription("Gets WebApi Status.")
+                .WithExample(new[] { "status", "--debug", "--hidden" });
+
+            config.PropagateExceptions();
+        });
+        try
+        {
+            await app.RunAsync(args);
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+            return;
+        }
+        if (args.Length == 0)
             return;
         // Debug Window
         var table = new Table().Centered();
         table.Expand();
 
         // Animate
-        await AnsiConsole
+        AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .StartAsync(async ctx =>
+            .Start(ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -128,7 +145,7 @@ class Program
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
- 
+
                 // Columns
                 Update(230, () => table.AddColumn(""));
                 Update(230, () => table.AddColumn(""));
@@ -148,7 +165,7 @@ class Program
                 Update(230, () => table.SimpleBorder());
                 Update(230, () => table.SimpleHeavyBorder());
 
-                if(isDebug)
+                if (isDebug)
                 {
                     // Column titles
                     Update(70, () => table.Columns[0].Header("[bold]Setting[/]"));
@@ -168,7 +185,14 @@ class Program
                     Update(70, () => table.AddRow("Debug", $"[yellow]{isDebug}[/]"));
                     Update(70, () => table.AddRow("Show Hidden", $"[yellow]{showHidden}[/]"));
                     Update(70, () => table.AddRow("Web API Status", $"[yellow]{getStatus}[/]"));
-                    Update(70, () => table.AddRow("Web API Monthly Allowance", $"[yellow]{monthlyAllowance}[/]"));
+                    Update(
+                        70,
+                        () =>
+                            table.AddRow(
+                                "Web API Monthly Allowance",
+                                $"[yellow]{monthlyAllowance}[/]"
+                            )
+                    );
                     Update(
                         70,
                         () => table.AddRow("Get Account Statistics", $"[yellow]{getAccount}[/]")
@@ -184,7 +208,10 @@ class Program
                                     $"[yellow]{connectionString}[/]"
                                 )
                         );
-                        Update(70, () => table.AddRow("Web API Access Token", $"[yellow]{token}[/]"));
+                        Update(
+                            70,
+                            () => table.AddRow("Web API Access Token", $"[yellow]{token}[/]")
+                        );
                     }
                 }
                 Update(70, () => table.Columns[1].Footer("[blue]Complete[/]"));
@@ -259,16 +286,96 @@ class Program
                         70,
                         () =>
                             logTable.AddRow(
-                                ":check_mark: [green bold]Finished Calculating number of days...[/]"
+                                $":check_mark: [green bold]Calculated {days} Days To Get Gold Prices For...[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             logTable.AddRow(
-                                $":hourglass_not_done: [red bold]Start Processing {days} Days Of Gold Prices...[/]"
+                                ":hourglass_not_done: [red bold]Verifying Account Has Enough Calls Left...[/]"
                             )
                     );
+                    await GetAccountInformation();
+                    var willBeLeft = (monthlyAllowance - _account.requests_month) - days;
+                    if (willBeLeft > 0)
+                    {
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":check_mark: [green bold]Will Leave {willBeLeft} Calls After Running...[/]"
+                                )
+                        );
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":hourglass_not_done: [red bold]Start Processing Gold Prices from {startDate.ToString("yyyy-MM-dd")} to {endDate.ToString("yyyy-MM-dd")}...[/]"
+                                )
+                        );
+                        var current = startDate;
+                        while (current <= endDate)
+                        {
+                            if(GetGoldPrice(current.ToString("yyyy-MM-dd")));
+                            {
+                                current = current.AddDays(1);
+                                if (_goldPrice != null)
+                                {
+                                    Update(
+                                        70,
+                                        () =>
+                                            logTable.AddRow(
+                                                $":check_mark: [yellow bold italic]{_goldPrice.date.ToString("yyyy-MM-dd")} Price: {_goldPrice.price:C} Previous Price: {_goldPrice.prev_close_price:C}...[/]"
+                                            )
+                                    );
+                                    if (doSave)
+                                    {
+                                        Update(
+                                            70,
+                                            () =>
+                                                logTable.AddRow(
+                                                    $":plus: [red bold]Adding Data To Database...[/]"
+                                                )
+                                        );
+                                        await Save(_goldPrice);
+                                        Update(
+                                            70,
+                                            () =>
+                                                logTable.AddRow(
+                                                    $":check_mark: [green bold]Saved Gold Price For {_goldPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                                )
+                                        );
+                                    }
+                                }
+                            }
+                        }
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":check_mark: [green bold]Finished Retrieving Gold Prices from {startDate.ToString("yyyy-MM-dd")} to {endDate.ToString("yyyy-MM-dd")}...[/]"
+                                )
+                        );
+                    }
+                    else
+                    {
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":bomb: [red bold italic]There are not enough API Calls left...[/]"
+                                )
+                        );
+                        Update(
+                            70,
+                            () =>
+                                logTable.Columns[0].Footer(
+                                    $"[red bold]Status[/] [red bold italic]Aborting {itemProcess}...[/]"
+                                )
+                        );
+                        return;
+                    }
                 }
                 if (getPrice)
                 {
@@ -276,23 +383,80 @@ class Program
                         70,
                         () =>
                             logTable.AddRow(
-                                $":hourglass_not_done: [red bold]Start Processing Current Gold Price For {DateTime.Parse(priceDate).ToString("yyyy-MM-dd")}...[/]"
+                                ":hourglass_not_done: [red bold]Verifying Account Has Enough Calls Left...[/]"
                             )
                     );
-                    await GetGoldPrice(DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd"));
-                    Update(
-                        70,
-                        () =>
-                            logTable.AddRow(
-                                $":check_mark: [green bold italic]Current Price: {_goldPrice.price} Previous Price: {_goldPrice.prev_close_price}[/]"
-                            )
-                    );
-                    if(doSave)
+                    await GetAccountInformation();
+                    var willBeLeft = (monthlyAllowance - _account.requests_month) - 1;
+                    if (willBeLeft > 0)
                     {
                         Update(
                             70,
-                            () => logTable.AddRow($":plus: [red bold]Adding Data To Database...[/]")
+                            () =>
+                                logTable.AddRow(
+                                    $":check_mark: [green bold]Will Leave {willBeLeft} Calls After Running...[/]"
+                                )
                         );
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":hourglass_not_done: [red bold]Start Processing Current Gold Price For {DateTime.Parse(priceDate).ToString("yyyy-MM-dd")}...[/]"
+                                )
+                        );
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":plus: [red bold]Retrieving Gold Price for {DateTime.Parse(priceDate).ToString("yyyy-MM-dd")}...[/]"
+                                )
+                        );
+                        if(GetGoldPrice(DateTime.Parse(priceDate).ToString("yyyy-MM-dd")));
+                        {
+                            Update(
+                                70,
+                                () =>
+                                    logTable.AddRow(
+                                        $":check_mark: [green bold italic]Current Price: {_goldPrice.price:C} Previous Price: {_goldPrice.prev_close_price:C}[/]"
+                                    )
+                            );
+                            if (doSave)
+                            {
+                                Update(
+                                    70,
+                                    () =>
+                                        logTable.AddRow(
+                                            $":plus: [red bold]Adding Data To Database...[/]"
+                                        )
+                                );
+                                await Save(_goldPrice);
+                                Update(
+                                    70,
+                                    () =>
+                                        logTable.AddRow(
+                                            $":check_mark: [green bold]Saved Gold Price For {_goldPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                        )
+                                );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":bomb: [red bold italic]There are not enough API Calls left...[/]"
+                                )
+                        );
+                        Update(
+                            70,
+                            () =>
+                                logTable.Columns[0].Footer(
+                                    $"[red bold]Status[/] [red bold italic]Aborting {itemProcess}...[/]"
+                                )
+                        );
+                        return;
                     }
                 }
                 if (getAccount)
@@ -406,19 +570,25 @@ class Program
         _status = JsonConvert.DeserializeObject<Status>(response.Content);
     }
 
-    private static async Task GetGoldPrice(string date)
+    private static bool GetGoldPrice(string date)
     {
         var processDate = DateTime.Parse(date);
         bool isHoliday = new USAPublicHoliday().IsPublicHoliday(processDate);
-        if(!isHoliday && processDate.DayOfWeek != DayOfWeek.Saturday && processDate.DayOfWeek != DayOfWeek.Sunday);
+        if (
+            !isHoliday
+            && processDate.DayOfWeek != DayOfWeek.Saturday
+            && processDate.DayOfWeek != DayOfWeek.Sunday
+        )
         {
             var client = new RestClient(url + gold + date);
             var request = new RestRequest(Method.GET);
             request.AddHeader("x-access-token", token);
             request.AddHeader("Content-Type", "application/json");
-            IRestResponse response = await client.ExecuteAsync(request);
+            IRestResponse response = client.Execute(request);
             _goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+            return true;
         }
+        return false;
     }
 
     private static int GetNumberOfDays(DateTime start, DateTime end)
@@ -464,7 +634,7 @@ class Program
         showHidden = settings.ShowHidden;
         isDebug = settings.Debug;
         doSave = settings.Save;
-        if(settings.Date != null)
+        if (settings.Date != null)
             priceDate = settings.Date;
         return 0;
     }
@@ -485,7 +655,7 @@ class Program
         return 0;
     }
 
-    static void Save(GoldPrice goldPrice)
+    static async Task Save(GoldPrice goldPrice)
     {
         if (goldPrice.date.Year < 1900)
             return;
@@ -500,7 +670,7 @@ class Program
             sqlCommand.Parameters.AddWithValue("ratedate", goldPrice.date.ToString("yyyy/MM/dd"));
             sqlCommand.Parameters.AddWithValue("chg", goldPrice.ch);
             sqlCommand.Parameters.AddWithValue("chg_pct", goldPrice.chp);
-            var recs = sqlCommand.ExecuteNonQuery();
+            var recs = await sqlCommand.ExecuteNonQueryAsync();
             Console.WriteLine("Records Inserted: {0}", recs);
         }
         catch (MySqlException ex)
