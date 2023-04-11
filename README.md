@@ -1,4 +1,4 @@
-# Gold Price Console
+# Gold Price Console v2.0.0
 
 ## About <a name = "about"></a>
 
