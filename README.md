@@ -73,7 +73,7 @@ usp_AddGoldPrice.sql to create the stored procedure.
 
 > *You do not need to run the above two scripts if you do the restore below. *
 
-If you would like the full history (Back to Dec 6th) of Gold Price, which will save you time and API calls if you want historical data, then restore the database in the db directory called GoldPrices.sql.gz.
+If you would like the full history (Back to Dec 6th, 2018) of Gold Price, which will save you time and API calls if you want historical data, then restore the database in the db directory called GoldPrices.sql.gz.
 
 ```bash
 gzip -d GoldPrices.sql.gz
