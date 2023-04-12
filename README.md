@@ -8,7 +8,14 @@ This application uses PublicHoliday nuget package (Copyright (C) 2013 Martin Wil
 
 ## Status
 
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml)
+.NET 6
+[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet6.yml)
+
+.NET 7
+[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml)
+
+.NET 8
+[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml)
 
 ## Buy Me A Coffee
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
@@ -27,7 +34,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites <a name = "prerequisites"></a>
 
-1. .NET 6 (will run on .NET 5 and .NET 6 and .NET 7).
+1. .NET 6, .NET 7 or .NET 8 Preview.
 2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 300 api calls per month.
 3. MariaDB (or MySQL).
 4. Configure appsettings **(Token) (DefaultDB) keys**
