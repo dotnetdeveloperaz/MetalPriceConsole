@@ -317,7 +317,8 @@ class Program
                         var current = startDate;
                         while (current <= endDate)
                         {
-                            if(GetGoldPrice(current.ToString("yyyy-MM-dd")));
+                            if (GetGoldPrice(current.ToString("yyyy-MM-dd")))
+                                ;
                             {
                                 current = current.AddDays(1);
                                 if (_goldPrice != null)
@@ -411,7 +412,8 @@ class Program
                                     $":plus: [red bold]Retrieving Gold Price for {DateTime.Parse(priceDate).ToString("yyyy-MM-dd")}...[/]"
                                 )
                         );
-                        if(GetGoldPrice(DateTime.Parse(priceDate).ToString("yyyy-MM-dd")));
+                        if (GetGoldPrice(DateTime.Parse(priceDate).ToString("yyyy-MM-dd")))
+                            ;
                         {
                             Update(
                                 70,
@@ -516,38 +518,8 @@ class Program
                             $"[red bold]Status[/] [green bold]Completed {itemProcess}[/]"
                         )
                 );
-            });
-        //        Thread.Sleep(2000);
-        return;
-        /*
-        if (args[0] == "/backtrack")
-        {
-            int cnt = int.Parse(args[2]);
-            DateTime dt = DateTime.Parse(args[1]);
-            Console.WriteLine(
-                "Getting rates starting from {0} to {1}",
-                args[1],
-                dt.AddDays(-cnt - 1).ToString("yyyy-MM-dd")
-            );
-            while (cnt != 0)
-            {
-                if (dt.DayOfWeek != DayOfWeek.Sunday && dt.DayOfWeek != DayOfWeek.Saturday)
-                {
-                    string fullURL = url + gold + dt.ToString("yyyyMMdd");
-                    var client = new RestClient(fullURL);
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("x-access-token", token);
-                    request.AddHeader("Content-Type", "application/json");
-                    IRestResponse response = client.Execute(request);
-                    _goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
-                    Save(_goldPrice);
-                    cnt--;
-                }
-                dt = dt.AddDays(-1);
             }
-            return;
-        }
-        */
+        );
     }
 
     private static async Task GetAccountInformation()
