@@ -16,7 +16,7 @@
     <PackageReference Include="RestSharp" Version="106.11.7" />
     <PackageReference Include="spectre.console" Version="0.46.0" />
     <PackageReference Include="spectre.console.cli" Version="0.46.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
   </ItemGroup>
 
   <ItemGroup>
