@@ -1,7 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using GoldPriceConsole.Commands;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 using Newtonsoft.Json;
@@ -9,7 +6,10 @@ using PublicHoliday;
 using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using GoldPriceConsole.Commands;
+using System;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace GoldPriceConsole;
 
@@ -643,7 +643,6 @@ class Program
             sqlCommand.Parameters.AddWithValue("chg", goldPrice.ch);
             sqlCommand.Parameters.AddWithValue("chg_pct", goldPrice.chp);
             var recs = await sqlCommand.ExecuteNonQueryAsync();
-            Console.WriteLine("Records Inserted: {0}", recs);
         }
         catch (MySqlException ex)
         {
