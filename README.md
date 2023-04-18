@@ -9,14 +9,15 @@ This application uses PublicHoliday nuget package (Copyright (C) 2013 Martin Wil
 ## Status
 
 .NET 6
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet6.yml)
+[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet6.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet6.yml)
 
 .NET 7
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml)
+[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml)
 
-.NET 8
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml)
+.NET 8 Preview 2
+[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml)
 
+** .NET 8 is Preview 2 as Preview 3 is not yet on Github, but it does work with preview 3.
 ## Buy Me A Coffee
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
@@ -73,12 +74,12 @@ dotnet user-secrets list
 
 Create the tables and stored procedures used by this utility.
 
-To create a fresh install, run the two scripts in the db directory.
+To create a fresh install, run the GoldRates-table.sql script in the db directory.
 
 GoldRates-table.sql to create the table.
 usp_AddGoldPrice.sql to create the stored procedure.
 
-> *You do not need to run the above two scripts if you do the restore below. *
+> *You do not need to run the GoldRates-table script if you do the restore below. *
 
 If you would like the full history (Back to Dec 6th, 2018) of Gold Price, which will save you time and API calls if you want historical data, then restore the database in the db directory called GoldPrices.sql.gz.
 
