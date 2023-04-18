@@ -271,33 +271,55 @@ class Program
                 Update(230, () => logTable.SimpleBorder());
                 Update(230, () => logTable.SimpleHeavyBorder());
                 // Content
-                if (doBackTrack)
+
+                Update(
+                    70,
+                    () =>
+                        logTable.AddRow(
+                            ":hourglass_not_done: [red bold]Calculating number of days...[/]"
+                        )
+                );
+
+                var days = GetNumberOfDays(startDate, endDate);
+                Update(
+                    70,
+                    () =>
+                        logTable.AddRow(
+                            $":check_mark: [green bold]Calculated {days} Days To Get Gold Prices For...[/]"
+                        )
+                );
+
+                if (days < 1)
                 {
                     Update(
                         70,
                         () =>
                             logTable.AddRow(
-                                ":hourglass_not_done: [red bold]Calculating number of days...[/]"
+                                $":check_mark: [red bold]There are {days} Days To Process...[/]"
                             )
                     );
+                    Update(
+                        70,
+                        () =>
+                            logTable.Columns[0].Footer(
+                                $"[red bold]Status[/] [green bold]Completed {itemProcess}[/]"
+                            )
+                    );
+                    return;
+                }
 
-                    var days = GetNumberOfDays(startDate, endDate);
-                    Update(
-                        70,
-                        () =>
-                            logTable.AddRow(
-                                $":check_mark: [green bold]Calculated {days} Days To Get Gold Prices For...[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            logTable.AddRow(
-                                ":hourglass_not_done: [red bold]Verifying Account Has Enough Calls Left...[/]"
-                            )
-                    );
-                    await GetAccountInformation();
-                    var willBeLeft = (monthlyAllowance - _account.requests_month) - days;
+                Update(
+                    70,
+                    () =>
+                        logTable.AddRow(
+                            ":hourglass_not_done: [red bold]Verifying Account Has Enough Calls Left...[/]"
+                        )
+                );
+                await GetAccountInformation();
+                var willBeLeft = (monthlyAllowance - _account.requests_month) - days;
+
+                if (doBackTrack)
+                {
                     if (willBeLeft > 0)
                     {
                         Update(
@@ -387,7 +409,6 @@ class Program
                             )
                     );
                     await GetAccountInformation();
-                    var willBeLeft = (monthlyAllowance - _account.requests_month) - 1;
                     if (willBeLeft > 0)
                     {
                         Update(
