@@ -318,7 +318,6 @@ class Program
                         while (current <= endDate)
                         {
                             if (GetGoldPrice(current.ToString("yyyy-MM-dd")))
-                                ;
                             {
                                 current = current.AddDays(1);
                                 if (_goldPrice != null)
@@ -413,7 +412,6 @@ class Program
                                 )
                         );
                         if (GetGoldPrice(DateTime.Parse(priceDate).ToString("yyyy-MM-dd")))
-                            ;
                         {
                             Update(
                                 70,
@@ -525,20 +523,20 @@ class Program
     private static async Task GetAccountInformation()
     {
         var client = new RestClient(url + stat);
-        var request = new RestRequest(Method.GET);
+        var request = new RestRequest("", Method.Get);
         request.AddHeader("x-access-token", token);
         request.AddHeader("Content-Type", "application/json");
-        IRestResponse response = await client.ExecuteAsync(request);
+        RestResponse response = await client.ExecuteAsync(request);
         _account = JsonConvert.DeserializeObject<Account>(response.Content);
     }
 
     private static async Task GetWebApiStatus()
     {
         var client = new RestClient(url + status);
-        var request = new RestRequest(Method.GET);
+        var request = new RestRequest("", Method.Get);
         request.AddHeader("x-access-token", token);
         request.AddHeader("Content-Type", "application/json");
-        IRestResponse response = await client.ExecuteAsync(request);
+        RestResponse response = await client.ExecuteAsync(request);
         _status = JsonConvert.DeserializeObject<Status>(response.Content);
     }
 
@@ -553,10 +551,10 @@ class Program
         )
         {
             var client = new RestClient(url + gold + date);
-            var request = new RestRequest(Method.GET);
+            var request = new RestRequest("", Method.Get);
             request.AddHeader("x-access-token", token);
             request.AddHeader("Content-Type", "application/json");
-            IRestResponse response = client.Execute(request);
+            RestResponse response = client.Execute(request);
             _goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
             return true;
         }
