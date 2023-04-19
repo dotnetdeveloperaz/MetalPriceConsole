@@ -7,6 +7,7 @@ using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
@@ -280,34 +281,6 @@ class Program
                         )
                 );
 
-                var days = GetNumberOfDays(startDate, endDate);
-                Update(
-                    70,
-                    () =>
-                        logTable.AddRow(
-                            $":check_mark: [green bold]Calculated {days} Days To Get Gold Prices For...[/]"
-                        )
-                );
-
-                if (days < 1)
-                {
-                    Update(
-                        70,
-                        () =>
-                            logTable.AddRow(
-                                $":check_mark: [red bold]There are {days} Days To Process...[/]"
-                            )
-                    );
-                    Update(
-                        70,
-                        () =>
-                            logTable.Columns[0].Footer(
-                                $"[red bold]Status[/] [green bold]Completed {itemProcess}[/]"
-                            )
-                    );
-                    return;
-                }
-
                 Update(
                     70,
                     () =>
@@ -316,10 +289,30 @@ class Program
                         )
                 );
                 await GetAccountInformation();
-                var willBeLeft = (monthlyAllowance - _account.requests_month) - days;
-
+                int willBeLeft = 0;
                 if (doBackTrack)
                 {
+                    List<DateTime> days;
+                    days = GetNumberOfDays(startDate, endDate);
+                    Update(
+                       70,
+                       () =>
+                           logTable.AddRow(
+                               $":check_mark: [green bold]Calculated {days.Count} Days To Get Gold Prices For...[/]"
+                           )
+                   );
+                    if (days.Count < 1)
+                    {
+                        Update(
+                            70,
+                            () =>
+                                logTable.Columns[0].Footer(
+                                    $"[red bold]Status[/] [green bold]Completed {itemProcess}[/]"
+                                )
+                        );
+                        return;
+                    }
+                    willBeLeft = (monthlyAllowance - _account.requests_month) - days.Count;
                     if (willBeLeft > 0)
                     {
                         Update(
@@ -336,8 +329,8 @@ class Program
                                     $":hourglass_not_done: [red bold]Start Processing Gold Prices from {startDate.ToString("yyyy-MM-dd")} to {endDate.ToString("yyyy-MM-dd")}...[/]"
                                 )
                         );
-                        var current = startDate;
-                        while (current <= endDate)
+                        var current = days[0];
+                        while (current <= days[days.Count - 1])
                         {
                             if (GetGoldPrice(current.ToString("yyyy-MM-dd")))
                             {
@@ -401,14 +394,37 @@ class Program
                 }
                 if (getPrice)
                 {
+                    int day = 0;
+                    DateTime date = DateTime.Parse(priceDate);
+                    bool isHoliday = new USAPublicHoliday().IsPublicHoliday(date);
+                    if (!isHoliday && date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
+                        day = 1;
                     Update(
-                        70,
-                        () =>
-                            logTable.AddRow(
-                                ":hourglass_not_done: [red bold]Verifying Account Has Enough Calls Left...[/]"
-                            )
+                       70,
+                       () =>
+                           logTable.AddRow(
+                               $":check_mark: [green bold]Calculated {day} Days To Get Gold Prices For...[/]"
+                           )
                     );
-                    await GetAccountInformation();
+                    if (day < 1)
+                    {
+                        Update(
+                            70,
+                            () =>
+                                logTable.AddRow(
+                                    $":check_mark: [red bold]There are {day} Days To Process...[/]"
+                                )
+                        );
+                        Update(
+                            70,
+                            () =>
+                                logTable.Columns[0].Footer(
+                                    $"[red bold]Status[/] [green bold]Completed {itemProcess}[/]"
+                                )
+                        );
+                        return;
+                    }
+                    willBeLeft = (monthlyAllowance - _account.requests_month) - day;
                     if (willBeLeft > 0)
                     {
                         Update(
@@ -582,9 +598,9 @@ class Program
         return false;
     }
 
-    private static int GetNumberOfDays(DateTime start, DateTime end)
+    private static List<DateTime> GetNumberOfDays(DateTime start, DateTime end)
     {
-        int i = 0;
+        List<DateTime> dates = new();
         var res = DateTime.Compare(end, DateTime.Now);
 
         // We do not want the end date to be the current date or future date.
@@ -597,15 +613,11 @@ class Program
         while (start <= end)
         {
             bool isHoliday = new USAPublicHoliday().IsPublicHoliday(start);
-            if (
-                !isHoliday
-                && start.DayOfWeek != DayOfWeek.Saturday
-                && start.DayOfWeek != DayOfWeek.Sunday
-            )
-                i++;
+            if (!isHoliday && start.DayOfWeek != DayOfWeek.Saturday && start.DayOfWeek != DayOfWeek.Sunday)
+                dates.Add(start);
             start = start.AddDays(1);
         }
-        return i;
+        return dates;
     }
 
     private static int BackTrack(CommandContext context, BacktrackCommand.Settings settings)
