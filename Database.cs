@@ -46,7 +46,7 @@ namespace GoldPriceConsole
                 Console.WriteLine("Could not insert new gold rate.");
                 Console.WriteLine("Exception: {0}", ex.Message);
                 string result = JsonConvert.SerializeObject(goldPrice, Formatting.Indented);
-                File.AppendAllText($"ExchangeRate.cache", result);
+                File.AppendAllText($"GoldPrice.cache", result);
                 return false;
             }
             finally
