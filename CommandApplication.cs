@@ -55,7 +55,7 @@ namespace GoldPriceConsole
                 config
                     .AddCommand<RestoreCommand>("restore")
                     .WithDescription("Restores Cache File.")
-                    .WithExample(new[] { "status", "--debug", "--hidden" });
+                    .WithExample(new[] { "restore", "--debug", "--hidden" });
 
 #if DEBUG
                 config.PropagateExceptions();
