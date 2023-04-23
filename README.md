@@ -14,10 +14,9 @@ This application uses PublicHoliday nuget package (Copyright (C) 2013 Martin Wil
 .NET 7
 [![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml)
 
-.NET 8 Preview 2
+.NET 8 Preview 3
 [![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml)
 
-** .NET 8 is Preview 2 as Preview 3 is not yet on Github, but it does work with preview 3.
 ## Buy Me A Coffee
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
@@ -41,23 +40,27 @@ These instructions will get you a copy of the project up and running on your loc
 4. Configure appsettings **(Token) (DefaultDB) keys**
 5. Set MonthlyAllowance if your account has a difference allowance amount.
 
+**Note: Setting this above your allowance will only make the API calls fail once you hit your limit.**
+
 ```
 {
-    "Token": "<YourApiKey>",
+  "ApiServer": {
+    "Token": "",
     "BaseURL": "https://www.goldapi.io/api/",
     "DefaultMetal": "XAU/USD/",
     "MonthlyAllowance": "300",
-    "Logging": {
-        "LogLevel": {
-          "Default": "Information",
-          "Microsoft": "Warning",
-          "Microsoft.Hosting.Lifetime": "Information"
-        }
-      },
-      "ConnectionStrings": {
-        "DefaultDB": "<YourDBConnectionString>"
-      }, 
-    "AllowedHosts": "*"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "ConnectionStrings": {
+    "DefaultDB": ""
+  },
+  "AllowedHosts": "*"
 }
 ```
 
@@ -67,8 +70,8 @@ Add your private settings for Token (ApiKey) and Database connection string or a
 
 ```bash
 dotnet user-secrets init
-dotnet user-secrets set "Token" "<YourApiKey>"
-dotnet user-secrets set "DefaultDB" "<YourDatabaseConnectionString>"
+dotnet user-secrets set "ApiServer:Token" "<YourApiKey>"
+dotnet user-secrets set "ConnectionStrings:DefaultDB" "<YourDatabaseConnectionString>"
 dotnet user-secrets list
 ```
 
@@ -79,7 +82,7 @@ To create a fresh install, run the GoldRates-table.sql script in the db director
 GoldRates-table.sql to create the table.
 usp_AddGoldPrice.sql to create the stored procedure.
 
-> *You do not need to run the GoldRates-table script if you do the restore below. *
+> *You do not need to run the GoldRates-table script if you do the restore below. 
 
 If you would like the full history (Back to Dec 6th, 2018) of Gold Price, which will save you time and API calls if you want historical data, then restore the database in the db directory called GoldPrices.sql.gz.
 
@@ -106,17 +109,27 @@ You should see something similar to:
 ```
 
 ## Usage <a name = "usage"></a>
-status - Gets the status of the third party web service, which is true (1) or false (0) for online.
+Commands
 
-acct - Gets details of your account (like sample above) at the third party web service.
+acct
+- Gets details of your account (like sample above) at the third party web service.
 
-price - Gets yesterday's (Prices are available for previous days close) Gold rate (and saves to the configured database if passing --save
+status 
+- Gets the status of the third party web service, which is true (1) or false (0) for online.
 
-price --date YYYY-MM-DD to get a specific date instead of yesterday's (default) close price.
+price
+- Gets yesterday's (Prices are available for previous days close) Gold rate (and saves to the configured database if passing --save
 
-backtrack --start <YYYY-MM-DD> --end <YYYY-MM-DD> - Gets Gold prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
+price --date YYYY-MM-DD 
+- Gets a specific date instead of yesterday's (default) close price.
 
-Appending --save will write the price data to the database on commands price and backtrack.
+backtrack --start <YYYY-MM-DD> --end <YYYY-MM-DD> 
+- Gets Gold prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
+
+** Appending --save will write the price data to the database on commands price and backtrack.**
+
+restore
+-- Restores existing cache file to the database.
 
 Example:
 ```
@@ -125,35 +138,39 @@ backtrack --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July
 backtrack --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
 ```
 
-*Only Non-Holiday Week Days Are Processed*
+*Only U.S. Non-Holiday Week Days Are Processed*
 
-Passing --debug will output configuration data. If you pass --debug --hidden, it will also output the user-secrets configuration data (eg: DB connection string, token)
+Passing --debug will output configuration data. If you pass --debug --hidden, it will also output  private configuration data (eg: DB connection string, token) even when not put into appsettings.json but in user-secrets instead.
 
 Run the application with no commands (dotnet run) and you will get the following usage screen.
 ```bash
-╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                      Gold ⛏  Price Console                                      │
-│                                  Copyright © 2023 Scott Glasgow                                  │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                              Gold ⛏  Price Console v2.1                                             │
+│                                               Written By Scott Glasgow                                               │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                 Cache file exists. Use restore to load to database.                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 USAGE:
     GoldPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    GoldPriceConsole.dll backtrack --start YYYY-MM-DD --end YYYY-MM-DD --debug --hidden
-    GoldPriceConsole.dll price --date YYYY-MM-DD --save --debug --hidden
-    GoldPriceConsole.dll acct --debug --hidden
-    GoldPriceConsole.dll status --debug --hidden
+    dotnet run  history --start YYYY-MM-DD --end YYYY-MM-DD --debug --hidden
+    dotnet run  price --date YYYY-MM-DD --save --debug --hidden
+    dotnet run  acct --debug --hidden
+    dotnet run  status --debug --hidden
+    dotnet run restore --debug --hidden
 
 OPTIONS:
-    -h, --help       Prints help information   
+    -h, --help       Prints help information
     -v, --version    Prints version information
 
 COMMANDS:
-    account      Gets account information                                                           
-    backtrack    Backtracks historical gold prices. Use --save to save to the database.             
-                 Weekends and holidays are skipped because markets are closed                       
-    price        Gets the current gold price. Use --save to save to database. Weekends and holidays 
-                 are skipped                                                                        
-    acct         Gets Account Statistics                                                            
-    status       Gets WebApi Status 
+    account    Retrieves account information
+    history    Retrieves historical gold prices. Use --save to save to the database.
+               Weekends and holidays are skipped because markets are closed
+    price      Retrieves the current gold price. Use --save to save to database. Weekends and holidays are skipped
+    acct       Retrieves Account Statistics
+    restore    Restores cache file
+    status     Retrieves WebApi Status
 ```
