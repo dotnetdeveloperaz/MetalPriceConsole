@@ -29,6 +29,8 @@ namespace GoldPriceConsole
                         "YYYY-MM-DD",
                         "--end",
                         "YYYY-MM-DD",
+                        "--fake",
+                        "--save",
                         "--debug",
                         "--hidden"
                         }
@@ -40,7 +42,7 @@ namespace GoldPriceConsole
                         "Retrieves the current gold price. Use --save to save to database. Weekends and holidays are skipped."
                     )
                     .WithExample(
-                        new[] { "price", "--date", "YYYY-MM-DD", "--save", "--debug", "--hidden" }
+                        new[] { "price", "--date", "YYYY-MM-DD", "--fake", "--save", "--debug", "--hidden" }
                 );
                 config
                     .AddCommand<AccountCommand>("acct")

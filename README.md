@@ -126,7 +126,9 @@ price --date YYYY-MM-DD
 backtrack --start <YYYY-MM-DD> --end <YYYY-MM-DD> 
 - Gets Gold prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
 
-** Appending --save will write the price data to the database on commands price and backtrack.**
+** The --save switch will write the price data to the database on commands price and backtrack.**
+
+** The --fake switch will load sample data, instead of calling the WebApi. **
 
 restore
 -- Restores existing cache file to the database.
@@ -155,8 +157,8 @@ USAGE:
     GoldPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    dotnet run  history --start YYYY-MM-DD --end YYYY-MM-DD --debug --hidden
-    dotnet run  price --date YYYY-MM-DD --save --debug --hidden
+    dotnet run  history --start YYYY-MM-DD --end YYYY-MM-DD --fake --save --debug --hidden
+    dotnet run  price --date YYYY-MM-DD --fake --save --debug --hidden
     dotnet run  acct --debug --hidden
     dotnet run  status --debug --hidden
     dotnet run restore --debug --hidden

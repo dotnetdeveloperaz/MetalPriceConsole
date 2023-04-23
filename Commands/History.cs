@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.IO;
 using System.Threading;
 using GoldPriceConsole.Models;
 using Microsoft.Extensions.Logging;
@@ -49,6 +51,11 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         [Description("Save Results")]
         [DefaultValue(false)]
         public bool Save { get; set; }
+
+        [CommandOption("--fake")]
+        [Description("Does Not Call WebApi")]
+        [DefaultValue(false)]
+        public bool Fake { get; set; }
     }
     public override int Execute(CommandContext context, Settings settings)
     {
@@ -136,6 +143,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                     );
                     foreach (DateTime date in days)
                     {
+                        int i = 0;
                         Update(
                             70,
                             () =>
@@ -143,12 +151,26 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                     $":plus: [red bold]Retrieving Gold Price for {date.ToString("yyyy-MM-dd")}...[/]"
                                 )
                         );
-                        client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + date.ToString("yyyy-MM-dd"));
-                        request = new RestRequest("", Method.Get);
-                        request.AddHeader("x-access-token", _apiServer.Token);
-                        request.AddHeader("Content-Type", "application/json");
-                        RestResponse response = client.Execute(request);
-                        GoldPrice goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+                        GoldPrice goldPrice;
+                        if (!settings.Fake)
+                        {
+                            client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + date.ToString("yyyy-MM-dd"));
+                            request = new RestRequest("", Method.Get);
+                            request.AddHeader("x-access-token", _apiServer.Token);
+                            request.AddHeader("Content-Type", "application/json");
+                            RestResponse response = client.Execute(request);
+                            goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+                        }
+                        else
+                        {
+                            string cache = File.ReadAllText("MultiDay.sample");
+                            List<GoldPrice> goldPrices = JsonConvert.DeserializeObject<List<GoldPrice>>(cache);
+                            if (i == days.Count)
+                                i = 0;
+                            else
+                                i++;
+                            goldPrice = goldPrices[i];
+                        }
                         if (goldPrice != null)
                         {
                             Update(

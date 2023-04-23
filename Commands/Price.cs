@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Security.Principal;
 using System.Threading;
 using GoldPriceConsole.Models;
@@ -50,6 +52,11 @@ public class PriceCommand : Command<PriceCommand.Settings>
         [Description("Save Results")]
         [DefaultValue(false)]
         public bool Save { get; set; }
+
+        [CommandOption("--fake")]
+        [Description("Does Not Call WebApi")]
+        [DefaultValue(false)]
+        public bool Fake { get; set; }
     }
 
     public override int Execute(CommandContext context, Settings settings)
@@ -155,12 +162,22 @@ public class PriceCommand : Command<PriceCommand.Settings>
                     );
                     if (!isHoliday && date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
                     {
-                        client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + settings.Date);
-                        request = new RestRequest("", Method.Get);
-                        request.AddHeader("x-access-token", _apiServer.Token);
-                        request.AddHeader("Content-Type", "application/json");
-                        RestResponse response = client.Execute(request);
-                        GoldPrice goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+                        GoldPrice goldPrice;
+                        if (!settings.Fake)
+                        {
+                            client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + settings.Date);
+                            request = new RestRequest("", Method.Get);
+                            request.AddHeader("x-access-token", _apiServer.Token);
+                            request.AddHeader("Content-Type", "application/json");
+                            RestResponse response = client.Execute(request);
+                            goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+                        }
+                        else
+                        {
+                            string cache = File.ReadAllText("SingleDay.sample");
+                            List<GoldPrice> goldPrices = JsonConvert.DeserializeObject<List<GoldPrice>>(cache);
+                            goldPrice = goldPrices[0];
+                        }
                         if (goldPrice != null)
                         {
                             Update(
