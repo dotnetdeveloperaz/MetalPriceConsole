@@ -53,11 +53,6 @@ namespace GoldPriceConsole
                     .WithExample(new[] { "status", "--debug", "--hidden" });
 
                 config
-                    .AddCommand<StatusCommand>("status")
-                    .WithDescription("Retrieves WebApi Status.")
-                    .WithExample(new[] { "status", "--debug", "--hidden" });
-
-                config
                     .AddCommand<RestoreCommand>("restore")
                     .WithDescription("Restores Cache File.")
                     .WithExample(new[] { "status", "--debug", "--hidden" });
