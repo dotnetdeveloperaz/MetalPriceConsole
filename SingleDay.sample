@@ -1,0 +1,13 @@
+[
+  {
+    "date": "2023-04-03T09:30:00Z",
+    "timestamp": 1680514200000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 1963.1,
+    "prev_close_price": 1978.8,
+    "ch": -15.7,
+    "chp": -0.7998
+  }
+]
