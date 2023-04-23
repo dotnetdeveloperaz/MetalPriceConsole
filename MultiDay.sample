@@ -1,0 +1,79 @@
+[
+  {
+    "date": "2023-04-03T09:30:00Z",
+    "timestamp": 1680514200000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 1963.1,
+    "prev_close_price": 1978.8,
+    "ch": -15.7,
+    "chp": -0.7998
+  },
+  {
+    "date": "2023-04-04T09:30:00Z",
+    "timestamp": 1680600600000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 1982.25,
+    "prev_close_price": 1963.1,
+    "ch": 19.15,
+    "chp": 0.9661
+  },
+  {
+    "date": "2023-04-05T09:30:00Z",
+    "timestamp": 1680687000000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 2022.3,
+    "prev_close_price": 1982.25,
+    "ch": 40.05,
+    "chp": 1.9804
+  },
+  {
+    "date": "2023-04-06T09:30:00Z",
+    "timestamp": 1680773400000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 2017.25,
+    "prev_close_price": 2022.3,
+    "ch": -5.05,
+    "chp": -0.2503
+  },
+  {
+    "date": "2023-04-07T09:30:00Z",
+    "timestamp": 1680859800000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 2017.25,
+    "prev_close_price": 2017.25,
+    "ch": 0.0,
+    "chp": 0.0
+  },
+  {
+    "date": "2023-03-06T10:30:00Z",
+    "timestamp": 1678098600000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 1851.7,
+    "prev_close_price": 1845.55,
+    "ch": 6.15,
+    "chp": 0.3321
+  },
+  {
+    "date": "2023-03-07T10:30:00Z",
+    "timestamp": 1678185000000,
+    "metal": "XAU",
+    "exchange": "LBMA",
+    "currency": "USD",
+    "price": 1843.05,
+    "prev_close_price": 1851.7,
+    "ch": -8.65,
+    "chp": -0.4693
+  }
+]

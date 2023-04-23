@@ -1,11 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Security.Principal;
 using System.Threading;
 using GoldPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using PublicHoliday;
 using RestSharp;
 using Spectre.Console;
@@ -13,28 +12,28 @@ using Spectre.Console.Cli;
 
 namespace GoldPriceConsole.Commands;
 
-public class PriceCommand : Command<PriceCommand.Settings>
+public class HistoryCommand : Command<HistoryCommand.Settings>
 {
-    private readonly ApiServer _apiServer;
     private readonly string _connectionString;
+    private readonly ApiServer _apiServer;
     private ILogger _logger;
 
-    public PriceCommand(ApiServer apiServer, ILogger<PriceCommand> logger, ConnectionStrings connectionStrings)
+    public HistoryCommand(ConnectionStrings ConnectionString, ApiServer apiServer, ILogger<AccountCommand> logger)
     {
+        _connectionString = ConnectionString.DefaultDB;
         _apiServer = apiServer;
         _logger = logger;
-        _connectionString = connectionStrings.DefaultDB;
     }
 
     public class Settings : CommandSettings
     {
-        [Description("Get Current Price.")]
-        [DefaultValue(false)]
-        public bool GetPrice { get; set; }
+        [CommandOption("--start <startdate>")]
+        [Description("Start Date.")]
+        public string StartDate { get; set; }
 
-        [CommandOption("--date <date>")]
-        [Description("Date To Get Price For")]
-        public string Date { get; set; }
+        [CommandOption("--end <enddate>")]
+        [Description("End Date")]
+        public string EndDate { get; set; }
 
         [CommandOption("--debug")]
         [Description("Enable Debug Output")]
@@ -51,13 +50,11 @@ public class PriceCommand : Command<PriceCommand.Settings>
         [DefaultValue(false)]
         public bool Save { get; set; }
     }
-
     public override int Execute(CommandContext context, Settings settings)
     {
-        settings.GetPrice = true;
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _logger);
+            DebugDisplay.Print(settings, _apiServer, _logger, _connectionString);
         }
         AnsiConsole.WriteLine();
         // Process Window
@@ -86,28 +83,18 @@ public class PriceCommand : Command<PriceCommand.Settings>
                     70,
                     () =>
                         table.Columns[0].Footer(
-                            $"[red bold]Status[/] [green bold]Retrieving Gold Price For {settings.Date}[/]"
+                            $"[red bold]Status[/] [green bold]Retrieving Gold Prices For {settings.StartDate} To {settings.EndDate}[/]"
                         )
                 );
-                int day = 0;
-                DateTime date = DateTime.Parse(settings.Date);
-                bool isHoliday = new USAPublicHoliday().IsPublicHoliday(date);
-                if (!isHoliday && date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
-                    day = 1;
-                Update(
-                   70,
-                   () =>
-                       table.AddRow(
-                           $":check_mark: [green bold]Calculated {day} Days To Get Gold Prices For...[/]"
-                       )
-                );
-                if (day < 1)
+                List<DateTime> days = GetNumberOfDays(settings.StartDate, settings.EndDate);
+
+                if (days.Count < 1)
                 {
                     Update(
                         70,
                         () =>
                             table.AddRow(
-                                $":check_mark: [red bold]There are {day} Days To Process...[/]"
+                                $":check_mark: [green bold]There are {days.Count} Days To Process...[/]"
                             )
                     );
                     Update(
@@ -119,6 +106,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                     );
                     return;
                 }
+
                 var client = new RestClient(_apiServer.BaseUrl + "stat");
                 var request = new RestRequest("", Method.Get);
                 request.AddHeader("x-access-token", _apiServer.Token);
@@ -136,7 +124,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                 }
                 int monthlyAllowance = 0;
                 int.TryParse(_apiServer.MonthlyAllowance, out monthlyAllowance);
-                var willBeLeft = (monthlyAllowance - account.requests_month) - day;
+                var willBeLeft = (monthlyAllowance - account.requests_month) - days.Count;
                 if (willBeLeft > 0)
                 {
                     Update(
@@ -146,16 +134,16 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                 $":check_mark: [green bold]Will Leave {willBeLeft} Calls After Running...[/]"
                             )
                     );
-                    Update(
-                        70,
-                        () =>
-                            table.AddRow(
-                                $":plus: [red bold]Retrieving Gold Price for {settings.Date}...[/]"
-                            )
-                    );
-                    if (!isHoliday && date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
+                    foreach (DateTime date in days)
                     {
-                        client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + settings.Date);
+                        Update(
+                            70,
+                            () =>
+                                table.AddRow(
+                                    $":plus: [red bold]Retrieving Gold Price for {date.ToString("yyyy-MM-dd")}...[/]"
+                                )
+                        );
+                        client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + date.ToString("yyyy-MM-dd"));
                         request = new RestRequest("", Method.Get);
                         request.AddHeader("x-access-token", _apiServer.Token);
                         request.AddHeader("Content-Type", "application/json");
@@ -167,7 +155,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                 70,
                                 () =>
                                     table.AddRow(
-                                        $":check_mark: [green bold italic]Current Price: {goldPrice.price:C} Previous Price: {goldPrice.prev_close_price:C}[/]"
+                                        $":check_mark: [green bold italic]Price: {goldPrice.price:C} Previous Days Price: {goldPrice.prev_close_price:C}[/]"
                                     )
                             );
                             if (settings.Save)
@@ -202,6 +190,12 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                 }
                             }
                         }
+                        // More rows than we want?
+                        if (table.Rows.Count > Console.WindowHeight - 15)
+                        {
+                            // Remove the first one
+                            table.Rows.RemoveAt(0);
+                        }
                     }
                 }
                 else
@@ -217,7 +211,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                         70,
                         () =>
                             table.Columns[0].Footer(
-                                $"[red bold]Status[/] [red bold italic]Aborting Retrieving Gold Price For {settings.Date}...[/]"
+                                $"[red bold]Status[/] [red bold italic]Aborting Retrieving Gold Price For {settings.StartDate} To {settings.EndDate}[/]"
                             )
                     );
                     return;
@@ -226,12 +220,35 @@ public class PriceCommand : Command<PriceCommand.Settings>
             });
         return 0;
     }
+    private static List<DateTime> GetNumberOfDays(string startDate, string endDate)
+    {
+        DateTime start = DateTime.Parse(startDate);
+        DateTime end = DateTime.Parse(endDate);
+        List<DateTime> dates = new();
+        var res = DateTime.Compare(end, DateTime.Now);
+
+        // We do not want the end date to be the current date or future date.
+        if (res > 0)
+            end = DateTime.Now.AddDays(-1);
+
+        while (start <= end)
+        {
+            bool isHoliday = new USAPublicHoliday().IsPublicHoliday(start);
+            if (!isHoliday && start.DayOfWeek != DayOfWeek.Saturday && start.DayOfWeek != DayOfWeek.Sunday)
+                dates.Add(start);
+            start = start.AddDays(1);
+        }
+        return dates;
+    }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
     {
-        DateTime date;
-        if (!DateTime.TryParse(settings.Date, out date))
-            return ValidationResult.Error($"Invalid date - {settings.Date}");
+        DateTime startDate;
+        DateTime endDate;
+        if (!DateTime.TryParse(settings.EndDate, out endDate))
+            return ValidationResult.Error($"Invalid end date - {settings.EndDate}");
+        if (!DateTime.TryParse(settings.StartDate, out startDate))
+            return ValidationResult.Error($"Invalid start date - {settings.StartDate}");
         return base.Validate(context, settings);
     }
 }
