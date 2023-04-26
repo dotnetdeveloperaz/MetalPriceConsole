@@ -11,7 +11,7 @@ CREATE DEFINER=`root`@`%` PROCEDURE `personal`.`usp_AddGoldPrice`(
 )
 BEGIN
 	INSERT INTO GoldPrices 
-		(Price, PrevPriceClose, RateDate, Chg, ChgPct)
+		(Price, PrevPriceClose, RateDate, Chg, ChgPct, price_gram_24k, price_gram_22k, price_gram_21k, price_gram_20k, price_gram_18k)
 		VALUES (price, prev_price, ratedate, chg, chg_pct, price_gram_24k, price_gram_22k, price_gram_21k, price_gram_20k, price_gram_18k
 )
 	ON DUPLICATE KEY UPDATE 
