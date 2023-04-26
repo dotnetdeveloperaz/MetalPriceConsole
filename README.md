@@ -4,8 +4,11 @@
 
 Simple console application utility that calls a third party web api to retrieve Gold or Silver prices and stores the data in a database. 
 
-This application uses PublicHoliday nuget package (Copyright (C) 2013 Martin Willey) which the source code and license is available at <a href="https://github.com/martinjw/Holiday/" target="_blank">Martin Willey's Github</a>. 
+This application uses the following open source libraries.
 
+-- PublicHoliday nuget package (Copyright (C) 2013 Martin Willey) which the source code and license is available at <a href="https://github.com/martinjw/Holiday/" target="_blank">Martin Willey's Github</a>. 
+
+-- Spectre Console and Spectre Console Cli. <a href="https://spectreconsole.net/" target="_blank">Spectre Console WebSite</a>
 ## Status
 
 .NET 6
