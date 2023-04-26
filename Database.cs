@@ -43,12 +43,18 @@ namespace GoldPriceConsole
             sqlCommand.CommandType = CommandType.StoredProcedure;
             try
             {
-                sqlConnection.Open();
+ 
+               sqlConnection.Open();
                 sqlCommand.Parameters.AddWithValue("price", goldPrice.price);
                 sqlCommand.Parameters.AddWithValue("prev_price", goldPrice.prev_close_price);
                 sqlCommand.Parameters.AddWithValue("ratedate", goldPrice.date.ToString("yyyy/MM/dd"));
                 sqlCommand.Parameters.AddWithValue("chg", goldPrice.ch);
                 sqlCommand.Parameters.AddWithValue("chg_pct", goldPrice.chp);
+                sqlCommand.Parameters.AddWithValue("price_gram_24k", goldPrice.price_gram_24k);
+                sqlCommand.Parameters.AddWithValue("price_gram_22k", goldPrice.price_gram_22k);
+                sqlCommand.Parameters.AddWithValue("price_gram_21k", goldPrice.price_gram_21k);
+                sqlCommand.Parameters.AddWithValue("price_gram_20k", goldPrice.price_gram_20k);
+                sqlCommand.Parameters.AddWithValue("price_gram_18k", goldPrice.price_gram_18k);
                 var recs = sqlCommand.ExecuteNonQuery();
             }
             catch (MySqlException ex)
