@@ -13,6 +13,11 @@ public class GoldPrice
     public double prev_close_price { get; set; }
     public double ch { get; set; }
     public double chp { get; set; }
+    public double price_gram_24k { get; set; }
+    public double price_gram_22k { get; set; }  
+    public double price_gram_21k { get; set; }  
+    public double price_gram_20k { get; set; }  
+    public double price_gram_18k { get; set; }  
 }
 public class ApiStatus
 {
