@@ -4,7 +4,7 @@ using System.IO;
 using System.Reflection;
 using Spectre.Console;
 
-namespace GoldPriceConsole;
+namespace MetalPriceConsole;
 
 public class Title
 {
@@ -17,7 +17,7 @@ public class Title
         titleTable.AddColumn(
             new TableColumn(
                 new Markup(
-                    $"[yellow]Gold :pick:  Price Console[/] {version}\r\n[green bold italic]Written By Scott Glasgow[/]"
+                    $"[yellow]Metal :pick:  Price Console[/] {version}\r\n[green bold italic]Written By Scott Glasgow[/]"
                 )
             ).Centered()
         );
@@ -27,7 +27,7 @@ public class Title
 
         AnsiConsole.Write(titleTable);
 
-        if(File.Exists("GoldPrice.cache"))
+        if(File.Exists("MetalPrice.cache"))
         {
             var table = new Table().Centered();
             table.AddColumn(new TableColumn(new Markup("[red bold italic]Cache file exists. Use restore to load to database.[/]").Centered()));

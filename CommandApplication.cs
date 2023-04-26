@@ -1,7 +1,7 @@
-﻿using GoldPriceConsole.Commands;
+﻿using MetalPriceConsole.Commands;
 using Spectre.Console.Cli;
 
-namespace GoldPriceConsole
+namespace MetalPriceConsole
 {
     public class CommandApplication
     {

@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using GoldPriceConsole.Models;
+using MetalPriceConsole.Models;
 using Newtonsoft.Json.Linq;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
-namespace GoldPriceConsole.Commands;
+namespace MetalPriceConsole.Commands;
 
 public class AccountCommand : Command<AccountCommand.Settings>
 {

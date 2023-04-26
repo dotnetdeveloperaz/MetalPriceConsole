@@ -1,21 +1,13 @@
-﻿using GoldPriceConsole.Commands;
-using Microsoft.Extensions.Configuration;
-using MySqlConnector;
-using Newtonsoft.Json;
-using PublicHoliday;
-using RestSharp;
+﻿using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading;
 using System.Threading.Tasks;
-using GoldPriceConsole.Models;
+using MetalPriceConsole.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace GoldPriceConsole;
+namespace MetalPriceConsole;
 
 class Program
 {
@@ -55,7 +47,7 @@ class Program
         var apiServer = config.GetSection("ApiServer");
         var services = new ServiceCollection();
         services.AddSingleton(new ApiServer() { Token = apiServer["Token"], BaseUrl = apiServer["BaseUrl"], 
-            DefaultMetal = apiServer["DefaultMetal"], MonthlyAllowance = apiServer["MonthlyAllowance"] });
+            Gold = apiServer["Gold"], Silver = apiServer["Silver"], Currency= apiServer["Currency"], MonthlyAllowance = apiServer["MonthlyAllowance"] });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
         services.AddLogging(loggingBuilder =>
         {
@@ -63,7 +55,7 @@ class Program
             loggingBuilder.AddEventSourceLogger();
         });
 
-        services.AddSingleton<GoldPriceEventSource>();
+        services.AddSingleton<MetalPriceEventSource>();
         services.BuildServiceProvider();
         return services;
     }

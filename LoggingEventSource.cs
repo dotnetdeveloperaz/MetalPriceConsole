@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics.Tracing;
-using System.Xml.Linq;
 
-namespace GoldPriceConsole;
+namespace MetalPriceConsole;
 
-[EventSource(Name = "Gold Price Console")]
-public class GoldPriceEventSource : EventSource
+[EventSource(Name = "Metal Price Console")]
+public class MetalPriceEventSource : EventSource
 {
-    public static GoldPriceEventSource Log = new GoldPriceEventSource();
+    public static MetalPriceEventSource Log = new MetalPriceEventSource();
 
     public void Trace(string message)
     {
