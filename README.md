@@ -125,22 +125,22 @@ status
 price
 - Gets yesterday's (Prices are available for previous days close) Gold rate (and saves to the configured database if passing --save
 
-price --date YYYY-MM-DD --silver --currency USD
+price --date YYYY-MM-DD
 - Gets a specific date instead of yesterday's (default) close price.
 
-history --start <YYYY-MM-DD> --end <YYYY-MM-DD> --silver --currency USD
+history --start <YYYY-MM-DD> --end <YYYY-MM-DD>
 - Gets Gold prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
 
-** The --save switch will write the price data to the database on commands price and backtrack.**
+** Using the --save switch for commands price and history will write the price data to the database on commands price and backtrack.**
 
 ** The --fake switch will load sample data, instead of calling the WebApi. **
 
-** The --silver switch will retrieve silver prices. **
+** Using the --silver switch for commands price and history will retrieve silver prices. **
 
-** The --gold switch will retrieve gold prices, however, this is the default and does not need to be added.
-    This switch switch was added for future enhancements to include platinum and palladium. **
+** Using the --gold switch for commands price and history will retrieve gold prices, however, this is the default and does not need to be added.
+    This switch was added for future enhancements to include platinum and palladium. **
 
-** The --currency rate is to override the configured default currency, which is USD. **
+** Using the --currency <USD> rate for commands price and history is to override the configured default currency, which is USD. **
 
 restore
 -- Restores existing cache file to the database.
