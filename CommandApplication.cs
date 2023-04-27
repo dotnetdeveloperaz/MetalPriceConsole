@@ -1,7 +1,7 @@
-﻿using GoldPriceConsole.Commands;
+﻿using MetalPriceConsole.Commands;
 using Spectre.Console.Cli;
 
-namespace GoldPriceConsole
+namespace MetalPriceConsole
 {
     public class CommandApplication
     {
@@ -29,6 +29,10 @@ namespace GoldPriceConsole
                         "YYYY-MM-DD",
                         "--end",
                         "YYYY-MM-DD",
+                        "--currency",
+                        "USD",
+                        "--gold",
+                        "--silver",
                         "--fake",
                         "--save",
                         "--debug",
@@ -42,7 +46,7 @@ namespace GoldPriceConsole
                         "Retrieves the current gold price. Use --save to save to database. Weekends and holidays are skipped."
                     )
                     .WithExample(
-                        new[] { "price", "--date", "YYYY-MM-DD", "--fake", "--save", "--debug", "--hidden" }
+                        new[] { "price", "--date", "YYYY-MM-DD", "--currency", "USD", "--gold", "--silver", "--fake", "--save", "--debug", "--hidden" }
                 );
                 config
                     .AddCommand<AccountCommand>("acct")

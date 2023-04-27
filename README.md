@@ -1,21 +1,24 @@
-# Gold Price Console v2.1
+# Metal Price Console v2.5
 
 ## About <a name = "about"></a>
 
-Simple console application utility that calls a third party web api to retrieve Gold prices and stores the data in a database. 
+Simple console application utility that calls a third party web api to retrieve Gold or Silver prices and stores the data in a database. 
 
-This application uses PublicHoliday nuget package (Copyright (C) 2013 Martin Willey) which the source code and license is available at <a href="https://github.com/martinjw/Holiday/" target="_blank">Martin Willey's Github</a>. 
+This application uses the following open source libraries.
 
+-- PublicHoliday nuget package (Copyright (C) 2013 Martin Willey) which the source code and license is available at <a href="https://github.com/martinjw/Holiday/" target="_blank">Martin Willey's Github</a>. 
+
+-- Spectre Console and Spectre Console Cli. <a href="https://spectreconsole.net/" target="_blank">Spectre Console WebSite</a>
 ## Status
 
 .NET 6
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet6.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet6.yml)
+[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet6.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet6.yml)
 
 .NET 7
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet7.yml)
+[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet7.yml)
 
 .NET 8 Preview 3
-[![build](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/GoldPriceConsole/actions/workflows/dotnet8.yml)
+[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml)
 
 ## Buy Me A Coffee
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
@@ -47,7 +50,9 @@ These instructions will get you a copy of the project up and running on your loc
   "ApiServer": {
     "Token": "",
     "BaseURL": "https://www.goldapi.io/api/",
-    "DefaultMetal": "XAU/USD/",
+    "Gold": "XAU/",
+    "Silver":  "XAG/",
+    "Currency":  "USD/",
     "MonthlyAllowance": "300",
   },
   "Logging": {
@@ -77,18 +82,18 @@ dotnet user-secrets list
 
 Create the tables and stored procedures used by this utility.
 
-To create a fresh install, run the GoldRates-table.sql script in the db directory.
+To create a fresh install, run the MetalRates-table.sql script in the db directory.
 
-GoldRates-table.sql to create the table.
-usp_AddGoldPrice.sql to create the stored procedure.
+MetalRates-table.sql to create the table.
+usp_AddMetalPrice.sql to create the stored procedure.
 
-> *You do not need to run the GoldRates-table script if you do the restore below. 
+> *You do not need to run the MetalRates-table script if you do the restore below. 
 
-If you would like the full history (Back to Dec 6th, 2018) of Gold Price, which will save you time and API calls if you want historical data, then restore the database in the db directory called GoldPrices.sql.gz.
+If you would like the full history (Back to Dec 6th, 2018) of Metal Prices database, which will save you time and API calls if you want historical data, then restore the database in the db directory called MetalPrices.sql.gz.
 
 ```bash
-gzip -d GoldPrices.sql.gz
-mysql -u <your username> -p <Your Target Database> < GoldPrices.sql
+gzip -d MetalPrices.sql.gz
+mysql -u <your username> -p <Your Target Database> < MetalPrices.sql
 ```
 
 Build the project by running the following in the project folder.
@@ -120,24 +125,31 @@ status
 price
 - Gets yesterday's (Prices are available for previous days close) Gold rate (and saves to the configured database if passing --save
 
-price --date YYYY-MM-DD 
+price --date YYYY-MM-DD --silver --currency USD
 - Gets a specific date instead of yesterday's (default) close price.
 
-backtrack --start <YYYY-MM-DD> --end <YYYY-MM-DD> 
+history --start <YYYY-MM-DD> --end <YYYY-MM-DD> --silver --currency USD
 - Gets Gold prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
 
 ** The --save switch will write the price data to the database on commands price and backtrack.**
 
 ** The --fake switch will load sample data, instead of calling the WebApi. **
 
+** The --silver switch will retrieve silver prices. **
+
+** The --gold switch will retrieve gold prices, however, this is the default and does not need to be added.
+    This switch switch was added for future enhancements to include platinum and palladium. **
+
+** The --currency rate is to override the configured default currency, which is USD. **
+
 restore
 -- Restores existing cache file to the database.
 
 Example:
 ```
-backtrack --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023.
+history --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023.
 
-backtrack --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
+history --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
 ```
 
 *Only U.S. Non-Holiday Week Days Are Processed*
@@ -147,18 +159,18 @@ Passing --debug will output configuration data. If you pass --debug --hidden, it
 Run the application with no commands (dotnet run) and you will get the following usage screen.
 ```bash
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                              Gold ⛏  Price Console v2.1                                             │
+│                                              Gold ⛏  Price Console v2.5                                             │
 │                                               Written By Scott Glasgow                                               │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │                                 Cache file exists. Use restore to load to database.                                  │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 USAGE:
-    GoldPriceConsole.dll [OPTIONS] <COMMAND>
+    metalPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    dotnet run  history --start YYYY-MM-DD --end YYYY-MM-DD --fake --save --debug --hidden
-    dotnet run  price --date YYYY-MM-DD --fake --save --debug --hidden
+    dotnet run  history --start YYYY-MM-DD --end YYYY-MM-DD --silver --currency USD --fake --save --debug --hidden
+    dotnet run  price --date YYYY-MM-DD --silver --currency USD --fake --save --debug --hidden
     dotnet run  acct --debug --hidden
     dotnet run  status --debug --hidden
     dotnet run restore --debug --hidden

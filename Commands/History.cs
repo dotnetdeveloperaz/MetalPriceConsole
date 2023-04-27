@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.IO;
 using System.Threading;
-using GoldPriceConsole.Models;
+using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using PublicHoliday;
@@ -12,7 +12,7 @@ using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace GoldPriceConsole.Commands;
+namespace MetalPriceConsole.Commands;
 
 public class HistoryCommand : Command<HistoryCommand.Settings>
 {
@@ -36,6 +36,21 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         [CommandOption("--end <enddate>")]
         [Description("End Date")]
         public string EndDate { get; set; }
+
+        [CommandOption("--currency <USD>")]
+        [Description("Specify The Currency")]
+        [DefaultValue("")]
+        public string Currency { get; set; }
+
+        [CommandOption("--silver")]
+        [Description("Get Silver Price")]
+        [DefaultValue(false)]
+        public bool GetSilver { get; set; }
+
+        [CommandOption("--gold")]
+        [Description("Get Gold Price - This is the default and is optional")]
+        [DefaultValue(true)]
+        public bool GetGold { get; set; }
 
         [CommandOption("--debug")]
         [Description("Enable Debug Output")]
@@ -63,6 +78,20 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         {
             DebugDisplay.Print(settings, _apiServer, _logger, _connectionString);
         }
+        if (settings.GetSilver)
+        {
+            settings.GetGold = false;
+            settings.GetSilver = true;
+        }
+        if (settings.Currency.Length == 0)
+            settings.Currency = _apiServer.Currency;
+        else
+            settings.Currency += "/";    
+
+        if (settings.Debug)
+        {
+            DebugDisplay.Print(settings, _apiServer, _logger);
+        }
         AnsiConsole.WriteLine();
         // Process Window
         var table = new Table().Centered();
@@ -86,11 +115,14 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
+                string metal = "Gold";
+                if (settings.GetSilver)
+                    metal = "Silver";
                 Update(
                     70,
                     () =>
                         table.Columns[0].Footer(
-                            $"[red bold]Status[/] [green bold]Retrieving Gold Prices For {settings.StartDate} To {settings.EndDate}[/]"
+                            $"[red bold]Status[/] [green bold]Retrieving {metal} Prices For {settings.StartDate} To {settings.EndDate}[/]"
                         )
                 );
                 List<DateTime> days = GetNumberOfDays(settings.StartDate, settings.EndDate);
@@ -148,43 +180,48 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                             70,
                             () =>
                                 table.AddRow(
-                                    $":plus: [red bold]Retrieving Gold Price for {date.ToString("yyyy-MM-dd")}...[/]"
+                                    $":plus: [red bold]Retrieving {metal} Price for {date.ToString("yyyy-MM-dd")}...[/]"
                                 )
                         );
-                        GoldPrice goldPrice;
+                        MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-                            client = new RestClient(_apiServer.BaseUrl + _apiServer.DefaultMetal + date.ToString("yyyy-MM-dd"));
+                            string url = _apiServer.BaseUrl;
+                            if (settings.GetSilver)
+                                url += _apiServer.Silver;
+                            else
+                                url += _apiServer.Gold;
+                            client = new RestClient(url + settings.Currency + date.ToString("yyyy-MM-dd"));
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);
                             request.AddHeader("Content-Type", "application/json");
                             RestResponse response = client.Execute(request);
-                            goldPrice = JsonConvert.DeserializeObject<GoldPrice>(response.Content);
+                            metalPrice = JsonConvert.DeserializeObject<MetalPrice>(response.Content);
                         }
                         else
                         {
                             string cache = File.ReadAllText("MultiDay.sample");
-                            List<GoldPrice> goldPrices = JsonConvert.DeserializeObject<List<GoldPrice>>(cache);
+                            List<MetalPrice> metalPrices = JsonConvert.DeserializeObject<List<MetalPrice>>(cache);
                             if (i == days.Count)
                                 i = 0;
                             else
                                 i++;
-                            goldPrice = goldPrices[i];
+                            metalPrice = metalPrices[i];
                         }
-                        if (goldPrice != null)
+                        if (metalPrice != null)
                         {
                             Update(
                                 70,
                                 () =>
                                     table.AddRow(
-                                        $":check_mark: [green bold italic]Price: {goldPrice.price:C} Previous Days Price: {goldPrice.prev_close_price:C}[/]"
+                                        $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.price:C} Previous Ounce Price: {metalPrice.prev_close_price:C}[/]"
                                     )
                             );
                             Update(
                                 70,
                                 () =>
                                     table.AddRow(
-                                        $"           :check_mark: [green bold italic] 24k gram: {goldPrice.price_gram_24k:C} 22k gram: {goldPrice.price_gram_22k:C} 21k gram: {goldPrice.price_gram_21k:C} 20k gram: {goldPrice.price_gram_20k:C} 18k gram: {goldPrice.price_gram_18k:C}[/]"
+                                        $"           :check_mark: [green bold italic] 24k gram: {metalPrice.price_gram_24k:C} 22k gram: {metalPrice.price_gram_22k:C} 21k gram: {metalPrice.price_gram_21k:C} 20k gram: {metalPrice.price_gram_20k:C} 18k gram: {metalPrice.price_gram_18k:C}[/]"
                                     )
                             );
                             if (settings.Save)
@@ -196,13 +233,13 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                             $":plus: [red bold]Adding Data To Database...[/]"
                                         )
                                 );
-                                if (Database.Save(goldPrice, _connectionString))
+                                if (Database.Save(metalPrice, _connectionString))
                                 {
                                     Update(
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":check_mark: [green bold]Saved Gold Price For {goldPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":check_mark: [green bold]Saved {metal} Price For {metalPrice.date.ToString("yyyy-MM-dd")}...[/]"
                                             )
                                     );
                                 }
@@ -213,7 +250,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":stop_sign: [red bold]Could Not Save Gold Price For {goldPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":stop_sign: [red bold]Could Not Save {metal} Price For {metalPrice.date.ToString("yyyy-MM-dd")}...[/]"
                                             )
                                     );
                                 }
@@ -240,7 +277,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                         70,
                         () =>
                             table.Columns[0].Footer(
-                                $"[red bold]Status[/] [red bold italic]Aborting Retrieving Gold Price For {settings.StartDate} To {settings.EndDate}[/]"
+                                $"[red bold]Status[/] [red bold italic]Aborting Retrieving {metal} Price For {settings.StartDate} To {settings.EndDate}[/]"
                             )
                     );
                     return;

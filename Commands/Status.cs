@@ -1,14 +1,14 @@
 using System;
 using System.ComponentModel;
 using System.Threading;
-using GoldPriceConsole.Models;
+using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace GoldPriceConsole.Commands;
+namespace MetalPriceConsole.Commands;
 
 public class StatusCommand : Command<StatusCommand.Settings>
 {

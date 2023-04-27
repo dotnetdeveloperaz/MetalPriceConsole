@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Net.NetworkInformation;
 using System.Threading;
-using GoldPriceConsole.Models;
+using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
-namespace GoldPriceConsole.Commands;
+namespace MetalPriceConsole.Commands;
 
 public class RestoreCommand : Command<RestoreCommand.Settings>
 {
@@ -81,17 +79,17 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                 );
 
                 // Content
-                if(!File.Exists("GoldPrice.cache"))
+                if(!File.Exists("metalPrice.cache"))
                 { 
                     Update(70, () => table.AddRow($"[red]No Cache File Exists. Exiting.[/]"));
                     Update(70, () => table.Columns[0].Footer("[blue]No Cache File To Process. Finishing.[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]GoldPrice.cache[/]"));
-                string cache = File.ReadAllText("GoldPrice.cache");
-                var goldPrices = JsonConvert.DeserializeObject<List<GoldPrice>>(cache);
+                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]metalPrice.cache[/]"));
+                string cache = File.ReadAllText("metalPrice.cache");
+                var metalPrices = JsonConvert.DeserializeObject<List<MetalPrice>>(cache);
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
-                Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{goldPrices.Count} Records Loaded[/]"));
+                Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
                 Update(70, () => table.Columns[0].Footer("[blue]Cache File Loaded[/]"));
 
                 table.Columns[0].LeftAligned();
@@ -104,21 +102,21 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                         )
                 );
                 int saved = 0;
-                foreach (GoldPrice goldPrice in goldPrices)
+                foreach (MetalPrice metalPrice in metalPrices)
                 {
-                    if (Database.Save(goldPrice, _connectionString))
+                    if (Database.Save(metalPrice, _connectionString))
                     {
                         Update(
                             70,
                             () =>
                                 table.AddRow(
-                                    $":check_mark: [green bold]Saved Gold Price For {goldPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                    $":check_mark: [green bold]Saved Gold Price For {metalPrice.date.ToString("yyyy-MM-dd")}...[/]"
                                 )
                         );
                         saved++;
                     }
                 }
-                if (saved == goldPrices.Count)
+                if (saved == metalPrices.Count)
                 {
                     Update(
                         70,
@@ -127,7 +125,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                                 $":minus: [red bold]Removing Cache File[/]"
                             )
                     );
-                    File.Delete("GoldPrice.cache");
+                    File.Delete("metalPrice.cache");
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });

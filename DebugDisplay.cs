@@ -4,12 +4,9 @@ using System.Threading;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using GoldPriceConsole.Models;
-using GoldPriceConsole.Commands;
-using System.Security.Principal;
-using Newtonsoft.Json.Linq;
+using MetalPriceConsole.Models;
 
-namespace GoldPriceConsole;
+namespace MetalPriceConsole;
 
 public class DebugDisplay
 {

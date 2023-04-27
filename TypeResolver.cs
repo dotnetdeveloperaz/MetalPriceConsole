@@ -1,7 +1,7 @@
 ﻿using Spectre.Console.Cli;
 using System;
 
-namespace GoldPriceConsole
+namespace MetalPriceConsole
 {
     public sealed class TypeResolver : ITypeResolver, IDisposable
     {

@@ -1,8 +1,8 @@
 using System;
 
-namespace GoldPriceConsole.Models;
+namespace MetalPriceConsole.Models;
 
-public class GoldPrice
+public class MetalPrice
 {
     public DateTime date { get; set; }
     public long timestamp { get; set; }
