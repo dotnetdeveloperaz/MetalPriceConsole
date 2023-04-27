@@ -1,4 +1,4 @@
-# Metal Price Console v2.5
+# Metal Price Console v2.5 (This release is dedicated to Suheyla who asked me to implement gram's and other base currencies)
 
 ## About <a name = "about"></a>
 
