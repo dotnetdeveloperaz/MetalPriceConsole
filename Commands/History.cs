@@ -83,8 +83,10 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
             settings.GetGold = false;
             settings.GetSilver = true;
         }
-        if (!settings.Currency.Contains("/"))
-            settings.Currency = settings.Currency + "/";
+        if (settings.Currency.Length == 0)
+            settings.Currency = _apiServer.Currency;
+        else
+            settings.Currency += "/";    
 
         if (settings.Debug)
         {

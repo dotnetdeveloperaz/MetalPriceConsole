@@ -79,10 +79,10 @@ public class PriceCommand : Command<PriceCommand.Settings>
             settings.GetGold = false;
             settings.GetSilver = true; 
         }
-        if(settings.Currency == "")
+        if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
-        if (!settings.Currency.Contains("/"))
-            settings.Currency = settings.Currency + "/";
+        else
+            settings.Currency += "/";
         settings.GetPrice = true;
         if (settings.Debug)
         {

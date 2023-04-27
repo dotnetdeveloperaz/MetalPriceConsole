@@ -45,6 +45,7 @@ namespace MetalPriceConsole
             {
                 sqlConnection.Open();
                 sqlCommand.Parameters.AddWithValue("metal", metalPrice.metal);
+                sqlCommand.Parameters.AddWithValue("currency", metalPrice.currency);
                 sqlCommand.Parameters.AddWithValue("price", metalPrice.price);
                 sqlCommand.Parameters.AddWithValue("prev_price", metalPrice.prev_close_price);
                 sqlCommand.Parameters.AddWithValue("ratedate", metalPrice.date.ToString("yyyy/MM/dd"));
