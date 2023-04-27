@@ -224,13 +224,6 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                         $"           :check_mark: [green bold italic] 24k gram: {metalPrice.price_gram_24k:C} 22k gram: {metalPrice.price_gram_22k:C} 21k gram: {metalPrice.price_gram_21k:C} 20k gram: {metalPrice.price_gram_20k:C} 18k gram: {metalPrice.price_gram_18k:C}[/]"
                                     )
                             );
-                            Update(
-                                70,
-                                () =>
-                                    table.AddRow(
-                                        $"           :check_mark: [green bold italic] 24k gram: {goldPrice.price_gram_24k:C} 22k gram: {goldPrice.price_gram_22k:C} 21k gram: {goldPrice.price_gram_21k:C} 20k gram: {goldPrice.price_gram_20k:C} 18k gram: {goldPrice.price_gram_18k:C}[/]"
-                                    )
-                            );
                             if (settings.Save)
                             {
                                 Update(
