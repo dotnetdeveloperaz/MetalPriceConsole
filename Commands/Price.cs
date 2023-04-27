@@ -74,6 +74,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
 
     public override int Execute(CommandContext context, Settings settings)
     {
+<<<<<<< HEAD
         if(settings.GetSilver)
         {
             settings.GetGold = false;
@@ -83,6 +84,10 @@ public class PriceCommand : Command<PriceCommand.Settings>
             settings.Currency = _apiServer.Currency;
         else
             settings.Currency += "/";
+=======
+        if (settings.Date == null)
+            settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+>>>>>>> main
         settings.GetPrice = true;
         if (settings.Debug)
         {
@@ -214,14 +219,22 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                 70,
                                 () =>
                                     table.AddRow(
+<<<<<<< HEAD
                                         $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.price:C} Previous Ounce Price: {metalPrice.prev_close_price:C}[/]"
+=======
+                                        $":check_mark: [green bold italic]Current Ounce Price: {goldPrice.price:C} Previous Ounce Price: {goldPrice.prev_close_price:C}[/]"
+>>>>>>> main
                                     )
                             );
                             Update(
                                 70,
                                 () =>
                                     table.AddRow(
+<<<<<<< HEAD
                                         $"           :check_mark: [green bold italic] 24k gram: {metalPrice.price_gram_24k:C} 22k gram: {metalPrice.price_gram_22k:C} 21k gram: {metalPrice.price_gram_21k:C} 20k gram: {metalPrice.price_gram_20k:C} 18k gram: {metalPrice.price_gram_18k:C}[/]"
+=======
+                                        $"           :check_mark: [green bold italic] 24k gram: { goldPrice.price_gram_24k:C} 22k gram: { goldPrice.price_gram_22k:C} 21k gram: { goldPrice.price_gram_21k:C} 20k gram: { goldPrice.price_gram_20k:C} 18k gram: { goldPrice.price_gram_18k:C}[/]"
+>>>>>>> main
                                     )
                             );
                             if (settings.Save)

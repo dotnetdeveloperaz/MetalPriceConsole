@@ -14,10 +14,17 @@ public class MetalPrice
     public double ch { get; set; }
     public double chp { get; set; }
     public double price_gram_24k { get; set; }
+<<<<<<< HEAD:Models/MetalPrice.cs
     public double price_gram_22k { get; set; }
     public double price_gram_21k { get; set; }
     public double price_gram_20k { get; set; }
     public double price_gram_18k { get; set; }
+=======
+    public double price_gram_22k { get; set; }  
+    public double price_gram_21k { get; set; }  
+    public double price_gram_20k { get; set; }  
+    public double price_gram_18k { get; set; }  
+>>>>>>> main:Models/GoldPrice.cs
 }
 public class ApiStatus
 {
