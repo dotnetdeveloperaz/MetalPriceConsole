@@ -43,7 +43,6 @@ namespace MetalPriceConsole
             sqlCommand.CommandType = CommandType.StoredProcedure;
             try
             {
-<<<<<<< HEAD
                 sqlConnection.Open();
                 sqlCommand.Parameters.AddWithValue("metal", metalPrice.metal);
                 sqlCommand.Parameters.AddWithValue("currency", metalPrice.currency);
@@ -57,7 +56,6 @@ namespace MetalPriceConsole
                 sqlCommand.Parameters.AddWithValue("price_gram_21k", metalPrice.price_gram_21k);
                 sqlCommand.Parameters.AddWithValue("price_gram_20k", metalPrice.price_gram_20k);
                 sqlCommand.Parameters.AddWithValue("price_gram_18k", metalPrice.price_gram_18k);
-=======
  
                sqlConnection.Open();
                 sqlCommand.Parameters.AddWithValue("price", goldPrice.price);
@@ -70,7 +68,6 @@ namespace MetalPriceConsole
                 sqlCommand.Parameters.AddWithValue("price_gram_21k", goldPrice.price_gram_21k);
                 sqlCommand.Parameters.AddWithValue("price_gram_20k", goldPrice.price_gram_20k);
                 sqlCommand.Parameters.AddWithValue("price_gram_18k", goldPrice.price_gram_18k);
->>>>>>> main
                 var recs = sqlCommand.ExecuteNonQuery();
             }
             catch (MySqlException ex)
