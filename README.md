@@ -1,4 +1,4 @@
-# Metal Price Console v3.0
+# Metal Price Console v2.5
 
 ## About <a name = "about"></a>
 
@@ -159,7 +159,7 @@ Passing --debug will output configuration data. If you pass --debug --hidden, it
 Run the application with no commands (dotnet run) and you will get the following usage screen.
 ```bash
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                              Gold ⛏  Price Console v2.1                                             │
+│                                              Gold ⛏  Price Console v2.5                                             │
 │                                               Written By Scott Glasgow                                               │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
