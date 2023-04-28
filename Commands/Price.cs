@@ -287,6 +287,8 @@ public class PriceCommand : Command<PriceCommand.Settings>
     public override ValidationResult Validate(CommandContext context, Settings settings)
     {
         DateTime date;
+        if (settings.Date == "")
+            settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
         if (!DateTime.TryParse(settings.Date, out date))
             return ValidationResult.Error($"Invalid date - {settings.Date}");
         return base.Validate(context, settings);
