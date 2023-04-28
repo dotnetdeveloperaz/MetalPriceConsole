@@ -49,6 +49,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
 
         [CommandOption("--date <date>")]
         [Description("Date To Get Price For")]
+        [DefaultValue("")]
         public string Date { get; set; }
 
         [CommandOption("--debug")]
