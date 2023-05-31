@@ -40,7 +40,7 @@ These instructions will get you a copy of the project up and running on your loc
 ### Prerequisites <a name = "prerequisites"></a>
 
 1. .NET 6, .NET 7 or .NET 8 Preview.
-2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 --300 they changed this in May 2023 -- api calls per month.
+2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 free (was 300 but they changed this in May 2023) api calls per month.
 3. MariaDB (or MySQL).
 4. Configure appsettings **(Token) (DefaultDB) keys**
 5. Set MonthlyAllowance if your account has a difference allowance amount.
@@ -55,7 +55,7 @@ These instructions will get you a copy of the project up and running on your loc
     "Gold": "XAU/",
     "Silver":  "XAG/",
     "Currency":  "USD/",
-    "MonthlyAllowance": "300",
+    "MonthlyAllowance": "100",
   },
   "Logging": {
     "LogLevel": {
