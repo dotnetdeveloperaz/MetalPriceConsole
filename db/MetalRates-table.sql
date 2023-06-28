@@ -10,6 +10,7 @@ CREATE TABLE `metalprices` (
   `Chg` double NOT NULL,
   `ChgPct` double NOT NULL,
   `AddDate` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Last_Update` tinmestamp NOT NULL DEFAULT current_timestamp(),
   `Price_Gram_24k` double DEFAULT NULL,
   `Price_Gram_22k` double DEFAULT NULL,
   `Price_Gram_21k` double DEFAULT NULL,
