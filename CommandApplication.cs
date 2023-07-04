@@ -63,6 +63,10 @@ namespace MetalPriceConsole
                     .WithDescription("Restores Cache File.")
                     .WithExample(new[] { "restore", "--debug", "--hidden" });
 
+                config
+                    .AddCommand<TestDatabaseCommand>("testdb")
+                    .WithDescription("Tests The Database Connection.")
+                    .WithExample(new[] { "testdb", "--debug", "--hidden" });
 #if DEBUG
                 config.PropagateExceptions();
 #endif
