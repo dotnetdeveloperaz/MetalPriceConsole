@@ -19,7 +19,7 @@ This application uses the following open source libraries.
 .NET 7
 [![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet7.yml)
 
-.NET 8 Preview 4
+.NET 8 Preview 6
 [![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml)
 
 ## Buy Me A Coffee
