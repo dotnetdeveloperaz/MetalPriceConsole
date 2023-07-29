@@ -19,34 +19,51 @@ namespace MetalPriceConsole
                 config
                     .AddCommand<HistoryCommand>("history")
                     .WithDescription(
-                        "Retrieves historical gold prices. Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
+                        "Retrieves historical precious metal prices. Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
                     )
                     .WithExample(
                         new[]
                         {
-                        "history",
-                        "--start",
-                        "YYYY-MM-DD",
-                        "--end",
-                        "YYYY-MM-DD",
-                        "--currency",
-                        "USD",
-                        "--gold",
-                        "--silver",
-                        "--fake",
-                        "--save",
-                        "--debug",
-                        "--hidden"
+                            "history",
+                            "--start",
+                            "YYYY-MM-DD",
+                            "--end",
+                            "YYYY-MM-DD",
+                            "--currency",
+                            "USD",
+                            "--gold",
+                            "--palladium",
+                            "--platinum",
+                            "--silver",
+                            "--fake",
+                            "--save",
+                            "--debug",
+                            "--hidden"
                         }
                     );
 
                 config
                     .AddCommand<PriceCommand>("price")
                     .WithDescription(
-                        "Retrieves the current gold price. Use --save to save to database. Weekends and holidays are skipped."
+                        "Retrieves the current precious metal price. Use --save to save to database. Weekends and holidays are skipped."
                     )
                     .WithExample(
-                        new[] { "price", "--date", "YYYY-MM-DD", "--currency", "USD", "--gold", "--silver", "--fake", "--save", "--debug", "--hidden" }
+                        new[] 
+                        { 
+                            "price", 
+                            "--date", 
+                            "YYYY-MM-DD", 
+                            "--currency", 
+                            "USD", 
+                            "--gold", 
+                            "--palladium",
+                            "--platinum",
+                            "--silver", 
+                            "--fake", 
+                            "--save", 
+                            "--debug", 
+                            "--hidden" 
+                        }
                 );
                 config
                     .AddCommand<AccountCommand>("acct")

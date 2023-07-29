@@ -40,9 +40,10 @@ public class StatusCommand : Command<StatusCommand.Settings>
     public override int Execute(CommandContext context, Settings settings)
     {
         settings.Status = true;
+        string url = _apiServer.BaseUrl + "status";
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _logger);
+            DebugDisplay.Print(settings, _apiServer, url);
         }
         // Process Window
         var table = new Table().Centered();
@@ -75,7 +76,7 @@ public class StatusCommand : Command<StatusCommand.Settings>
                         )
                 );
                 // Content
-                var client = new RestClient(_apiServer.BaseUrl + "status");
+                var client = new RestClient(url);
                 var request = new RestRequest("", Method.Get);
                 request.AddHeader("x-access-token", _apiServer.Token);
                 request.AddHeader("Content-Type", "application/json");

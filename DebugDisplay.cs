@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using MetalPriceConsole.Models;
@@ -10,11 +9,11 @@ namespace MetalPriceConsole;
 
 public class DebugDisplay
 {
-    internal static void Print(CommandSettings settings, ApiServer server, ILogger logger)
+    internal static void Print(CommandSettings settings, ApiServer server, string Url)
     {
-        Print(settings, server, logger, "");
+        Print(settings, server, "", Url);
     }
-    internal static void Print(CommandSettings settings, ApiServer server, ILogger logger, string connectionString)
+    internal static void Print(CommandSettings settings, ApiServer server, string connectionString, string Url)
     {
         // Debug Window
         var table = new Table().Centered();
@@ -67,6 +66,7 @@ public class DebugDisplay
                         if (connectionString != String.Empty)
                             Update(70, () => table.AddRow($"Database Connection:", $"{connectionString}"));
                         Update(70, () => table.AddRow($"Token:", $"{server.Token}"));
+                        Update(70, () => table.AddRow($"Url:", $"{Url}"));
                     }
                     foreach (PropertyInfo property in properties)
                     {
@@ -75,8 +75,8 @@ public class DebugDisplay
                         if (property.PropertyType == typeof(bool))
                             Update(70, () => table.AddRow($"{property.Name}", $"[yellow]{(bool)value}[/]"));
                         else
-                            if ((object)value != null)
-                            Update(70, () => table.AddRow($"{property.Name}", $"{value}"));
+                            if (value is not null)
+                                Update(70, () => table.AddRow($"{property.Name}", $"{value}"));
                     }
                 }
             });

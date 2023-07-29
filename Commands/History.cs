@@ -42,15 +42,25 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         [DefaultValue("")]
         public string Currency { get; set; }
 
-        [CommandOption("--silver")]
-        [Description("Get Silver Price")]
-        [DefaultValue(false)]
-        public bool GetSilver { get; set; }
-
         [CommandOption("--gold")]
         [Description("Get Gold Price - This is the default and is optional")]
         [DefaultValue(true)]
         public bool GetGold { get; set; }
+
+        [CommandOption("--palladium")]
+        [Description("Get Palladium Price")]
+        [DefaultValue(false)]
+        public bool GetPalladium { get; set; }   
+
+        [CommandOption("--platinum")]
+        [Description("Get Platinum Price")]
+        [DefaultValue(false)]
+        public bool GetPlatinum { get; set; }   
+
+        [CommandOption("--silver")]
+        [Description("Get Silver Price")]
+        [DefaultValue(false)]
+        public bool GetSilver { get; set; }
 
         [CommandOption("--debug")]
         [Description("Enable Debug Output")]
@@ -74,6 +84,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
     }
     public override int Execute(CommandContext context, Settings settings)
     {
+/*
         if (settings.Debug)
         {
             DebugDisplay.Print(settings, _apiServer, _logger, _connectionString);
@@ -83,14 +94,25 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
             settings.GetGold = false;
             settings.GetSilver = true;
         }
+*/
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
         else
             settings.Currency += "/";    
 
+        string url = _apiServer.BaseUrl;
+        if (settings.GetSilver)
+            url += _apiServer.Silver;
+        else if (settings.GetPalladium)
+            url += _apiServer.Palladium;
+        else if (settings.GetPlatinum)
+            url += _apiServer.Platinum;
+        else
+            url += _apiServer.Gold;
+
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _logger);
+            DebugDisplay.Print(settings, _apiServer, url);
         }
         AnsiConsole.WriteLine();
         // Process Window
@@ -161,8 +183,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                     Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
                     return;
                 }
-                int monthlyAllowance = 0;
-                int.TryParse(_apiServer.MonthlyAllowance, out monthlyAllowance);
+                int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                 var willBeLeft = (monthlyAllowance - account.requests_month) - days.Count;
                 if (willBeLeft > 0)
                 {
@@ -186,11 +207,6 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-                            string url = _apiServer.BaseUrl;
-                            if (settings.GetSilver)
-                                url += _apiServer.Silver;
-                            else
-                                url += _apiServer.Gold;
                             client = new RestClient(url + settings.Currency + date.ToString("yyyy-MM-dd"));
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);

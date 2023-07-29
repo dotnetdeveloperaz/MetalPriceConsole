@@ -44,9 +44,10 @@ public class AccountCommand : Command<AccountCommand.Settings>
     public override int Execute(CommandContext context, Settings settings)
     {
         settings.Account = true;
+        string url = _apiServer.BaseUrl + "stat";
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _logger);
+            DebugDisplay.Print(settings, _apiServer, url);
         }
         AnsiConsole.WriteLine();
         // Process Window
@@ -84,7 +85,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                         )
                 );
                 // Content
-                var client = new RestClient(_apiServer.BaseUrl + "stat");
+                var client = new RestClient(url);
                 var request = new RestRequest("", Method.Get);
                 request.AddHeader("x-access-token", _apiServer.Token);
                 request.AddHeader("Content-Type", "application/json");

@@ -45,7 +45,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
         settings.Restore = true;
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _logger);
+            DebugDisplay.Print(settings, _apiServer, "");
         }
         // Process Window
         var table = new Table().Centered();

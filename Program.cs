@@ -46,8 +46,12 @@ class Program
         var database = config.GetSection("ConnectionStrings");
         var apiServer = config.GetSection("ApiServer");
         var services = new ServiceCollection();
-        services.AddSingleton(new ApiServer() { Token = apiServer["Token"], BaseUrl = apiServer["BaseUrl"], 
-            Gold = apiServer["Gold"], Silver = apiServer["Silver"], Currency= apiServer["Currency"], MonthlyAllowance = apiServer["MonthlyAllowance"] });
+        services.AddSingleton(new ApiServer() { 
+            Token = apiServer["Token"], BaseUrl = apiServer["BaseUrl"], 
+            Gold = apiServer["Gold"], Palladium = apiServer["Palladium"], 
+            Platinum = apiServer["Platinum"], Silver = apiServer["Silver"], 
+            Currency= apiServer["Currency"], MonthlyAllowance = apiServer["MonthlyAllowance"] 
+        });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
         services.AddLogging(loggingBuilder =>
         {
