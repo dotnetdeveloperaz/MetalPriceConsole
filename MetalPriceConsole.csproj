@@ -5,7 +5,7 @@
 		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Title>Metal Price Console</Title>
-		<Version>2.5</Version>
+		<Version>3.0</Version>
 		<Authors>Scott Glasgow</Authors>
 		<Copyright>Copyright © 2023 Scott Glasgow</Copyright>
 		<UserSecretsId>49b2ab55-a5d6-4a2a-a7dd-ef3bd5e67ab1</UserSecretsId>

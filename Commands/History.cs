@@ -84,17 +84,6 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
     }
     public override int Execute(CommandContext context, Settings settings)
     {
-/*
-        if (settings.Debug)
-        {
-            DebugDisplay.Print(settings, _apiServer, _logger, _connectionString);
-        }
-        if (settings.GetSilver)
-        {
-            settings.GetGold = false;
-            settings.GetSilver = true;
-        }
-*/
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
         else
@@ -102,13 +91,26 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
 
         string url = _apiServer.BaseUrl;
         if (settings.GetSilver)
-            url += _apiServer.Silver;
+        {
+            url += _apiServer.Silver + settings.Currency;
+            settings.GetGold = false;
+        }
         else if (settings.GetPalladium)
-            url += _apiServer.Palladium;
+        {
+            url += _apiServer.Palladium + settings.Currency;
+            settings.GetGold = false;
+        }
         else if (settings.GetPlatinum)
-            url += _apiServer.Platinum;
+        {
+            url += _apiServer.Platinum + settings.Currency;
+            settings.GetGold = false;
+        }
         else
-            url += _apiServer.Gold;
+            url += _apiServer.Gold + settings.Currency;
+        // For some reason, Platinum and Palladium do not like date
+        // Need to make this specific for gold and silver for now until 
+        // I can look into it, which is above
+        //url += settings.Currency +  settings.Date;
 
         if (settings.Debug)
         {
@@ -207,7 +209,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-                            client = new RestClient(url + settings.Currency + date.ToString("yyyy-MM-dd"));
+                            client = new RestClient(url + date.ToString("yyyy-MM-dd"));
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);
                             request.AddHeader("Content-Type", "application/json");

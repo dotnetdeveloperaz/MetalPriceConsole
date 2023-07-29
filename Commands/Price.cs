@@ -93,18 +93,30 @@ public class PriceCommand : Command<PriceCommand.Settings>
         settings.GetPrice = true;
         string url = _apiServer.BaseUrl;
         if (settings.GetSilver)
-            url += _apiServer.Silver;
+        {
+            url += _apiServer.Silver + settings.Currency + settings.Date;
+            settings.GetGold = false;
+        }
         else if (settings.GetPalladium)
-            url += _apiServer.Palladium;
+        {
+            url += _apiServer.Palladium + settings.Currency;
+            settings.GetGold = false;
+        }
         else if (settings.GetPlatinum)
-            url += _apiServer.Platinum;
+        {
+            url += _apiServer.Platinum + settings.Currency;
+            settings.GetGold = false;
+        }
         else
-            url += _apiServer.Gold;
+            url += _apiServer.Gold + settings.Currency + settings.Date;
+        // For some reason, Platinum and Palladium do not like date
+        // Need to make this specific for gold and silver for now until 
+        // I can look into it, which is above
+        //url += settings.Currency +  settings.Date;
         if (settings.Debug)
         {
             DebugDisplay.Print(settings, _apiServer, url);
         }
-        //AnsiConsole.WriteLine();
         // Process Window
         var table = new Table().Centered();
         table.BorderColor(Color.Yellow);
@@ -209,13 +221,11 @@ public class PriceCommand : Command<PriceCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-                            client = new RestClient(url + settings.Currency +  settings.Date);
+                            client = new RestClient(url);
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);
                             request.AddHeader("Content-Type", "application/json");
                             RestResponse response = client.Execute(request);
-                            Console.WriteLine($"Response: {response.Content}");
-                            Thread.Sleep(4000);
                             metalPrice = JsonConvert.DeserializeObject<MetalPrice>(response.Content);
                         }
                         else
