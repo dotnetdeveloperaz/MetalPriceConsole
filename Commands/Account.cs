@@ -2,23 +2,20 @@ using System;
 using System.ComponentModel;
 using System.Text.Json;
 using System.Threading;
-using Microsoft.Extensions.Logging;
-using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using MetalPriceConsole.Models;
+using System.Net.Http;
 
 namespace MetalPriceConsole.Commands;
 
 public class AccountCommand : Command<AccountCommand.Settings>
 {
     private readonly ApiServer _apiServer;
-    private ILogger _logger;
 
-    public AccountCommand(ApiServer apiServer, ILogger<AccountCommand> logger)
+    public AccountCommand(ApiServer apiServer)
     {
         _apiServer = apiServer;
-        _logger = logger;
     }
 
     public class Settings : CommandSettings
@@ -49,7 +46,6 @@ public class AccountCommand : Command<AccountCommand.Settings>
         AnsiConsole.WriteLine();
         // Process Window
         var table = new Table().Centered();
-//        table.HideHeaders();
         table.BorderColor(Color.Yellow);
         table.Border(TableBorder.Rounded);
         table.Border(TableBorder.Simple);
@@ -70,8 +66,6 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
- //               Update(230, () => table.AddColumn(""));
- //               Update(230, () => table.AddColumn(""));
                 // Borders
                 // Footers
                 Update(
@@ -82,20 +76,23 @@ public class AccountCommand : Command<AccountCommand.Settings>
                         )
                 );
                 // Content
-                var client = new RestClient(url);
-                var request = new RestRequest("", Method.Get);
-                request.AddHeader("x-access-token", _apiServer.Token);
-                request.AddHeader("Content-Type", "application/json");
                 Account account;
-                try
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
+                using (HttpRequestMessage request = new(HttpMethod.Get, url))
                 {
-                    RestResponse response = client.Execute(request);
-                    account = JsonSerializer.Deserialize<Account>(response.Content);
-                }
-                catch (Exception ex)
-                {
-                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                    return;
+                    try
+                    {
+                        HttpResponseMessage response = client.Send(request);
+                        response.EnsureSuccessStatusCode();
+                        var result = response.Content.ReadAsStream();
+                        account = JsonSerializer.Deserialize<Account>(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                        return;
+                    }
                 }
                 table.Columns[1].RightAligned().Width(30).PadRight(20);
                 table.Columns[0].RightAligned();
@@ -104,8 +101,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                 Update(70, () => table.AddRow($"[yellow]Requests This Month[/]", $"[yellow]{account.RequestsMonth}[/]"));
                 Update(70, () => table.AddRow($"[yellow]Requests Last Month[/]", $"[yellow]{account.RequestsLastMonth}[/]"));
 
-                int allowance = 0;
-                int.TryParse(_apiServer.MonthlyAllowance, out allowance);
+                _ = int.TryParse(_apiServer.MonthlyAllowance, out int allowance);
                 Update(
                     70,
                     () =>

@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using PublicHoliday;
-using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -17,7 +17,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _apiServer;
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
     public HistoryCommand(ConnectionStrings ConnectionString, ApiServer apiServer, ILogger<AccountCommand> logger)
     {
@@ -88,29 +88,39 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         else
             settings.Currency += "/";    
 
+        var warning = new Table().Centered();
+        warning.AddColumn(
+            new TableColumn(
+                new Markup(
+                    $"[red bold]Issue with Third Party API. Cannot run history on Palladium or Platinum[/]"
+                )
+            ).Centered()
+        );
+
         string url = _apiServer.BaseUrl;
         if (settings.GetSilver)
         {
-            url += _apiServer.Silver + settings.Currency;
+            url += _apiServer.Silver;
             settings.GetGold = false;
         }
+// Issue with web API using date which is needed for palladium and platinum
         else if (settings.GetPalladium)
         {
-            url += _apiServer.Palladium + settings.Currency;
+            url += _apiServer.Palladium;
             settings.GetGold = false;
+            AnsiConsole.Write(warning);
+            return -1;
         }
         else if (settings.GetPlatinum)
         {
-            url += _apiServer.Platinum + settings.Currency;
+            url += _apiServer.Platinum;
             settings.GetGold = false;
+            AnsiConsole.Write(warning);
+            return -1;
         }
         else
-            url += _apiServer.Gold + settings.Currency;
-        // For some reason, Platinum and Palladium do not like date
-        // Need to make this specific for gold and silver for now until 
-        // I can look into it, which is above
-        //url += settings.Currency +  settings.Date;
-
+            url += _apiServer.Gold;
+        url += $"/{settings.Currency}";
         if (settings.Debug)
         {
             DebugDisplay.Print(settings, _apiServer, url);
@@ -130,7 +140,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .Start(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -169,27 +179,26 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                     return;
                 }
 
-                var client = new RestClient(_apiServer.BaseUrl + "stat");
-                var request = new RestRequest("", Method.Get);
-                request.AddHeader("x-access-token", _apiServer.Token);
-                request.AddHeader("Content-Type", "application/json");
                 Account account;
-                try
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
+                using (HttpRequestMessage request = new(HttpMethod.Get, $"{_apiServer.BaseUrl}stat"))
                 {
-                    RestResponse response = client.Execute(request);
-                    account = JsonSerializer.Deserialize<Account>(response.Content);
+                    try
+                    {
+                        HttpResponseMessage response = client.Send(request);
+                        response.EnsureSuccessStatusCode();
+                        var result = response.Content.ReadAsStream();
+                        account = JsonSerializer.Deserialize<Account>(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                        return;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                    return;
-                }
-                int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
-<<<<<<< HEAD
-                var willBeLeft = (monthlyAllowance - account.requests_month) - days.Count;
-=======
+                _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                 var willBeLeft = (monthlyAllowance - account.RequestsMonth) - days.Count;
->>>>>>> origin
                 if (willBeLeft > 0)
                 {
                     Update(
@@ -212,22 +221,22 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-<<<<<<< HEAD
-                            client = new RestClient(url + date.ToString("yyyy-MM-dd"));
-=======
-                            string url = _apiServer.BaseUrl;
-                            if (settings.GetSilver)
-                                url += _apiServer.Silver;
-                            else
-                                url += _apiServer.Gold;
-                            client = new RestClient($"{url}/{settings.Currency}/{date:yyyy-MM-dd}");
->>>>>>> origin
-                            request = new RestRequest("", Method.Get);
-                            request.AddHeader("x-access-token", _apiServer.Token);
-                            request.AddHeader("Content-Type", "application/json");
-                            RestResponse response = client.Execute(request);
-                            metalPrice = JsonSerializer.Deserialize<MetalPrice>(response.Content);
-                        }
+                            // The API doesn't like date with Palladium or Platinum for some reason
+                            // even though the documents show it should.
+                            using HttpRequestMessage request = new(HttpMethod.Get, $"{url}/{date:yyyy-MM-dd}");
+                            try
+                            {
+                                HttpResponseMessage response = client.Send(request);
+                                response.EnsureSuccessStatusCode();
+                                var result = response.Content.ReadAsStream();
+                                metalPrice = JsonSerializer.Deserialize<MetalPrice>(result);
+                            }
+                            catch (Exception ex)
+                            {
+                                Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                                return;
+                            }
+                         }
                         else
                         {
                             string cache = File.ReadAllText("MultiDay.sample");

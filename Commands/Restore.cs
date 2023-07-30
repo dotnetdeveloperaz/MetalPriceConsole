@@ -15,7 +15,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _apiServer;
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
     public RestoreCommand(ConnectionStrings ConnectionString, ApiServer apiServer, ILogger<AccountCommand> logger)
     {

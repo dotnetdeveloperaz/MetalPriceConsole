@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using PublicHoliday;
-using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -17,7 +17,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
 {
     private readonly ApiServer _apiServer;
     private readonly string _connectionString;
-    private ILogger _logger;
+    private readonly ILogger _logger;
     private static readonly string[] columns = new[] { "" };
 
     public PriceCommand(ApiServer apiServer, ILogger<PriceCommand> logger, ConnectionStrings connectionStrings)
@@ -88,33 +88,28 @@ public class PriceCommand : Command<PriceCommand.Settings>
     {
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
-<<<<<<< HEAD
         else
             settings.Currency += "/";
         settings.Date ??= DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
-=======
-        if (settings.Date == null)
-            settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
->>>>>>> origin
         settings.GetPrice = true;
         string url = _apiServer.BaseUrl;
         if (settings.GetSilver)
         {
-            url += _apiServer.Silver + settings.Currency + settings.Date;
+            url += $"{_apiServer.Silver}/{settings.Currency}/{settings.Date}";
             settings.GetGold = false;
         }
         else if (settings.GetPalladium)
         {
-            url += _apiServer.Palladium + settings.Currency;
+            url += $"{_apiServer.Palladium}/{settings.Currency}/{settings.Date}";
             settings.GetGold = false;
         }
         else if (settings.GetPlatinum)
         {
-            url += _apiServer.Platinum + settings.Currency;
+            url += $"{_apiServer.Platinum}/{settings.Currency}/{settings.Date}";
             settings.GetGold = false;
         }
         else
-            url += _apiServer.Gold + settings.Currency + settings.Date;
+            url += $"{_apiServer.Gold}/{settings.Currency}/{settings.Date}";
         // For some reason, Platinum and Palladium do not like date
         // Need to make this specific for gold and silver for now until 
         // I can look into it, which is above
@@ -189,28 +184,26 @@ public class PriceCommand : Command<PriceCommand.Settings>
                     );
                     return;
                 }
-                var client = new RestClient(_apiServer.BaseUrl + "stat");
-                var request = new RestRequest("", Method.Get);
-                request.AddHeader("x-access-token", _apiServer.Token);
-                request.AddHeader("Content-Type", "application/json");
                 Account account;
-                try
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
+                using (HttpRequestMessage request = new(HttpMethod.Get, _apiServer.BaseUrl + "stat"))
                 {
-                    RestResponse response = client.Execute(request);
-                    account = JsonSerializer.Deserialize<Account>(response.Content);
+                    try
+                    {
+                        HttpResponseMessage response = client.Send(request);
+                        response.EnsureSuccessStatusCode();
+                        var result = response.Content.ReadAsStream();
+                        account = JsonSerializer.Deserialize<Account>(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                        return;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                    return;
-                }
-<<<<<<< HEAD
-                int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
-                var willBeLeft = (monthlyAllowance - account.requests_month) - day;
-=======
                 _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                 var willBeLeft = (monthlyAllowance - account.RequestsMonth) - day;
->>>>>>> origin
                 if (willBeLeft > 0)
                 {
                     Update(
@@ -232,16 +225,19 @@ public class PriceCommand : Command<PriceCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-<<<<<<< HEAD
-                            client = new RestClient(url);
-=======
-                            client = new RestClient($"{url}/{settings.Currency}/{settings.Date}");
->>>>>>> origin
-                            request = new RestRequest("", Method.Get);
-                            request.AddHeader("x-access-token", _apiServer.Token);
-                            request.AddHeader("Content-Type", "application/json");
-                            RestResponse response = client.Execute(request);
-                            metalPrice = JsonSerializer.Deserialize<MetalPrice>(response.Content);
+                            using HttpRequestMessage request = new(HttpMethod.Get, $"{url}/{date:yyyy-MM-dd}");
+                            try
+                            {
+                                HttpResponseMessage response = client.Send(request);
+                                response.EnsureSuccessStatusCode();
+                                var result = response.Content.ReadAsStream();
+                                metalPrice = JsonSerializer.Deserialize<MetalPrice>(result);
+                            }
+                            catch (Exception ex)
+                            {
+                                Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                                return;
+                            }
                         }
                         else
                         {

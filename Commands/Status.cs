@@ -1,10 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
-using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -13,7 +14,7 @@ namespace MetalPriceConsole.Commands;
 public class StatusCommand : Command<StatusCommand.Settings>
 {
     private readonly ApiServer _apiServer;
-    private ILogger _logger;
+    private readonly ILogger _logger;
 
     public StatusCommand(ApiServer apiServer, ILogger<AccountCommand> logger)
     {
@@ -37,6 +38,7 @@ public class StatusCommand : Command<StatusCommand.Settings>
         [DefaultValue(false)]
         public bool ShowHidden { get; set; }
     }
+
     public override int Execute(CommandContext context, Settings settings)
     {
         settings.Status = true;
@@ -76,21 +78,23 @@ public class StatusCommand : Command<StatusCommand.Settings>
                         )
                 );
                 // Content
-                var client = new RestClient(url);
-                var request = new RestRequest("", Method.Get);
-                request.AddHeader("x-access-token", _apiServer.Token);
-                request.AddHeader("Content-Type", "application/json");
-                RestResponse response;
                 ApiStatus apiStatus;
-                try
+                HttpClient client = new();
+                client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
+                using (HttpRequestMessage request = new(HttpMethod.Get, url))
                 {
-                    response = client.Execute(request);
-                    apiStatus = JsonSerializer.Deserialize<ApiStatus>(response.Content);
-                }
-                catch (Exception ex)
-                {
-                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}status[/]"));
-                    return;
+                    try
+                    {
+                        HttpResponseMessage response = client.Send(request);
+                        response.EnsureSuccessStatusCode();
+                        var result = response.Content.ReadAsStream();
+                        apiStatus = JsonSerializer.Deserialize<ApiStatus>(result);
+                    }
+                    catch (Exception ex)
+                    {
+                        Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                        return;
+                    }
                 }
                 table.Columns[1].RightAligned().Width(30).PadRight(20);
                 table.Columns[0].RightAligned();
