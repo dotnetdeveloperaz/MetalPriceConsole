@@ -1,16 +1,34 @@
-# Metal Price Console v2.5 
+# Metal Price Console v3.0 beta
 
-** This release is dedicated to my wife Suheyla who asked me to implement gram's and other base currencies **
+## **<span style="color: red;">Important Note:</span>**
 
-## About <a name = "about"></a>
+### *This version in the development branch contains code that includes the --palladium and --platinum switches to retrieve prices for those metals.*
 
-Simple console application utility that calls a third party web api to retrieve Gold or Silver prices and stores the data in a database. 
+### *However, for some reason, the third-party api does not appear to return data when a date is supplied, so only the latest price information is retrieved.*
+
+### *Date is NOT used in the code currently, thus, **DO NOT USE** the history command with the --palladium and --platinum switch and note that the --date switch for price command is ignored.*
+
+I have emailed the developers in hopes to get feedback on this issue, as all four metals should function the same, based on their documentation, but even their documentation page behaves in the same manner.
+
+## Table of Contents
+
+- [About](#about)
+- [Status](#status)
+- [Getting Started](#getting_started)
+- [Prerequisites](#prerequisites)
+- [Installing](#installing)
+- [Usage](#usage)
+
+## About
+
+Simple console application utility that calls a third party web api to retrieve Gold or Silver prices and stores the data in a database.
 
 This application uses the following open source libraries.
 
--- PublicHoliday nuget package (Copyright (C) 2013 Martin Willey) which the source code and license is available at <a href="https://github.com/martinjw/Holiday/" target="_blank">Martin Willey's Github</a>. 
+-- [PublicHoliday nuget package](https://github.com/martinjw/Holiday/")
 
--- Spectre Console and Spectre Console Cli. <a href="https://spectreconsole.net/" target="_blank">Spectre Console WebSite</a>
+-- [Spectre Console and Spectre Console Cli](https://spectreconsole.net/)
+
 ## Status
 
 .NET 6
@@ -22,22 +40,13 @@ This application uses the following open source libraries.
 .NET 8 Preview 6
 [![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml)
 
-## Buy Me A Coffee
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
-
-## Table of Contents
-
-- [About](#about)
-- [Getting Started](#getting_started)
-- [Prerequisites](#prerequisites)
-- [Installing](#installing)
-- [Usage](#usage)
 
 ## Getting Started <a name = "getting_started"></a>
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-### Prerequisites <a name = "prerequisites"></a>
+## Prerequisites
 
 1. .NET 6, .NET 7 or .NET 8 Preview.
 2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 free (was 300 but they changed this in May 2023) api calls per month.
@@ -53,6 +62,8 @@ These instructions will get you a copy of the project up and running on your loc
     "Token": "",
     "BaseURL": "https://www.goldapi.io/api/",
     "Gold": "XAU/",
+    "Palladium": "XPD/",
+    "Platinum": "XPT/",
     "Silver":  "XAG/",
     "Currency":  "USD/",
     "MonthlyAllowance": "100",
@@ -71,7 +82,7 @@ These instructions will get you a copy of the project up and running on your loc
 }
 ```
 
-### Installing <a name = "installing"></a>
+## Installing
 
 Add your private settings for Token (ApiKey) and Database connection string or add them to appsettings.json above.
 
@@ -89,7 +100,7 @@ To create a fresh install, run the MetalRates-table.sql script in the db directo
 MetalRates-table.sql to create the table.
 usp_AddMetalPrice.sql to create the stored procedure.
 
-> *You do not need to run the MetalRates-table script if you do the restore below. 
+> *You do not need to run the MetalRates-table script if you do the restore below.
 
 If you would like the full history (Back to Dec 6th, 2018) of Metal Prices database, which will save you time and API calls if you want historical data, then restore the database in the db directory called MetalPrices.sql.gz.
 
@@ -99,14 +110,19 @@ mysql -u <your username> -p <Your Target Database> < MetalPrices.sql
 ```
 
 Build the project by running the following in the project folder.
-```bash 
+
+```bash
 dotnet build
-``` 
+```
+
 To run a simple test, run the following.
-```bash 
+
+```bash
 dotnet run acct
 ```
+
 You should see something similar to:
+
 ```bash
   ⏳ Start Processing Get Account Information...                                                    
   ✔ Finished Getting Account Information...                                                         
@@ -115,39 +131,49 @@ You should see something similar to:
   ✔ Remaining WebAPI Requests: 280    
 ```
 
-## Usage <a name = "usage"></a>
+## Usage
+
 Commands
 
 acct
+
 - Gets details of your account (like sample above) at the third party web service.
 
-status 
+status
+
 - Gets the status of the third party web service, which is true (1) or false (0) for online.
 
 price
-- Gets yesterday's (Prices are available for previous days close) Gold rate (and saves to the configured database if passing --save
+
+- Gets yesterday's (Prices are available for previous days close) Gold rate and saves to the configured database if passing --save
 
 price --date YYYY-MM-DD
+
 - Gets a specific date instead of yesterday's (default) close price.
 
-history --start <YYYY-MM-DD> --end <YYYY-MM-DD>
-- Gets Gold prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
+history --start YYYY-MM-DD --end YYYY-MM-DD
 
-** Using the --save switch for commands price and history will write the price data to the database on commands price and backtrack.**
+- Gets prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
 
-** The --fake switch will load sample data, instead of calling the WebApi. **
+**Using the --save switch for commands price and history will write the price data to the database on commands price and backtrack.**
 
-** Using the --silver switch for commands price and history will retrieve silver prices. **
+**The --fake switch will load sample data, instead of calling the WebApi.**
 
-** Using the --gold switch for commands price and history will retrieve gold prices, however, this is the default and does not need to be added.
-    This switch was added for future enhancements to include platinum and palladium. **
+**Using the --silver switch for commands price and history will retrieve silver prices.**
 
-** Using the --currency <USD> rate for commands price and history is to override the configured default currency, which is USD. **
+**Using the --palladium switch for commands price and history will retrieve palladium prices.**
+
+**Using the --platinum switch for the commands price and history will retrieve platinum prices.**
+
+**Using the --gold switch for commands price and history will retrieve gold prices, however, this is the default and does not need to be passed.**
+
+**Using the --currency <USD> rate for commands price and history is to override the configured default currency, which is USD.**
 
 restore
 -- Restores existing cache file to the database.
 
 Example:
+
 ```
 history --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023.
 
@@ -159,6 +185,7 @@ history --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from
 Passing --debug will output configuration data. If you pass --debug --hidden, it will also output  private configuration data (eg: DB connection string, token) even when not put into appsettings.json but in user-secrets instead.
 
 Run the application with no commands (dotnet run) and you will get the following usage screen.
+
 ```bash
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
 │                                              Gold ⛏  Price Console v2.5                                             │
