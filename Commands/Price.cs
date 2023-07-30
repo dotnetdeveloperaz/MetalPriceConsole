@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using PublicHoliday;
 using RestSharp;
 using Spectre.Console;
@@ -88,9 +88,14 @@ public class PriceCommand : Command<PriceCommand.Settings>
     {
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
+<<<<<<< HEAD
         else
             settings.Currency += "/";
         settings.Date ??= DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+=======
+        if (settings.Date == null)
+            settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+>>>>>>> origin
         settings.GetPrice = true;
         string url = _apiServer.BaseUrl;
         if (settings.GetSilver)
@@ -192,15 +197,20 @@ public class PriceCommand : Command<PriceCommand.Settings>
                 try
                 {
                     RestResponse response = client.Execute(request);
-                    account = JsonConvert.DeserializeObject<Account>(response.Content);
+                    account = JsonSerializer.Deserialize<Account>(response.Content);
                 }
                 catch (Exception ex)
                 {
                     Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
                     return;
                 }
+<<<<<<< HEAD
                 int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                 var willBeLeft = (monthlyAllowance - account.requests_month) - day;
+=======
+                _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
+                var willBeLeft = (monthlyAllowance - account.RequestsMonth) - day;
+>>>>>>> origin
                 if (willBeLeft > 0)
                 {
                     Update(
@@ -222,17 +232,21 @@ public class PriceCommand : Command<PriceCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
+<<<<<<< HEAD
                             client = new RestClient(url);
+=======
+                            client = new RestClient($"{url}/{settings.Currency}/{settings.Date}");
+>>>>>>> origin
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);
                             request.AddHeader("Content-Type", "application/json");
                             RestResponse response = client.Execute(request);
-                            metalPrice = JsonConvert.DeserializeObject<MetalPrice>(response.Content);
+                            metalPrice = JsonSerializer.Deserialize<MetalPrice>(response.Content);
                         }
                         else
                         {
                             string cache = File.ReadAllText("SingleDay.sample");
-                            List<MetalPrice> metalPrices = JsonConvert.DeserializeObject<List<MetalPrice>>(cache);
+                            List<MetalPrice> metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
                             metalPrice = metalPrices[0];
                         }
                         if (metalPrice != null)
@@ -241,14 +255,14 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                 70,
                                 () =>
                                     table.AddRow(
-                                        $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.price:C} Previous Ounce Price: {metalPrice.prev_close_price:C}[/]"
+                                        $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
                                     )
                             );
                             Update(
                                 70,
                                 () =>
                                     table.AddRow(
-                                        $"           :check_mark: [green bold italic] 24k gram: {metalPrice.price_gram_24k:C} 22k gram: {metalPrice.price_gram_22k:C} 21k gram: {metalPrice.price_gram_21k:C} 20k gram: {metalPrice.price_gram_20k:C} 18k gram: {metalPrice.price_gram_18k:C}[/]"
+                                        $"           :check_mark: [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
                                     )
                             );
                             if (settings.Save)
@@ -266,7 +280,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":check_mark: [green bold]Saved Gold Price For {metalPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date.ToString("yyyy-MM-dd")}...[/]"
                                             )
                                     );
                                 }
@@ -277,7 +291,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date.ToString("yyyy-MM-dd")}...[/]"
                                             )
                                     );
                                 }
@@ -310,10 +324,9 @@ public class PriceCommand : Command<PriceCommand.Settings>
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
     {
-        DateTime date;
         if (settings.Date == "")
             settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
-        if (!DateTime.TryParse(settings.Date, out date))
+        if (!DateTime.TryParse(settings.Date, out _))
             return ValidationResult.Error($"Invalid date - {settings.Date}");
         return base.Validate(context, settings);
     }

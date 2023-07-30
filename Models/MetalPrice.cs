@@ -1,33 +1,52 @@
 using System;
+using System.Text.Json.Serialization;
 
 namespace MetalPriceConsole.Models;
 
 public class MetalPrice
 {
-    public DateTime date { get; set; }
-    public long timestamp { get; set; }
-    public string metal { get; set; }
-    public string exchange { get; set; }
-    public string currency { get; set; }
-    public double price { get; set; }
-    public double prev_close_price { get; set; }
-    public double ch { get; set; }
-    public double chp { get; set; }
-    public double price_gram_24k { get; set; }
-    public double price_gram_22k { get; set; }  
-    public double price_gram_21k { get; set; }  
-    public double price_gram_20k { get; set; }  
-    public double price_gram_18k { get; set; }  
+    [JsonPropertyName("date")]
+    public DateTime Date { get; set; }
+    [JsonPropertyName("timestamp")]
+    public long Timestamp { get; set; }
+    [JsonPropertyName("metal")]
+    public string Metal { get; set; }
+    [JsonPropertyName("exchange")]
+    public string Exchange { get; set; }
+    [JsonPropertyName("currency")]
+    public string Currency { get; set; }
+    [JsonPropertyName("price")]
+    public double Price { get; set; }
+    [JsonPropertyName("prev_close_price")]
+    public double PrevClosePrice { get; set; }
+    [JsonPropertyName("ch")]
+    public double Change { get; set; }
+    [JsonPropertyName("chp")]
+    public double ChangePercent { get; set; }
+    [JsonPropertyName("price_gram_24k")]
+    public double PriceGram24k { get; set; }
+    [JsonPropertyName("price_gram_22k")]
+    public double PriceGram22k { get; set; }  
+    [JsonPropertyName("price_gram_21k")]
+    public double PriceGram21k { get; set; }  
+    [JsonPropertyName("price_gram_20k")]
+    public double PriceGram20k { get; set; }  
+    [JsonPropertyName("price_gram_18k")]
+    public double PriceGram18k { get; set; }  
 }
 public class ApiStatus
 {
-    public bool result { get; set; }
+    [JsonPropertyName("result")]
+    public bool Result { get; set; }
 }
 public class Account
 {
-    public int requests_today { get; set; }
-    public int requests_yesterday { get; set; }
-    public int requests_month { get; set; }
-    public int requests_last_month { get; set; }
+    [JsonPropertyName("requests_today")]
+    public int RequestsToday { get; set; }
+    [JsonPropertyName("requests_yesterday")]
+    public int RequestsYesterday { get; set; }
+    [JsonPropertyName("requests_month")]
+    public int RequestsMonth { get; set; }
+    [JsonPropertyName("requests_last_month")]
+    public int RequestsLastMonth { get; set; }
 }
-

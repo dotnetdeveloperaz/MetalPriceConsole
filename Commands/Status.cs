@@ -1,9 +1,9 @@
 using System;
 using System.ComponentModel;
+using System.Text.Json;
 using System.Threading;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -85,7 +85,7 @@ public class StatusCommand : Command<StatusCommand.Settings>
                 try
                 {
                     response = client.Execute(request);
-                    apiStatus = JsonConvert.DeserializeObject<ApiStatus>(response.Content);
+                    apiStatus = JsonSerializer.Deserialize<ApiStatus>(response.Content);
                 }
                 catch (Exception ex)
                 {
@@ -94,7 +94,7 @@ public class StatusCommand : Command<StatusCommand.Settings>
                 }
                 table.Columns[1].RightAligned().Width(30).PadRight(20);
                 table.Columns[0].RightAligned();
-                if(apiStatus.result)
+                if(apiStatus.Result)
                     Update(70, () => table.AddRow($"[yellow]WebApi Status[/]", "[green]Service is Up[/]"));
                 else
                     Update(70, () => table.AddRow($"[yellow]WebApi Status[/]", "[red]Service is Down[/]"));

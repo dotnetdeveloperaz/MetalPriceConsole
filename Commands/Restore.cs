@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Text.Json;
 using System.Threading;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -87,7 +87,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                 }
                 Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]metalPrice.cache[/]"));
                 string cache = File.ReadAllText("metalPrice.cache");
-                var metalPrices = JsonConvert.DeserializeObject<List<MetalPrice>>(cache);
+                var metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
                 Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
                 Update(70, () => table.Columns[0].Footer("[blue]Cache File Loaded[/]"));
@@ -110,7 +110,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                             70,
                             () =>
                                 table.AddRow(
-                                    $":check_mark: [green bold]Saved Gold Price For {metalPrice.date.ToString("yyyy-MM-dd")}...[/]"
+                                    $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                 )
                         );
                         saved++;
