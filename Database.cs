@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using RestSharp;
 using MetalPriceConsole.Models;
 using MySqlConnector;
 using System.Data;
 using System;
-using Newtonsoft.Json;
 using System.IO;
+using System.Text.Json;
 
 namespace MetalPriceConsole
 {
@@ -36,26 +35,26 @@ namespace MetalPriceConsole
         /// <returns></returns>
         public static bool Save(MetalPrice metalPrice, string connectionString)
         {
-            if (metalPrice.date.Year < 1900)
+            if (metalPrice.Date.Year < 1900)
                 return false;
-            MySqlConnection sqlConnection = new MySqlConnection(connectionString);
-            MySqlCommand sqlCommand = new MySqlCommand("usp_AddMetalPrice", sqlConnection);
+            MySqlConnection sqlConnection = new(connectionString);
+            MySqlCommand sqlCommand = new("usp_AddMetalPrice", sqlConnection);
             sqlCommand.CommandType = CommandType.StoredProcedure;
             try
             {
                 sqlConnection.Open();
-                sqlCommand.Parameters.AddWithValue("metal", metalPrice.metal);
-                sqlCommand.Parameters.AddWithValue("currency", metalPrice.currency);
-                sqlCommand.Parameters.AddWithValue("price", metalPrice.price);
-                sqlCommand.Parameters.AddWithValue("prev_price", metalPrice.prev_close_price);
-                sqlCommand.Parameters.AddWithValue("ratedate", metalPrice.date.ToString("yyyy/MM/dd"));
-                sqlCommand.Parameters.AddWithValue("chg", metalPrice.ch);
-                sqlCommand.Parameters.AddWithValue("chg_pct", metalPrice.chp);
-                sqlCommand.Parameters.AddWithValue("price_gram_24k", metalPrice.price_gram_24k);
-                sqlCommand.Parameters.AddWithValue("price_gram_22k", metalPrice.price_gram_22k);
-                sqlCommand.Parameters.AddWithValue("price_gram_21k", metalPrice.price_gram_21k);
-                sqlCommand.Parameters.AddWithValue("price_gram_20k", metalPrice.price_gram_20k);
-                sqlCommand.Parameters.AddWithValue("price_gram_18k", metalPrice.price_gram_18k);
+                sqlCommand.Parameters.AddWithValue("metal", metalPrice.Metal);
+                sqlCommand.Parameters.AddWithValue("currency", metalPrice.Currency);
+                sqlCommand.Parameters.AddWithValue("price", metalPrice.Price);
+                sqlCommand.Parameters.AddWithValue("prev_price", metalPrice.PrevClosePrice);
+                sqlCommand.Parameters.AddWithValue("ratedate", metalPrice.Date.ToString("yyyy/MM/dd"));
+                sqlCommand.Parameters.AddWithValue("chg", metalPrice.Change);
+                sqlCommand.Parameters.AddWithValue("chg_pct", metalPrice.ChangePercent);
+                sqlCommand.Parameters.AddWithValue("price_gram_24k", metalPrice.PriceGram24k);
+                sqlCommand.Parameters.AddWithValue("price_gram_22k", metalPrice.PriceGram22k);
+                sqlCommand.Parameters.AddWithValue("price_gram_21k", metalPrice.PriceGram21k);
+                sqlCommand.Parameters.AddWithValue("price_gram_20k", metalPrice.PriceGram20k);
+                sqlCommand.Parameters.AddWithValue("price_gram_18k", metalPrice.PriceGram18k);
  
                 var recs = sqlCommand.ExecuteNonQuery();
             }
@@ -63,14 +62,14 @@ namespace MetalPriceConsole
             {
                 Console.WriteLine("Could not insert new gold rate.");
                 Console.WriteLine("Exception: {0}", ex.Message);
-                List<MetalPrice> metalPrices = new List<MetalPrice>();
+                List<MetalPrice> metalPrices = new();
                 if (File.Exists("MetalPrice.cache"))
                 {
                     var file = File.ReadAllText("MetalPrice.cache");
-                    metalPrices = JsonConvert.DeserializeObject<List<MetalPrice>>(file);
+                    metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(file);
                 }
                 metalPrices.Add(metalPrice);
-                string result = JsonConvert.SerializeObject(metalPrices, Formatting.Indented);
+                string result = JsonSerializer.Serialize(metalPrices);
                 File.WriteAllText($"MetalPrice.cache", result);
 
                 return false;

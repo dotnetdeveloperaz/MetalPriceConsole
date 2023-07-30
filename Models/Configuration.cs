@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace MetalPriceConsole.Models;
 
 public class Configuration
@@ -35,6 +33,5 @@ public class LogLevel
     public string Default { get; set; }
     public string Microsoft { get; set; }
 
-    [JsonPropertyAttribute("Microsoft.Hosting.Lifetime")]
     public string MicrosoftHostingLifetime { get; set; }
 }
