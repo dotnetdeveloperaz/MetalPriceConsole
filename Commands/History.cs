@@ -179,7 +179,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                             70,
                             () =>
                                 table.AddRow(
-                                    $":plus: [red bold]Retrieving {metal} Price for {date.ToString("yyyy-MM-dd")}...[/]"
+                                    $":plus: [red bold]Retrieving {metal} Price for {date:yyyy-MM-dd}...[/]"
                                 )
                         );
                         MetalPrice metalPrice;
@@ -190,7 +190,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                 url += _apiServer.Silver;
                             else
                                 url += _apiServer.Gold;
-                            client = new RestClient(url + settings.Currency + date.ToString("yyyy-MM-dd"));
+                            client = new RestClient($"{url}/{settings.Currency}/{date:yyyy-MM-dd}");
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);
                             request.AddHeader("Content-Type", "application/json");
