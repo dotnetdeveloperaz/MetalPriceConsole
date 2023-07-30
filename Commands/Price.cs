@@ -82,8 +82,6 @@ public class PriceCommand : Command<PriceCommand.Settings>
         }
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
-        else
-            settings.Currency += "/";
         if (settings.Date == null)
             settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
         settings.GetPrice = true;
@@ -169,7 +167,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                     Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
                     return;
                 }
-                int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
+                _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                 var willBeLeft = (monthlyAllowance - account.RequestsMonth) - day;
                 if (willBeLeft > 0)
                 {
@@ -197,7 +195,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                             url += _apiServer.Gold;
                         if (!settings.Fake)
                         {
-                            client = new RestClient(url + settings.Currency +  settings.Date);
+                            client = new RestClient($"{url}/{settings.Currency}/{settings.Date}");
                             request = new RestRequest("", Method.Get);
                             request.AddHeader("x-access-token", _apiServer.Token);
                             request.AddHeader("Content-Type", "application/json");
@@ -285,10 +283,9 @@ public class PriceCommand : Command<PriceCommand.Settings>
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
     {
-        DateTime date;
         if (settings.Date == "")
             settings.Date = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
-        if (!DateTime.TryParse(settings.Date, out date))
+        if (!DateTime.TryParse(settings.Date, out _))
             return ValidationResult.Error($"Invalid date - {settings.Date}");
         return base.Validate(context, settings);
     }
