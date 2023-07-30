@@ -1,15 +1,12 @@
 using System;
 using System.ComponentModel;
+using System.Text.Json;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using RestSharp;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using MetalPriceConsole.Models;
-using Newtonsoft.Json.Linq;
-using System.Security.Principal;
-using System.Threading.Tasks;
 
 namespace MetalPriceConsole.Commands;
 
@@ -92,7 +89,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                 try
                 {
                     RestResponse response = client.Execute(request);
-                    account = JsonConvert.DeserializeObject<Account>(response.Content);
+                    account = JsonSerializer.Deserialize<Account>(response.Content);
                 }
                 catch (Exception ex)
                 {
@@ -101,10 +98,10 @@ public class AccountCommand : Command<AccountCommand.Settings>
                 }
                 table.Columns[1].RightAligned().Width(30).PadRight(20);
                 table.Columns[0].RightAligned();
-                Update(70, () => table.AddRow($"[yellow]Requests Today[/]", $"[yellow]{account.requests_today}[/]"));
-                Update(70, () => table.AddRow($"[yellow]Requests Yesterday[/]", $"[yellow]{account.requests_yesterday}[/]"));
-                Update(70, () => table.AddRow($"[yellow]Requests This Month[/]", $"[yellow]{account.requests_month}[/]"));
-                Update(70, () => table.AddRow($"[yellow]Requests Last Month[/]", $"[yellow]{account.requests_last_month}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Requests Today[/]", $"[yellow]{account.RequestsToday}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Requests Yesterday[/]", $"[yellow]{account.RequestsYesterday}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Requests This Month[/]", $"[yellow]{account.RequestsMonth}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Requests Last Month[/]", $"[yellow]{account.RequestsLastMonth}[/]"));
 
                 int allowance = 0;
                 int.TryParse(_apiServer.MonthlyAllowance, out allowance);
@@ -113,7 +110,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     () =>
                     table.AddRow(
                         $":check_mark: [green bold italic]Remaining WebAPI Requests:[/]", 
-                        $"[green bold italic]{allowance - account.requests_month}[/]"));
+                        $"[green bold italic]{allowance - account.RequestsMonth}[/]"));
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
         return 0;
