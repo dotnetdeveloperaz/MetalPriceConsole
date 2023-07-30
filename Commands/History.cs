@@ -140,7 +140,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(async ctx =>
+            .Start(ctx =>
             {
                 void Update(int delay, Action action)
                 {
