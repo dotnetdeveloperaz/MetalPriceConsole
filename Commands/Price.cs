@@ -18,6 +18,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
     private readonly ApiServer _apiServer;
     private readonly string _connectionString;
     private ILogger _logger;
+    private static readonly string[] columns = new[] { "" };
 
     public PriceCommand(ApiServer apiServer, ILogger<PriceCommand> logger, ConnectionStrings connectionStrings)
     {
@@ -112,7 +113,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
         // For some reason, Platinum and Palladium do not like date
         // Need to make this specific for gold and silver for now until 
         // I can look into it, which is above
-        //url += settings.Currency +  settings.Date;
+        // url += settings.Currency +  settings.Date;
         if (settings.Debug)
         {
             DebugDisplay.Print(settings, _apiServer, url);
@@ -122,7 +123,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
         table.BorderColor(Color.Yellow);
         table.Border(TableBorder.Rounded);
         table.Border(TableBorder.Simple);
-        table.AddColumns(new[] { "" });
+        table.AddColumns(columns);
         table.Expand();
 
         // Animate
