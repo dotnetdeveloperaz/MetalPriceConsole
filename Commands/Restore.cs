@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
@@ -11,7 +12,7 @@ using Spectre.Console.Cli;
 
 namespace MetalPriceConsole.Commands;
 
-public class RestoreCommand : Command<RestoreCommand.Settings>
+public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _apiServer;
@@ -40,7 +41,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
         [DefaultValue(false)]
         public bool ShowHidden { get; set; }
     }
-    public override int Execute(CommandContext context, Settings settings)
+    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.Restore = true;
         if (settings.Debug)
@@ -129,6 +130,6 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
-        return 0;
+        return Task.FromResult(0);
     }
 }

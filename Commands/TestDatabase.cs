@@ -1,14 +1,15 @@
+using System;
+using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using MySqlConnector;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using System;
-using System.ComponentModel;
-using System.Threading;
 
 namespace MetalPriceConsole.Commands;
 
-public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
+public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
 {
     private readonly string _connectionString;
     //private ILogger eventSource { get; }
@@ -37,7 +38,7 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
         public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         var titleTable = new Table().Centered();
         // Borders
@@ -90,6 +91,6 @@ public class TestDatabaseCommand : Command<TestDatabaseCommand.Settings>
                             titleTable.AddRow(
                                 ":check_mark:[green bold] Connection Successful[/]"));
             });
-        return 0;
+        return Task.FromResult(0);
     }
 }

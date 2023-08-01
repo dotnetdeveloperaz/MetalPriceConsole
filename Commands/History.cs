@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using PublicHoliday;
@@ -13,11 +15,12 @@ using Spectre.Console.Cli;
 
 namespace MetalPriceConsole.Commands;
 
-public class HistoryCommand : Command<HistoryCommand.Settings>
+public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _apiServer;
     private readonly ILogger _logger;
+    private static readonly string[] columns = new[] { "" };
 
     public HistoryCommand(ConnectionStrings ConnectionString, ApiServer apiServer, ILogger<AccountCommand> logger)
     {
@@ -81,7 +84,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         [DefaultValue(false)]
         public bool Fake { get; set; }
     }
-    public override int Execute(CommandContext context, Settings settings)
+    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
@@ -103,20 +106,20 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
             url += _apiServer.Silver;
             settings.GetGold = false;
         }
-// Issue with web API using date which is needed for palladium and platinum
+// Issue with web API using date which is needed for history
         else if (settings.GetPalladium)
         {
             url += _apiServer.Palladium;
             settings.GetGold = false;
             AnsiConsole.Write(warning);
-            return -1;
+            return Task.FromResult(-1);
         }
         else if (settings.GetPlatinum)
         {
             url += _apiServer.Platinum;
             settings.GetGold = false;
             AnsiConsole.Write(warning);
-            return -1;
+            return Task.FromResult(-1);
         }
         else
             url += _apiServer.Gold;
@@ -131,7 +134,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
         table.BorderColor(Color.Yellow);
         table.Border(TableBorder.Rounded);
         table.Border(TableBorder.Simple);
-        table.AddColumns(new[] { "" });
+        table.AddColumns(columns);
         table.Expand();
 
         // Animate
@@ -140,7 +143,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -186,9 +189,9 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                 {
                     try
                     {
-                        HttpResponseMessage response = client.Send(request);
+                        HttpResponseMessage response = await client.SendAsync(request);
                         response.EnsureSuccessStatusCode();
-                        var result = response.Content.ReadAsStream();
+                        var result = await response.Content.ReadAsStreamAsync();
                         account = JsonSerializer.Deserialize<Account>(result);
                     }
                     catch (Exception ex)
@@ -226,10 +229,10 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                             using HttpRequestMessage request = new(HttpMethod.Get, $"{url}/{date:yyyy-MM-dd}");
                             try
                             {
-                                HttpResponseMessage response = client.Send(request);
+                                HttpResponseMessage response = await client.SendAsync(request);
                                 response.EnsureSuccessStatusCode();
-                                var result = response.Content.ReadAsStream();
-                                metalPrice = JsonSerializer.Deserialize<MetalPrice>(result);
+                                var result = await response.Content.ReadAsStreamAsync();
+                                metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
                             }
                             catch (Exception ex)
                             {
@@ -239,8 +242,12 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                          }
                         else
                         {
-                            string cache = File.ReadAllText("MultiDay.sample");
-                            List<MetalPrice> metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
+                            List<MetalPrice> metalPrices;
+                            string cache = await File.ReadAllTextAsync("MultiDay.sample");
+                            using (MemoryStream stream = new(Encoding.UTF8.GetBytes(cache)))
+                            {
+                                metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(stream);
+                            }
                             if (i == days.Count)
                                 i = 0;
                             else
@@ -278,7 +285,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":check_mark: [green bold]Saved {metal} Price For {metalPrice.Date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":check_mark: [green bold]Saved {metal} Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                             )
                                     );
                                 }
@@ -289,7 +296,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":stop_sign: [red bold]Could Not Save {metal} Price For {metalPrice.Date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":stop_sign: [red bold]Could Not Save {metal} Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                             )
                                     );
                                 }
@@ -323,7 +330,7 @@ public class HistoryCommand : Command<HistoryCommand.Settings>
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
-        return 0;
+        return Task.FromResult(0);
     }
     private static List<DateTime> GetNumberOfDays(string startDate, string endDate)
     {

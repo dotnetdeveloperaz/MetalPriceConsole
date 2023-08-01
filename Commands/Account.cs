@@ -1,17 +1,19 @@
 using System;
 using System.ComponentModel;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using MetalPriceConsole.Models;
-using System.Net.Http;
 
 namespace MetalPriceConsole.Commands;
 
-public class AccountCommand : Command<AccountCommand.Settings>
+public class AccountCommand : AsyncCommand<AccountCommand.Settings>
 {
     private readonly ApiServer _apiServer;
+    private static readonly string[] columns = new[] { "", ""};
 
     public AccountCommand(ApiServer apiServer)
     {
@@ -35,7 +37,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
         public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.Account = true;
         string url = _apiServer.BaseUrl + "stat";
@@ -49,16 +51,16 @@ public class AccountCommand : Command<AccountCommand.Settings>
         table.BorderColor(Color.Yellow);
         table.Border(TableBorder.Rounded);
         table.Border(TableBorder.Simple);
-        table.AddColumns(new[] { "", ""});
+        table.AddColumns(columns);
         table.Expand();
 
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -85,7 +87,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     {
                         HttpResponseMessage response = client.Send(request);
                         response.EnsureSuccessStatusCode();
-                        var result = response.Content.ReadAsStream();
+                        var result = await response.Content.ReadAsStreamAsync();
                         account = JsonSerializer.Deserialize<Account>(result);
                     }
                     catch (Exception ex)

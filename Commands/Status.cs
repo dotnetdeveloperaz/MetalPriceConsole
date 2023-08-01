@@ -11,7 +11,7 @@ using Spectre.Console.Cli;
 
 namespace MetalPriceConsole.Commands;
 
-public class StatusCommand : Command<StatusCommand.Settings>
+public class StatusCommand : AsyncCommand<StatusCommand.Settings>
 {
     private readonly ApiServer _apiServer;
     private readonly ILogger _logger;
@@ -39,7 +39,7 @@ public class StatusCommand : Command<StatusCommand.Settings>
         public bool ShowHidden { get; set; }
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.Status = true;
         string url = _apiServer.BaseUrl + "status";
@@ -104,6 +104,6 @@ public class StatusCommand : Command<StatusCommand.Settings>
                     Update(70, () => table.AddRow($"[yellow]WebApi Status[/]", "[red]Service is Down[/]"));
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
-        return 0;
+        return Task.FromResult(0);
     }
 }

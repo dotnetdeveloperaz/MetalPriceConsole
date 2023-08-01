@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using PublicHoliday;
@@ -13,7 +15,7 @@ using Spectre.Console.Cli;
 
 namespace MetalPriceConsole.Commands;
 
-public class PriceCommand : Command<PriceCommand.Settings>
+public class PriceCommand : AsyncCommand<PriceCommand.Settings>
 {
     private readonly ApiServer _apiServer;
     private readonly string _connectionString;
@@ -84,7 +86,21 @@ public class PriceCommand : Command<PriceCommand.Settings>
         public bool Fake { get; set; }
     }
 
+
+/* Unmerged change from project 'MetalPriceConsole (net6.0)'
+Before:
     public override int Execute(CommandContext context, Settings settings)
+After:
+    public override int ExecuteAsync(CommandContext context, Settings settings)
+*/
+
+/* Unmerged change from project 'MetalPriceConsole (net8.0)'
+Before:
+    public override int Execute(CommandContext context, Settings settings)
+After:
+    public override int ExecuteAsync(CommandContext context, Settings settings)
+*/
+    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
@@ -132,7 +148,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -228,11 +244,11 @@ public class PriceCommand : Command<PriceCommand.Settings>
                             using HttpRequestMessage request = new(HttpMethod.Get, $"{url}/{date:yyyy-MM-dd}");
                             try
                             {
-                                HttpResponseMessage response = client.Send(request);
+                                HttpResponseMessage response = await client.SendAsync(request);
                                 response.EnsureSuccessStatusCode();
-                                var result = response.Content.ReadAsStream();
-                                metalPrice = JsonSerializer.Deserialize<MetalPrice>(result);
-                            }
+                                var result = await response.Content.ReadAsStreamAsync();
+                                metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
+                             }
                             catch (Exception ex)
                             {
                                 Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
@@ -241,8 +257,9 @@ public class PriceCommand : Command<PriceCommand.Settings>
                         }
                         else
                         {
-                            string cache = File.ReadAllText("SingleDay.sample");
-                            List<MetalPrice> metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
+                            string cache = await File.ReadAllTextAsync("SingleDay.sample");
+                            using MemoryStream stream = new(Encoding.UTF8.GetBytes(cache));
+                            List<MetalPrice> metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(stream);
                             metalPrice = metalPrices[0];
                         }
                         if (metalPrice != null)
@@ -276,7 +293,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                             )
                                     );
                                 }
@@ -287,7 +304,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date.ToString("yyyy-MM-dd")}...[/]"
+                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                             )
                                     );
                                 }
@@ -315,7 +332,7 @@ public class PriceCommand : Command<PriceCommand.Settings>
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
-        return 0;
+        return Task.FromResult(0);
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
