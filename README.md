@@ -2,11 +2,14 @@
 
 ## **<span style="color: red;">Important Note:</span>**
 
-### *This version in the development branch contains code that includes the --palladium and --platinum switches to retrieve prices for those metals.*
 
-### *However, for some reason, the third-party api does not appear to return data when a date is supplied, so only the latest price information is retrieved.*
+### *This branch is ongoing development and may NOT function*
 
-### *Date is NOT used in the code currently, thus, **DO NOT USE** the history command with the --palladium and --platinum switch and note that the --date switch for price command is ignored.*
+#### *This version in the development branch contains code that includes the --palladium and --platinum switches to retrieve prices for those metals.*
+
+#### *However, for some reason, the third-party api does not appear to return data when a date is supplied, so only the latest price information is retrieved.*
+
+#### *Date is NOT used in the code currently, thus, **DO NOT USE** the history command with the --palladium and --platinum switch and note that the --date switch for price command is ignored.*
 
 I have emailed the developers in hopes to get feedback on this issue, as all four metals should function the same, based on their documentation, but even their documentation page behaves in the same manner.
 
