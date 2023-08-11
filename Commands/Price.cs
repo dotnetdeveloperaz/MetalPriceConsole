@@ -301,6 +301,16 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                             }
                         }
                     }
+                    else
+                    {
+                        Update(
+                            70,
+                            () =>
+                                table.AddRow(
+                                    $":stop_sign: [red bold]There was no data available...[/]"
+                                )
+                        );
+                    }
                 }
                 else
                 {
