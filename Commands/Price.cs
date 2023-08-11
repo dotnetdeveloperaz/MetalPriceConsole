@@ -86,27 +86,14 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
         public bool Fake { get; set; }
     }
 
-
-/* Unmerged change from project 'MetalPriceConsole (net6.0)'
-Before:
-    public override int Execute(CommandContext context, Settings settings)
-After:
-    public override int ExecuteAsync(CommandContext context, Settings settings)
-*/
-
-/* Unmerged change from project 'MetalPriceConsole (net8.0)'
-Before:
-    public override int Execute(CommandContext context, Settings settings)
-After:
-    public override int ExecuteAsync(CommandContext context, Settings settings)
-*/
     public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
         else
             settings.Currency += "/";
-        settings.Date ??= DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+        // We always get the previous day so that we have the closing price as the default.
+        settings.Date ??= DateTime.Now.AddDays(-1).ToString("yyyyMMdd");
         settings.GetPrice = true;
         string url = _apiServer.BaseUrl;
         if (settings.GetSilver)
@@ -116,12 +103,12 @@ After:
         }
         else if (settings.GetPalladium)
         {
-            url += $"{_apiServer.Palladium}/{settings.Currency}/{settings.Date}";
+            url += $"{_apiServer.Palladium}/{settings.Currency}"; //{settings.Date}";
             settings.GetGold = false;
         }
         else if (settings.GetPlatinum)
         {
-            url += $"{_apiServer.Platinum}/{settings.Currency}/{settings.Date}";
+            url += $"{_apiServer.Platinum}/{settings.Currency}"; //{settings.Date}";
             settings.GetGold = false;
         }
         else
@@ -241,18 +228,21 @@ After:
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-                            using HttpRequestMessage request = new(HttpMethod.Get, $"{url}/{date:yyyy-MM-dd}");
-                            try
+                            using (HttpRequestMessage request = new(HttpMethod.Get, $"{url}"))
                             {
-                                HttpResponseMessage response = await client.SendAsync(request);
-                                response.EnsureSuccessStatusCode();
-                                var result = await response.Content.ReadAsStreamAsync();
-                                metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
-                             }
-                            catch (Exception ex)
-                            {
-                                Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                                return;
+                                Update(70, () => table.Columns[0].Footer($"[red]Calling {url}[/]"));
+                                try
+                                {
+                                    HttpResponseMessage response = await client.SendAsync(request);
+                                    response.EnsureSuccessStatusCode();
+                                    var result = await response.Content.ReadAsStreamAsync();
+                                    metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                                    return;
+                                }
                             }
                         }
                         else
