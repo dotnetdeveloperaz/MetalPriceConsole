@@ -79,14 +79,14 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                 );
 
                 // Content
-                if(!File.Exists("metalPrice.cache"))
+                if(!File.Exists("MetalPrice.cache"))
                 { 
                     Update(70, () => table.AddRow($"[red]No Cache File Exists. Exiting.[/]"));
                     Update(70, () => table.Columns[0].Footer("[blue]No Cache File To Process. Finishing.[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]metalPrice.cache[/]"));
-                string cache = File.ReadAllText("metalPrice.cache");
+                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]MetalPrice.cache[/]"));
+                string cache = File.ReadAllText("MetalPrice.cache");
                 var metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
                 Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
@@ -125,7 +125,7 @@ public class RestoreCommand : Command<RestoreCommand.Settings>
                                 $":minus: [red bold]Removing Cache File[/]"
                             )
                     );
-                    File.Delete("metalPrice.cache");
+                    File.Delete("MetalPrice.cache");
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
