@@ -277,7 +277,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                                             $":plus: [red bold]Adding Data To Database...[/]"
                                         )
                                 );
-                                if (Database.Save(metalPrice, _connectionString))
+                                if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
                                 {
                                     Update(
                                         70,

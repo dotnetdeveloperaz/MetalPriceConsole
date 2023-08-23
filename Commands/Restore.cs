@@ -80,14 +80,14 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                 );
 
                 // Content
-                if(!File.Exists("MetalPrice.cache"))
+                if(!File.Exists(_apiServer.CacheFile))
                 { 
                     Update(70, () => table.AddRow($"[red]No Cache File Exists. Exiting.[/]"));
                     Update(70, () => table.Columns[0].Footer("[blue]No Cache File To Process. Finishing.[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]metalPrice.cache[/]"));
-                string cache = File.ReadAllText("MetalPrice.cache");
+                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]{_apiServer.CacheFile}[/]"));
+                string cache = File.ReadAllText(_apiServer.CacheFile);
                 var metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
                 Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
@@ -105,7 +105,7 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                 int saved = 0;
                 foreach (MetalPrice metalPrice in metalPrices)
                 {
-                    if (Database.Save(metalPrice, _connectionString))
+                    if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
                     {
                         Update(
                             70,
@@ -126,7 +126,7 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                                 $":minus: [red bold]Removing Cache File[/]"
                             )
                     );
-                    File.Delete("metalPrice.cache");
+                    File.Delete(_apiServer.CacheFile);
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });

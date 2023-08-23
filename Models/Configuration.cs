@@ -11,6 +11,7 @@ public class Configuration
 public class ApiServer
 {
     public string BaseUrl { get; set; }
+    public string CacheFile { get; set; }
     public string Token { get; set; }
     public string Gold { get; set; }
     public string Palladium { get; set; }

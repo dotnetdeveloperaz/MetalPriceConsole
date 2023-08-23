@@ -17,12 +17,12 @@ namespace MetalPriceConsole
         /// <param name="metalPrices"></param>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        public static bool Save(List<MetalPrice> metalPrices, string connectionString)
+        public static bool Save(List<MetalPrice> metalPrices, string connectionString, string cacheFile)
         {
             int success = 0;
             foreach (MetalPrice metalPrice in metalPrices)
             {
-                if (Save(metalPrice, connectionString))
+                if (Save(metalPrice, connectionString, cacheFile))
                     success++;
             }
             return (success == metalPrices.Count);
@@ -33,7 +33,7 @@ namespace MetalPriceConsole
         /// <param name="metalPrice">Type metalPrice</param>
         /// <param name="connectionString"Database connectionstring></param>
         /// <returns></returns>
-        public static bool Save(MetalPrice metalPrice, string connectionString)
+        public static bool Save(MetalPrice metalPrice, string connectionString, string cacheFile)
         {
             if (metalPrice.Date.Year < 1900)
                 return false;
@@ -63,14 +63,14 @@ namespace MetalPriceConsole
                 Console.WriteLine("Could not insert new gold rate.");
                 Console.WriteLine("Exception: {0}", ex.Message);
                 List<MetalPrice> metalPrices = new();
-                if (File.Exists("MetalPrice.cache"))
+                if (File.Exists(cacheFile))
                 {
-                    var file = File.ReadAllText("MetalPrice.cache");
+                    var file = File.ReadAllText(cacheFile);
                     metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(file);
                 }
                 metalPrices.Add(metalPrice);
                 string result = JsonSerializer.Serialize(metalPrices);
-                File.WriteAllText($"MetalPrice.cache", result);
+                File.WriteAllText(cacheFile, result);
 
                 return false;
             }
