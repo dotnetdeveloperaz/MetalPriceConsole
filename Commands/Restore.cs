@@ -80,14 +80,14 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                 );
 
                 // Content
-                if(!File.Exists("metalPrice.cache"))
+                if(!File.Exists("MetalPrice.cache"))
                 { 
                     Update(70, () => table.AddRow($"[red]No Cache File Exists. Exiting.[/]"));
                     Update(70, () => table.Columns[0].Footer("[blue]No Cache File To Process. Finishing.[/]"));
                     return;
                 }
                 Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]metalPrice.cache[/]"));
-                string cache = File.ReadAllText("metalPrice.cache");
+                string cache = File.ReadAllText("MetalPrice.cache");
                 var metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
                 Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
