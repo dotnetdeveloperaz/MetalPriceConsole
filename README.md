@@ -59,10 +59,11 @@ These instructions will get you a copy of the project up and running on your loc
 
 **Note: Setting this above your allowance will only make the API calls fail once you hit your limit.**
 
-```
+```json
 {
   "ApiServer": {
     "Token": "",
+    "CacheFile": "MetalPrice.cache",
     "BaseURL": "https://www.goldapi.io/api/",
     "Gold": "XAU/",
     "Palladium": "XPD/",
@@ -146,6 +147,11 @@ status
 
 - Gets the status of the third party web service, which is true (1) or false (0) for online.
 
+restore
+- Restores existing cache file to the database.
+
+  ###### The cache file is created automatically when the call to the database fails during normal processing. The restore process is manual and you have to use the restore command.
+
 price
 
 - Gets yesterday's (Prices are available for previous days close) Gold rate and saves to the configured database if passing --save
@@ -156,34 +162,33 @@ price --date YYYY-MM-DD
 
 history --start YYYY-MM-DD --end YYYY-MM-DD
 
-- Gets prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unecessary api calls.
+- Gets prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unnecessary api calls.
 
-**Using the --save switch for commands price and history will write the price data to the database on commands price and backtrack.**
+### Switches
 
-**The --fake switch will load sample data, instead of calling the WebApi.**
+- --save writes the price data to the database on commands price and backtrack.
 
-**Using the --silver switch for commands price and history will retrieve silver prices.**
+- --fake will load sample data, instead of calling the WebApi.
 
-**Using the --palladium switch for commands price and history will retrieve palladium prices.**
+- --gold Retrieves gold prices. This is the default and never needs to be used.
 
-**Using the --platinum switch for the commands price and history will retrieve platinum prices.**
+- --silver Retrieves silver prices.
 
-**Using the --gold switch for commands price and history will retrieve gold prices, however, this is the default and does not need to be passed.**
+- --palladium Retrieves palladium prices.
 
-**Using the --currency <USD> rate for commands price and history is to override the configured default currency, which is USD.**
+- --platinum Retrieves platinum prices.
 
-restore
--- Restores existing cache file to the database.
+- --currency EUR Specifies the base currency, which the default is USD. This can also just be set in the appsettings.json file.
 
 Example:
 
-```
+```bash
 history --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023.
 
 history --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
 ```
 
-*Only U.S. Non-Holiday Week Days Are Processed*
+#### Only U.S. Non-Holiday Week Days Are Processed
 
 Passing --debug will output configuration data. If you pass --debug --hidden, it will also output  private configuration data (eg: DB connection string, token) even when not put into appsettings.json but in user-secrets instead.
 
