@@ -13,6 +13,8 @@
 
 I have emailed the developers in hopes to get feedback on this issue, as all four metals should function the same, based on their documentation, but even their documentation page behaves in the same manner.
 
+#### Update 8/23/2023 Got a response from one of the developers, and they confirmed that historical data is not currently supported in these two metals, but they are looking to add support for it. I will leave the supporting code in, and re-enable the date support when it's available.
+
 ## Table of Contents
 
 - [About](#about)
