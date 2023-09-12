@@ -180,7 +180,7 @@ history --start YYYY-MM-DD --end YYYY-MM-DD
 
 - --platinum Retrieves platinum prices.
 
-- --currency EUR Specifies the base currency, in ISO 4217 format,  which the default is USD. This can also just be set in the appsettings.json file. See goldapi.io for the supported base currencies.
+- --currency EUR Specifies the base currency, in ISO 4217 format,  which the default is USD. This can also just be set in the appsettings.json file. See goldapi.io for the supported base currencies. List below as of Sept, 12, 2023.
 
 Example:
 
@@ -188,6 +188,28 @@ Example:
 history --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023.
 
 history --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
+```
+
+#### Base Currencies Supported
+``` text
+USD - United States Dollar
+EUR - European Euro
+CAD - Canadian Dollar
+GBP - British Pound
+JPY - Japanese Yen
+KRW - South Korean Won
+INR - Indian Rupee
+CZK - Czech Krona
+PLN - Polish Zloty
+RUB - Russian Ruble
+MYR - Malaysian Ringgit
+SGD - Singapore Dollar
+AED - E.A.U. Durham
+OMR - Omani Rial
+SAR - Saudi Riyal
+HKD - Hong Kong Dollar
+MXN - Mexican Peso
+JOD - Jordanian Dinar
 ```
 
 #### Only U.S. Non-Holiday Week Days Are Processed
