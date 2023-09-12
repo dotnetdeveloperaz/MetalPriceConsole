@@ -180,7 +180,7 @@ history --start YYYY-MM-DD --end YYYY-MM-DD
 
 - --platinum Retrieves platinum prices.
 
-- --currency EUR Specifies the base currency, which the default is USD. This can also just be set in the appsettings.json file.
+- --currency EUR Specifies the base currency, in ISO 4217 format,  which the default is USD. This can also just be set in the appsettings.json file. See goldapi.io for the supported base currencies.
 
 Example:
 
