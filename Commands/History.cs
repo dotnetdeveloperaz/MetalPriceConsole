@@ -95,7 +95,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
         warning.AddColumn(
             new TableColumn(
                 new Markup(
-                    $"[red bold]Issue with Third Party API. Cannot run history on Palladium or Platinum[/]"
+                    $"[red bold]API does not suppport historical data for Palladium or Platinum[/]"
                 )
             ).Centered()
         );
@@ -192,7 +192,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
                         HttpResponseMessage response = await client.SendAsync(request);
                         response.EnsureSuccessStatusCode();
                         var result = await response.Content.ReadAsStreamAsync();
-                        account = JsonSerializer.Deserialize<Account>(result);
+                        account = await JsonSerializer.DeserializeAsync<Account>(result);
                     }
                     catch (Exception ex)
                     {
@@ -242,6 +242,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
                          }
                         else
                         {
+                            // We need to change this outside of the loop. Bad logic loading this multiple times
                             List<MetalPrice> metalPrices;
                             string cache = await File.ReadAllTextAsync("MultiDay.sample");
                             using (MemoryStream stream = new(Encoding.UTF8.GetBytes(cache)))

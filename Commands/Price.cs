@@ -240,7 +240,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                                 }
                                 catch (Exception ex)
                                 {
-                                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                                    Update(70, () => table.AddRow($"[red]Deserialization Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
                                     return;
                                 }
                             }
@@ -294,11 +294,21 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
+                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date:yyyy-MM-dd}, data was cached...[/]"
                                             )
                                     );
                                 }
                             }
+                        }
+                        else
+                        {
+                            Update(
+                                70,
+                                () =>
+                                    table.Columns[0].Footer(
+                                        $"[red bold]Error[/] [red bold italic]No data Deserialized...[/]"
+                                    )
+                            );
                         }
                     }
                     else
@@ -306,7 +316,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                         Update(
                             70,
                             () =>
-                                table.AddRow(
+                                table.Columns[0].Footer(
                                     $":stop_sign: [red bold]There was no data available...[/]"
                                 )
                         );

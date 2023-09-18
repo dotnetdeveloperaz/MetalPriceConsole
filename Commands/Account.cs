@@ -88,7 +88,7 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                         HttpResponseMessage response = await client.SendAsync(request);
                         response.EnsureSuccessStatusCode();
                         var result = await response.Content.ReadAsStreamAsync();
-                        account = JsonSerializer.Deserialize<Account>(result);
+                        account = await JsonSerializer.DeserializeAsync<Account>(result);
                     }
                     catch (Exception ex)
                     {
