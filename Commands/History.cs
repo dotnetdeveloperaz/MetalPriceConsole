@@ -79,6 +79,11 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
         [DefaultValue(false)]
         public bool Save { get; set; }
 
+        [CommandOption("--cache")]
+        [Description("Cache Results To File")]
+        [DefaultValue(false)]
+        public bool Cache { get; set; }
+
         [CommandOption("--fake")]
         [Description("Does Not Call WebApi")]
         [DefaultValue(false)]
@@ -233,6 +238,8 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
                                 response.EnsureSuccessStatusCode();
                                 var result = await response.Content.ReadAsStreamAsync();
                                 metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
+                                if(settings.Cache)
+                                    Database.CacheData(metalPrice, _apiServer.CacheFile);
                             }
                             catch (Exception ex)
                             {

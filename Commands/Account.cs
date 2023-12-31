@@ -85,10 +85,16 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                 {
                     try
                     {
+                        Update(70, () => table.Columns[0].Footer($"[green]Calling {request.RequestUri.AbsoluteUri}[/]"));
                         HttpResponseMessage response = await client.SendAsync(request);
                         response.EnsureSuccessStatusCode();
                         var result = await response.Content.ReadAsStreamAsync();
                         account = await JsonSerializer.DeserializeAsync<Account>(result);
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Update(70, () => table.AddRow($"[red]Request Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                        return;
                     }
                     catch (Exception ex)
                     {
@@ -110,7 +116,7 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                     table.AddRow(
                         $":check_mark: [green bold italic]Remaining WebAPI Requests:[/]", 
                         $"[green bold italic]{allowance - account.RequestsMonth}[/]"));
-                Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
+                Update(70, () => table.Columns[1].Footer("[blue]Complete[/]"));
             });
         return 0;
     }

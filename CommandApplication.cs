@@ -37,6 +37,7 @@ namespace MetalPriceConsole
                             "--silver",
                             "--fake",
                             "--save",
+                            "--cache",
                             "--debug",
                             "--hidden"
                         }
@@ -61,6 +62,7 @@ namespace MetalPriceConsole
                             "--silver", 
                             "--fake", 
                             "--save", 
+                            "--cache",
                             "--debug", 
                             "--hidden" 
                         }

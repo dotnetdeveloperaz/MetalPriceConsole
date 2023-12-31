@@ -105,6 +105,20 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                 int saved = 0;
                 foreach (MetalPrice metalPrice in metalPrices)
                 {
+                    Update(
+                        70,
+                        () =>
+                            table.AddRow(
+                                $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
+                            )
+                    );
+                    Update(
+                        70,
+                        () =>
+                            table.AddRow(
+                                $"           :check_mark: [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
+                            )
+                    );
                     if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
                     {
                         Update(

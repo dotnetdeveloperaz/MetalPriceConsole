@@ -57,6 +57,7 @@ namespace MetalPriceConsole
                 sqlCommand.Parameters.AddWithValue("price_gram_18k", metalPrice.PriceGram18k);
  
                 var recs = sqlCommand.ExecuteNonQuery();
+                CacheData(metalPrice, cacheFile);
             }
             catch (MySqlException ex)
             {
@@ -81,6 +82,21 @@ namespace MetalPriceConsole
                 sqlCommand.Dispose();
                 sqlConnection.Dispose();
             }
+            return true;
+        }
+        public static bool CacheData(MetalPrice metalPrice, string cacheFile)
+        {
+            List<MetalPrice> metalPrices = new();
+            
+            if (File.Exists(cacheFile))
+            {
+                var file = File.ReadAllText(cacheFile);
+                metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(file);
+            }
+            metalPrices.Add(metalPrice);
+            string result = JsonSerializer.Serialize(metalPrices);
+            File.WriteAllText(cacheFile, result);
+
             return true;
         }
     }
