@@ -16,37 +16,23 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _apiServer;
-    private readonly ILogger _logger;
 
-    public RestoreCommand(ConnectionStrings ConnectionString, ApiServer apiServer, ILogger<AccountCommand> logger)
+    public RestoreCommand(ConnectionStrings ConnectionString, ApiServer apiServer)
     {
         _connectionString = ConnectionString.DefaultDB;
         _apiServer = apiServer;
-        _logger = logger;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
-        [Description("Restores Cache File")]
-        [DefaultValue(false)]
-        public bool Restore { get; set; }
+        // There are no special settings for this command
 
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
     public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        settings.Restore = true;
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, "");
+            DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A");
         }
         // Process Window
         var table = new Table().Centered();

@@ -29,7 +29,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
         _logger = logger;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : PriceCommandSettings
     {
         [CommandOption("--start <startdate>")]
         [Description("Start Date.")]
@@ -38,56 +38,6 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
         [CommandOption("--end <enddate>")]
         [Description("End Date")]
         public string EndDate { get; set; }
-
-        [CommandOption("--currency <USD>")]
-        [Description("Specify The Currency")]
-        [DefaultValue("")]
-        public string Currency { get; set; }
-
-        [CommandOption("--gold")]
-        [Description("Get Gold Price - This is the default and is optional")]
-        [DefaultValue(true)]
-        public bool GetGold { get; set; }
-
-        [CommandOption("--palladium")]
-        [Description("Get Palladium Price")]
-        [DefaultValue(false)]
-        public bool GetPalladium { get; set; }   
-
-        [CommandOption("--platinum")]
-        [Description("Get Platinum Price")]
-        [DefaultValue(false)]
-        public bool GetPlatinum { get; set; }   
-
-        [CommandOption("--silver")]
-        [Description("Get Silver Price")]
-        [DefaultValue(false)]
-        public bool GetSilver { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
-
-        [CommandOption("--save")]
-        [Description("Save Results")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
-
-        [CommandOption("--cache")]
-        [Description("Cache Results To File")]
-        [DefaultValue(false)]
-        public bool Cache { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Does Not Call WebApi")]
-        [DefaultValue(false)]
-        public bool Fake { get; set; }
     }
     public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
@@ -111,7 +61,9 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
             url += _apiServer.Silver;
             settings.GetGold = false;
         }
-// Issue with web API using date which is needed for history
+        // Issue with web API using date which is needed for history
+        // Developer stated they will eventually support history for these two metals
+        // which then we can enable date specification
         else if (settings.GetPalladium)
         {
             url += _apiServer.Palladium;
@@ -231,6 +183,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
                         {
                             // The API doesn't like date with Palladium or Platinum for some reason
                             // even though the documents show it should.
+                            // See notes, API developer stated history is not supported yet, but plan on adding it.
                             using HttpRequestMessage request = new(HttpMethod.Get, $"{url}/{date:yyyy-MM-dd}");
                             try
                             {

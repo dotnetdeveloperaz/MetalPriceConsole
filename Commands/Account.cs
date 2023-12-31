@@ -20,21 +20,11 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
         _apiServer = apiServer;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
         [Description("Get Account Statistics.")]
         [DefaultValue(false)]
         public bool Account { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)

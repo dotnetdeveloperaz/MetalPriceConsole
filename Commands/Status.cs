@@ -14,34 +14,19 @@ namespace MetalPriceConsole.Commands;
 public class StatusCommand : AsyncCommand<StatusCommand.Settings>
 {
     private readonly ApiServer _apiServer;
-    private readonly ILogger _logger;
 
-    public StatusCommand(ApiServer apiServer, ILogger<AccountCommand> logger)
+    public StatusCommand(ApiServer apiServer)
     {
         _apiServer = apiServer;
-        _logger = logger;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
-        [Description("Get WebApi Status.")]
-        [DefaultValue(false)]
-        public bool Status { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
+        // There are no special settings for this command
     }
 
     public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        settings.Status = true;
         string url = _apiServer.BaseUrl + "status";
         if (settings.Debug)
         {

@@ -12,34 +12,25 @@ namespace MetalPriceConsole.Commands;
 public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
 {
     private readonly string _connectionString;
-    //private ILogger eventSource { get; }
+    private readonly ApiServer _apiServer;
 
-    //    public TestDatabaseCommand(IConfigurationSection config, ILogger<Program> eventSource)
-    public TestDatabaseCommand(ConnectionStrings ConnectionString)
+    public TestDatabaseCommand(ApiServer apiServer, ConnectionStrings ConnectionString)
     {
+        _apiServer = apiServer;
         _connectionString = ConnectionString.DefaultDB;
-        // _ = eventSource ?? throw new ArgumentNullException(nameof(eventSource));
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
-        [Description("Test Database Configuration.")]
-        [DefaultValue(false)]
-        public bool DoTestDatabase { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
+        // There are no special settings for this command
     }
 
     public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        if (settings.Debug)
+        {
+            DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A");
+        }
         var titleTable = new Table().Centered();
         // Borders
         titleTable.BorderColor(Color.Blue);
@@ -71,7 +62,6 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     Thread.Sleep(delay);
                 }
 
-                settings.DoTestDatabase = true;
                 Update(70, () =>
                     titleTable.AddRow(
                         $":hourglass_not_done:[red bold] Testing Connection...[/]"));
@@ -79,6 +69,9 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                 try
                 {
                     conn.Open();
+                    Update(70, () =>
+                        titleTable.AddRow(
+                            $":check_mark:[green bold] Connection Made Successfully...[/]"));
                 }
                 catch (Exception ex)
                 {
@@ -86,10 +79,13 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                                 titleTable.AddRow(
                                     $"[red bold]Error Connecting to Database: {ex.Message}[/]"));
                 }
+                Update(70, () =>
+                    titleTable.AddRow(
+                        $":check_mark:[green bold] Cleaning up...[/]"));
                 conn.Close();
                 Update(70, () =>
                             titleTable.AddRow(
-                                ":check_mark:[green bold] Connection Successful[/]"));
+                                ":check_mark:[green bold] Database Connection Test Complete[/]"));
             });
         return Task.FromResult(0);
     }

@@ -1,10 +1,8 @@
-using System.Xml.Xsl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -24,85 +22,31 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
     private readonly ILogger _logger;
     private static readonly string[] columns = new[] { "" };
 
-    public PriceCommand(ApiServer apiServer, ILogger<PriceCommand> logger, ConnectionStrings connectionStrings)
+    public PriceCommand(ApiServer apiServer, ConnectionStrings connectionStrings)
     {
         _apiServer = apiServer;
-        _logger = logger;
         _connectionString = connectionStrings.DefaultDB;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : PriceCommandSettings
     {
-        [Description("Get Current Price.")]
-        [DefaultValue(false)]
-        public bool GetPrice { get; set; }
-
-        [CommandOption("--currency <USD>")]
-        [Description("Specify The Currency")]
-        [DefaultValue("")]
-        public string Currency { get; set; }
-
-        [CommandOption("--gold")]
-        [Description("Get Gold Price - This is the default and is optional")]
-        [DefaultValue(true)]
-        public bool GetGold { get; set; }   
-
-        [CommandOption("--palladium")]
-        [Description("Get Palladium Price")]
-        [DefaultValue(false)]
-        public bool GetPalladium { get; set; }   
-
-        [CommandOption("--platinum")]
-        [Description("Get Platinum Price")]
-        [DefaultValue(false)]
-        public bool GetPlatinum { get; set; }   
-
-        [CommandOption("--silver")]
-        [Description("Get Silver Price")]
-        [DefaultValue(false)]
-        public bool GetSilver { get; set; }
-
         [CommandOption("--date <date>")]
         [Description("Date To Get Price For")]
         [DefaultValue("")]
         public string Date { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
-
-        [CommandOption("--save")]
-        [Description("Save Results")]
-        [DefaultValue(false)]
-        public bool Save { get; set; }
-
-        [CommandOption("--cache")]
-        [Description("Cache Results To File")]
-        [DefaultValue(false)]
-        public bool Cache { get; set; }
-
-        [CommandOption("--fake")]
-        [Description("Does Not Call WebApi")]
-        [DefaultValue(false)]
-        public bool Fake { get; set; }
     }
 
     public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        if (settings.Currency.Length == 0)
-            settings.Currency = _apiServer.Currency;
-        else
-            settings.Currency += "/";
+        // If Currency isn't specified use the configured default currency. Free accounts do not allow specifying and default to USD
+        // so this is only good for none free accounts
+        settings.Currency = _apiServer.Currency.Length == 0 ? _apiServer.Currency : settings.Currency += "/";
+
         // We always get the previous day so that we have the closing price as the default.
-        var date = settings.Date == null ? DateTime.Now.AddDays(-1).ToString("yyyyMMdd") : settings.Date.Replace("-","");
-        settings.GetPrice = true;
+        var date = settings.Date == null ? DateTime.Now.AddDays(-1).ToString("yyyyMMdd") : settings.Date.Replace("-", "");
         string url = _apiServer.BaseUrl;
+
+        // We can probably simplify this as well as consolidate the code
         if (settings.GetSilver)
         {
             url += $"{_apiServer.Silver}/{settings.Currency}/{date}";
@@ -120,7 +64,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
         }
         else
             url += $"{_apiServer.Gold}/{settings.Currency}/{date}";
-        // Platinum and Palladium do not support specify date
+        // Platinum and Palladium do not support specifying date (History)
         // Developer stated they would be adding it 
         // For now, we have the if else if statements above
         // url += settings.Currency + date;
@@ -137,7 +81,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
         table.Expand();
 
         // Animate
-        AnsiConsole
+        _ = AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
@@ -161,7 +105,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                     70,
                     () =>
                         table.Columns[0].Footer(
-                            $"[red bold]Status[/] [green bold]Checking for business day before retrieving {metal} Price For {settings.Date}[/]"
+                            $"[red bold]Status[/] [green bold]Checking for business/holiday/weekend day before retrieving {metal} Price For {settings.Date}[/]"
                         )
                 );
                 int day = 0;
@@ -202,24 +146,48 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                     return;
                 }
                 Account account;
-                using (HttpClient client = new())
+                try
                 {
+                    /*
+                                        HttpClient client = new();
+                                        client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
+                                        HttpRequestMessage request = new(HttpMethod.Get, _apiServer.BaseUrl + "stat");
+                                        try
+                                        {
+                                            Update(
+                                                70,
+                                                () =>
+                                                    table.Columns[0].Footer(
+                                                        $"[red bold]Status[/] [green bold]Checking Number Of API Calls Remaining...[/]"
+                                                    )
+                                            );
+                                            using var accountResponse = await client.SendAsync(request);
+                                            accountResponse.EnsureSuccessStatusCode();
+                                            var result = await accountResponse.Content.ReadAsStreamAsync();
+                                            account = await JsonSerializer.DeserializeAsync<Account>(result);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                                            return;
+                                        }
+                    */
+                    Update(70, () => table.Columns[0].Footer($"[green]Calling {_apiServer.BaseUrl}stat For Account Information[/]"));
+                    HttpClient client = new();
                     client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
                     using (HttpRequestMessage request = new(HttpMethod.Get, _apiServer.BaseUrl + "stat"))
                     {
                         try
                         {
-                            Update(
-                                70,
-                                () =>
-                                    table.Columns[0].Footer(
-                                        $"[red bold]Status[/] [green bold]Checking Number Of API Calls Remaining...[/]"
-                                    )
-                            );
                             HttpResponseMessage response = await client.SendAsync(request);
                             response.EnsureSuccessStatusCode();
                             var result = await response.Content.ReadAsStreamAsync();
                             account = await JsonSerializer.DeserializeAsync<Account>(result);
+                        }
+                        catch (HttpRequestException ex)
+                        {
+                            Update(70, () => table.AddRow($"[red]Request Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                            return;
                         }
                         catch (Exception ex)
                         {
@@ -227,7 +195,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                             return;
                         }
                     }
-                
+
                     _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                     var willBeLeft = (monthlyAllowance - account.RequestsMonth) - day;
                     if (willBeLeft > 0)
@@ -246,97 +214,85 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                                     $":plus: [red bold]Retrieving {metal} Price for {settings.Date}...[/]"
                                 )
                         );
-                        if (!isHoliday && date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
+
+                        MetalPrice metalPrice;
+                        if (!settings.Fake)
                         {
-                            MetalPrice metalPrice;
-                            if (!settings.Fake)
+                            using (var request = new HttpRequestMessage(HttpMethod.Get, $"{url}"))
                             {
-                                using (var request = new HttpRequestMessage(HttpMethod.Get, $"{url}"))
+                                try
                                 {
-                                    try
-                                    {
-//                                      Update(70, () => table.Columns[0].Footer($"[green]Calling {url}[/]"));
-                                        Update(70, () => table.Columns[0].Footer($"[green]Calling {request.RequestUri.AbsoluteUri}[/]"));
-                                        HttpResponseMessage response = await client.SendAsync(request);
-                                        response.EnsureSuccessStatusCode();
-                                        Update(70, () => table.Columns[0].Footer($"[green]Reading Response, Status {response.StatusCode}[/]"));
-                                        var result = await response.Content.ReadAsStreamAsync();
-                                        Update(70, () => table.Columns[0].Footer($"[green]Deserializing {result}[/]"));
-                                        metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
-                                        if(settings.Cache)
-                                            Database.CacheData(metalPrice, _apiServer.CacheFile);
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        Update(70, () => table.AddRow($"[red]Deserialization Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                                        return;
-                                    }
+                                    Update(70, () => table.AddRow($"[green]Calling {url}[/]"));
+                                    Update(70, () => table.Columns[0].Footer($"[green]Calling {request.RequestUri.AbsoluteUri}[/]"));
+                                    HttpResponseMessage response = await client.SendAsync(request);
+                                    response.EnsureSuccessStatusCode();
+                                    Update(70, () => table.Columns[0].Footer($"[green]Reading Response, Status {response.StatusCode}[/]"));
+                                    var result = await response.Content.ReadAsStreamAsync();
+                                    Update(70, () => table.Columns[0].Footer($"[green]Deserializing {result}[/]"));
+                                    metalPrice = await JsonSerializer.DeserializeAsync<MetalPrice>(result);
+                                    if (settings.Cache)
+                                        Database.CacheData(metalPrice, _apiServer.CacheFile);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Update(70, () => table.AddRow($"[red]Deserialization Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                                    return;
                                 }
                             }
-                            else
-                            {
-                                string cache = await File.ReadAllTextAsync("SingleDay.sample");
-                                using MemoryStream stream = new(Encoding.UTF8.GetBytes(cache));
-                                List<MetalPrice> metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(stream);
-                                metalPrice = metalPrices[0];
-                            }
-                            if (metalPrice != null)
+                        }
+                        else
+                        {
+                            string cache = await File.ReadAllTextAsync("SingleDay.sample");
+                            using MemoryStream stream = new(Encoding.UTF8.GetBytes(cache));
+                            List<MetalPrice> metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(stream);
+                            metalPrice = metalPrices[0];
+                        }
+                        if (metalPrice != null)
+                        {
+                            Update(
+                                70,
+                                () =>
+                                    table.AddRow(
+                                        $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
+                                    )
+                            );
+                            Update(
+                                70,
+                                () =>
+                                    table.AddRow(
+                                        $"           :check_mark: [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
+                                    )
+                            );
+                            if (settings.Save)
                             {
                                 Update(
                                     70,
                                     () =>
                                         table.AddRow(
-                                            $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
+                                            $":plus: [red bold]Adding Data To Database...[/]"
                                         )
                                 );
-                                Update(
-                                    70,
-                                    () =>
-                                        table.AddRow(
-                                            $"           :check_mark: [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
-                                        )
-                                );
-                                if (settings.Save)
+                                if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
                                 {
                                     Update(
                                         70,
                                         () =>
                                             table.AddRow(
-                                                $":plus: [red bold]Adding Data To Database...[/]"
+                                                $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                             )
                                     );
-                                    if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
-                                    {
-                                        Update(
-                                            70,
-                                            () =>
-                                                table.AddRow(
-                                                    $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
-                                                )
-                                        );
-                                    }
-                                    else
-                                    {
-                                        // Caching is taken care of in the Save method on failure
-                                        Update(
-                                            70,
-                                            () =>
-                                                table.AddRow(
-                                                    $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date:yyyy-MM-dd}, data was cached...[/]"
-                                                )
-                                        );
-                                    }
                                 }
-                            }
-                            else
-                            {
-                                Update(
-                                    70,
-                                    () =>
-                                        table.Columns[0].Footer(
-                                            $"[red bold]Error[/] [red bold italic]No data Deserialized...[/]"
-                                        )
-                                );
+                                else
+                                {
+                                    // Caching is taken care of in the Save method on failure, notify user that it was cached.
+                                    Update(
+                                        70,
+                                        () =>
+                                            table.AddRow(
+                                                $":stop_sign: [red bold]Could Not Save Gold Price For {metalPrice.Date:yyyy-MM-dd}, data was cached...[/]"
+                                            )
+                                    );
+                                }
                             }
                         }
                         else
@@ -345,7 +301,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                                 70,
                                 () =>
                                     table.Columns[0].Footer(
-                                        $":stop_sign: [red bold]There was no data available...[/]"
+                                        $"[red bold]Error[/] [red bold italic]No data Deserialized...[/]"
                                     )
                             );
                         }
@@ -369,6 +325,16 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                         return;
                     }
                     Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
+                }
+                catch (Exception ex)
+                {
+                    Update(
+                                70,
+                                () =>
+                                    table.Columns[0].Footer(
+                                        $"[red bold]Status[/] [red bold italic]Fatal Error: {ex.Message}[/]"
+                                    )
+                            );
                 }
             });
         return Task.FromResult(0);
