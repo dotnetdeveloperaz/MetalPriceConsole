@@ -5,6 +5,7 @@ using System.Data;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Reflection;
 
 namespace MetalPriceConsole
 {
@@ -61,18 +62,9 @@ namespace MetalPriceConsole
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine("Could not insert new gold rate.");
+                Console.WriteLine("Could not insert new metal rate, caching data.");
                 Console.WriteLine("Exception: {0}", ex.Message);
-                List<MetalPrice> metalPrices = new();
-                if (File.Exists(cacheFile))
-                {
-                    var file = File.ReadAllText(cacheFile);
-                    metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(file);
-                }
-                metalPrices.Add(metalPrice);
-                string result = JsonSerializer.Serialize(metalPrices);
-                File.WriteAllText(cacheFile, result);
-
+                CacheData(metalPrice, cacheFile);
                 return false;
             }
             finally
@@ -87,15 +79,16 @@ namespace MetalPriceConsole
         public static bool CacheData(MetalPrice metalPrice, string cacheFile)
         {
             List<MetalPrice> metalPrices = new();
-            
-            if (File.Exists(cacheFile))
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string file = Path.Combine(path, cacheFile);
+            if (File.Exists(file))
             {
-                var file = File.ReadAllText(cacheFile);
-                metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(file);
+                var json = File.ReadAllText(file);
+                metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(json);
             }
             metalPrices.Add(metalPrice);
             string result = JsonSerializer.Serialize(metalPrices);
-            File.WriteAllText(cacheFile, result);
+            File.WriteAllText(file, result);
 
             return true;
         }
