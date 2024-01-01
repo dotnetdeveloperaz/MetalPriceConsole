@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace MetalPriceConsole;
 
