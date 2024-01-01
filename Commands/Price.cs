@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using MetalPriceConsole.Models;
-using Microsoft.Extensions.Logging;
 using PublicHoliday;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -19,7 +19,6 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
 {
     private readonly ApiServer _apiServer;
     private readonly string _connectionString;
-    private readonly ILogger _logger;
     private static readonly string[] columns = new[] { "" };
 
     public PriceCommand(ApiServer apiServer, ConnectionStrings connectionStrings)
@@ -36,17 +35,18 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
         public string Date { get; set; }
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         // If Currency isn't specified use the configured default currency. Free accounts do not allow specifying and default to USD
         // so this is only good for none free accounts
-        settings.Currency = _apiServer.Currency.Length == 0 ? _apiServer.Currency : settings.Currency += "/";
+        settings.Currency = _apiServer.Currency.Length != 0 ? _apiServer.Currency : settings.Currency += "/";
 
         // We always get the previous day so that we have the closing price as the default.
         var date = settings.Date == null ? DateTime.Now.AddDays(-1).ToString("yyyyMMdd") : settings.Date.Replace("-", "");
         string url = _apiServer.BaseUrl;
 
         // We can probably simplify this as well as consolidate the code
+        // We default to Gold as stated in the documentation.
         if (settings.GetSilver)
         {
             url += $"{_apiServer.Silver}/{settings.Currency}/{date}";
@@ -81,7 +81,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
         table.Expand();
 
         // Animate
-        _ = AnsiConsole
+        await AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
@@ -113,8 +113,8 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                 Update(
                     70,
                     () =>
-                        table.Columns[0].Footer(
-                            $"[red bold]Status[/] [green bold]Checking if {date} is a holiday....[/]"
+                        table.AddRow(
+                            $"[red bold]Status[/] [green bold]Checking if {settings.Date} is a holiday....[/]"
                         )
                 );
                 bool isHoliday = new USAPublicHoliday().IsPublicHoliday(date);
@@ -124,7 +124,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                    70,
                    () =>
                        table.AddRow(
-                           $":check_mark: [green bold]Calculated {day} Days to get {metal} prices for...[/]"
+                           $"{Emoji.Known.CheckMark} [green bold]Calculated {day} Days to get {metal} prices for...[/]"
                        )
                 );
                 if (day < 1)
@@ -145,55 +145,35 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                     );
                     return;
                 }
-                Account account;
                 try
                 {
-                    /*
-                                        HttpClient client = new();
-                                        client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
-                                        HttpRequestMessage request = new(HttpMethod.Get, _apiServer.BaseUrl + "stat");
-                                        try
-                                        {
-                                            Update(
-                                                70,
-                                                () =>
-                                                    table.Columns[0].Footer(
-                                                        $"[red bold]Status[/] [green bold]Checking Number Of API Calls Remaining...[/]"
-                                                    )
-                                            );
-                                            using var accountResponse = await client.SendAsync(request);
-                                            accountResponse.EnsureSuccessStatusCode();
-                                            var result = await accountResponse.Content.ReadAsStreamAsync();
-                                            account = await JsonSerializer.DeserializeAsync<Account>(result);
-                                        }
-                                        catch (Exception ex)
-                                        {
-                                            Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                                            return;
-                                        }
-                    */
                     Update(70, () => table.Columns[0].Footer($"[green]Calling {_apiServer.BaseUrl}stat For Account Information[/]"));
-                    HttpClient client = new();
-                    client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
-                    using (HttpRequestMessage request = new(HttpMethod.Get, _apiServer.BaseUrl + "stat"))
+                    Account account;
+                    try
                     {
-                        try
+                        string accountUrl = _apiServer.BaseUrl + "stat";
+                        Update(70, () => table.AddRow($"[green]Calling {accountUrl}[/]"));
+                        //                        account = await AccountDetails.GetDetailsAsync(_apiServer, accountUrl);
+                        if (!settings.Fake)
+                            account = await AccountDetails.GetDetailsAsync(_apiServer, accountUrl);
+                        else
                         {
-                            HttpResponseMessage response = await client.SendAsync(request);
-                            response.EnsureSuccessStatusCode();
-                            var result = await response.Content.ReadAsStreamAsync();
-                            account = await JsonSerializer.DeserializeAsync<Account>(result);
+                            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                            string file = Path.Combine(path, "Account.sample");
+                            string cache = File.ReadAllText(file);
+                            account = JsonSerializer.Deserialize<Account>(cache);
+
                         }
-                        catch (HttpRequestException ex)
-                        {
-                            Update(70, () => table.AddRow($"[red]Request Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                            return;
-                        }
-                        catch (Exception ex)
-                        {
-                            Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
-                            return;
-                        }
+
+                        Update(70, () => table.AddRow($"[yellow]     Requests Today[/] [yellow]{account.RequestsToday}[/]"));
+                        Update(70, () => table.AddRow($"[yellow] Requests Yesterday[/] [yellow]{account.RequestsYesterday}[/]"));
+                        Update(70, () => table.AddRow($"[yellow]Requests This Month[/] [yellow]{account.RequestsMonth}[/]"));
+                        Update(70, () => table.AddRow($"[yellow]Requests Last Month[/] [yellow]{account.RequestsLastMonth}[/]"));
+                    }
+                    catch (Exception ex)
+                    {
+                        Update(70, () => table.AddRow($"[red]Request Error: {ex.Message} Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                        return;
                     }
 
                     _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
@@ -218,12 +198,14 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                         MetalPrice metalPrice;
                         if (!settings.Fake)
                         {
-                            using (var request = new HttpRequestMessage(HttpMethod.Get, $"{url}"))
+                            using (var request = new HttpRequestMessage(HttpMethod.Get, url))
                             {
                                 try
                                 {
                                     Update(70, () => table.AddRow($"[green]Calling {url}[/]"));
                                     Update(70, () => table.Columns[0].Footer($"[green]Calling {request.RequestUri.AbsoluteUri}[/]"));
+                                    HttpClient client = new();
+                                    client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
                                     HttpResponseMessage response = await client.SendAsync(request);
                                     response.EnsureSuccessStatusCode();
                                     Update(70, () => table.Columns[0].Footer($"[green]Reading Response, Status {response.StatusCode}[/]"));
@@ -337,7 +319,7 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                             );
                 }
             });
-        return Task.FromResult(0);
+        return 0;
     }
 
     public override ValidationResult Validate(CommandContext context, Settings settings)
