@@ -1,5 +1,5 @@
-﻿using Spectre.Console.Cli;
-using System.ComponentModel;
+﻿using System.ComponentModel;
+using Spectre.Console.Cli;
 
 namespace MetalPriceConsole.Commands
 {
@@ -7,12 +7,12 @@ namespace MetalPriceConsole.Commands
     {
         [CommandOption("--currency <USD>")]
         [Description("Specify The Currency")]
-        [DefaultValue("")]
+        [DefaultValue("USD")]
         public string Currency { get; set; }
 
         [CommandOption("--gold")]
         [Description("Get Gold Price - This is the default and is optional")]
-        [DefaultValue(true)]
+        [DefaultValue(false)]
         public bool GetGold { get; set; }
 
         [CommandOption("--palladium")]
