@@ -19,14 +19,12 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
 {
     private readonly string _connectionString;
     private readonly ApiServer _apiServer;
-    private readonly ILogger _logger;
     private static readonly string[] columns = new[] { "" };
 
-    public HistoryCommand(ConnectionStrings ConnectionString, ApiServer apiServer, ILogger<AccountCommand> logger)
+    public HistoryCommand(ConnectionStrings ConnectionString, ApiServer apiServer)
     {
         _connectionString = ConnectionString.DefaultDB;
         _apiServer = apiServer;
-        _logger = logger;
     }
 
     public class Settings : PriceCommandSettings
@@ -39,7 +37,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
         [Description("End Date")]
         public string EndDate { get; set; }
     }
-    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         if (settings.Currency.Length == 0)
             settings.Currency = _apiServer.Currency;
@@ -69,14 +67,14 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
             url += _apiServer.Palladium;
             settings.GetGold = false;
             AnsiConsole.Write(warning);
-            return Task.FromResult(-1);
+            return -1;
         }
         else if (settings.GetPlatinum)
         {
             url += _apiServer.Platinum;
             settings.GetGold = false;
             AnsiConsole.Write(warning);
-            return Task.FromResult(-1);
+            return -1;
         }
         else
             url += _apiServer.Gold;
@@ -95,7 +93,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
         table.Expand();
 
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
@@ -291,7 +289,7 @@ public class HistoryCommand : AsyncCommand<HistoryCommand.Settings>
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
-        return Task.FromResult(0);
+        return 0;
     }
     private static List<DateTime> GetNumberOfDays(string startDate, string endDate)
     {
