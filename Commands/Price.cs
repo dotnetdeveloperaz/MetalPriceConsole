@@ -164,11 +164,6 @@ public class PriceCommand : AsyncCommand<PriceCommand.Settings>
                             account = JsonSerializer.Deserialize<Account>(cache);
 
                         }
-
-                        Update(70, () => table.AddRow($"[yellow]     Requests Today[/] [yellow]{account.RequestsToday}[/]"));
-                        Update(70, () => table.AddRow($"[yellow] Requests Yesterday[/] [yellow]{account.RequestsYesterday}[/]"));
-                        Update(70, () => table.AddRow($"[yellow]Requests This Month[/] [yellow]{account.RequestsMonth}[/]"));
-                        Update(70, () => table.AddRow($"[yellow]Requests Last Month[/] [yellow]{account.RequestsLastMonth}[/]"));
                     }
                     catch (Exception ex)
                     {
