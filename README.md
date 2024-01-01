@@ -170,7 +170,9 @@ history --start YYYY-MM-DD --end YYYY-MM-DD
 
 - --save writes the price data to the database on commands price and backtrack.
 
-- --fake will load sample data, instead of calling the WebApi.
+- --cache writes the data to a json file which later can be restored to the configured database.
+
+- --fake will load sample data, instead of calling the WebApi. This is available for price, history and acct commands.
 
 - --gold Retrieves gold prices. This is the default and never needs to be used.
 
@@ -185,7 +187,7 @@ history --start YYYY-MM-DD --end YYYY-MM-DD
 Example:
 
 ```bash
-history --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023.
+history --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31st, 2023 to June 21st, 2023 skipping holidays and weekends.
 
 history --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
 ```
@@ -232,7 +234,7 @@ USAGE:
 EXAMPLES:
     dotnet run  history --start YYYY-MM-DD --end YYYY-MM-DD --silver --currency USD --fake --save --debug --hidden
     dotnet run  price --date YYYY-MM-DD --silver --currency USD --fake --save --debug --hidden
-    dotnet run  acct --debug --hidden
+    dotnet run  acct --debug --hidden --fake
     dotnet run  status --debug --hidden
     dotnet run restore --debug --hidden
 
