@@ -25,11 +25,13 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
         // There are no special settings for this command
     }
 
-    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A");
+            if (!DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A"))
+                return 0;
+
         }
         var titleTable = new Table().Centered();
         // Borders
@@ -48,12 +50,12 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
         titleTable.Expand();
 
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(titleTable)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -62,31 +64,27 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     Thread.Sleep(delay);
                 }
 
-                Update(70, () =>
-                    titleTable.AddRow(
-                        $":hourglass_not_done:[red bold] Testing Connection...[/]"));
+                Update(70, () => titleTable.AddRow($"[red bold] Testing Connection...[/]"));
                 var conn = new MySqlConnection(_connectionString);
                 try
                 {
-                    conn.Open();
-                    Update(70, () =>
-                        titleTable.AddRow(
-                            $":check_mark:[green bold] Connection Made Successfully...[/]"));
+                    await conn.OpenAsync();
+                    Update(70, () => titleTable.AddRow($"[green bold] Connection Made Successfully...[/]"));
                 }
                 catch (Exception ex)
                 {
-                    Update(70, () =>
-                                titleTable.AddRow(
-                                    $"[red bold]Error Connecting to Database: {ex.Message}[/]"));
+                    Update(70, () => titleTable.AddRow($"[red bold]Error Connecting to Database: {ex.Message}[/]"));
                 }
-                Update(70, () =>
-                    titleTable.AddRow(
-                        $":check_mark:[green bold] Cleaning up...[/]"));
-                conn.Close();
-                Update(70, () =>
-                            titleTable.AddRow(
-                                ":check_mark:[green bold] Database Connection Test Complete[/]"));
+                finally
+                {
+                    Update(70, () => titleTable.AddRow($"[green bold] Cleaning up...[/]"));
+                    if (conn.State == System.Data.ConnectionState.Open)
+                        await conn.CloseAsync();
+                    await conn.DisposeAsync();
+                }
+
+                Update(70, () => titleTable.AddRow("[green bold] Database Connection Test Complete[/]"));
             });
-        return Task.FromResult(0);
+        return 0;
     }
 }
