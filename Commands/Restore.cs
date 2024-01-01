@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -64,16 +65,17 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                             $"[red bold]Status[/] [green bold]Checking For Cache File[/]"
                         )
                 );
-
+                string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string file = Path.Combine(path, _apiServer.CacheFile);
                 // Content
-                if(!File.Exists(_apiServer.CacheFile))
+                if (!File.Exists(file))
                 { 
                     Update(70, () => table.AddRow($"[red]No Cache File Exists. Exiting.[/]"));
                     Update(70, () => table.Columns[0].Footer("[blue]No Cache File To Process. Finishing.[/]"));
                     return;
                 }
                 Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]{_apiServer.CacheFile}[/]"));
-                string cache = File.ReadAllText(_apiServer.CacheFile);
+                string cache = File.ReadAllText(file);
                 var metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
                 Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
@@ -123,10 +125,10 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                         70,
                         () =>
                             table.AddRow(
-                                $":minus: [red bold]Removing Cache File[/]"
+                                $":minus: [red bold]Removing Cache File {file}[/]"
                             )
                     );
-                    File.Delete(_apiServer.CacheFile);
+                    File.Delete(file);
                 }
                 Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
             });
