@@ -42,7 +42,7 @@ class Program
     }
     public static IServiceCollection ConfigureServices(IConfiguration config)
     {
-        var logging = config.GetSection("Logging");
+        //var logging = config.GetSection("Logging");
         var database = config.GetSection("ConnectionStrings");
         var apiServer = config.GetSection("ApiServer");
         var services = new ServiceCollection();
@@ -53,6 +53,7 @@ class Program
             Currency= apiServer["Currency"], MonthlyAllowance = apiServer["MonthlyAllowance"] 
         });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
+/*
         services.AddLogging(loggingBuilder =>
         {
             loggingBuilder.AddConfiguration(config.GetSection("Logging"));
@@ -60,6 +61,7 @@ class Program
         });
 
         services.AddSingleton<MetalPriceEventSource>();
+*/
         services.BuildServiceProvider();
         return services;
     }
