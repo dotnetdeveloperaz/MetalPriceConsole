@@ -17,7 +17,8 @@ public class DebugDisplay
     {
         // Debug Window
         var table = new Table().Centered();
-        //table.HideHeaders();
+        table.BorderColor(Color.BlueViolet);
+        table.Border(TableBorder.DoubleEdge);
         table.Expand();
 
         // Animate
@@ -36,17 +37,12 @@ public class DebugDisplay
                 }
 
                 // Columns
-                Update(70, () => table.AddColumn(""));
-                Update(70, () => table.AddColumn(""));
+                Update(70, () => table.AddColumn("Setting Key"));
+                Update(70, () => table.AddColumn("Value"));
 
                 // Column alignment
                 Update(70, () => table.Columns[0].RightAligned());
                 Update(70, () => table.Columns[1].RightAligned());
-
-                // Borders
-                Update(70, () => table.BorderColor(Color.Yellow));
-                Update(70, () => table.MinimalBorder());
-                Update(70, () => table.SimpleBorder());
 
                 bool isDebug = false;
                 bool showHidden = false;
