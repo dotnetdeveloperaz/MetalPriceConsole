@@ -13,18 +13,13 @@ namespace MetalPriceConsole
                 config.ValidateExamples();
 
                 config
-                    .AddCommand<AccountCommand>("account")
-                    .WithDescription("Retrieves account information.");
-
-                config
-                    .AddCommand<HistoryCommand>("history")
-                    .WithDescription(
-                        "Retrieves historical precious metal prices. Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
-                    )
+                    .AddCommand<MetalPriceCommand>("metalprice")
+                    .WithAlias("price")
+                    .WithDescription("Testing new method")
                     .WithExample(
                         new[]
                         {
-                            "history",
+                            "metalprice",
                             "--start",
                             "YYYY-MM-DD",
                             "--end",
@@ -39,38 +34,15 @@ namespace MetalPriceConsole
                             "--save",
                             "--cache",
                             "--debug",
-                            "--hidden"
                         }
-                    );
+                     );
 
                 config
-                    .AddCommand<PriceCommand>("price")
-                    .WithDescription(
-                        "Retrieves the current precious metal price. Use --save to save to database. Weekends and holidays are skipped."
-                    )
-                    .WithExample(
-                        new[] 
-                        { 
-                            "price", 
-                            "--date", 
-                            "YYYY-MM-DD", 
-                            "--currency", 
-                            "USD", 
-                            "--gold", 
-                            "--palladium",
-                            "--platinum",
-                            "--silver", 
-                            "--fake", 
-                            "--save", 
-                            "--cache",
-                            "--debug", 
-                            "--hidden" 
-                        }
-                );
-                config
-                    .AddCommand<AccountCommand>("acct")
-                    .WithDescription("Retrieves Account Statistics.")
-                    .WithExample(new[] { "acct", "--debug", "--hidden" });
+                    .AddCommand<AccountCommand>("account")
+                    .WithAlias("acct")
+                    .WithDescription("Retrieves account information.")
+                    .WithExample(new[] { "account", "--fake", "--debug", "--hidden" })
+                    .WithExample(new[] { "acct", "--fake", "--debug", "--hidden" });
 
                 config
                     .AddCommand<StatusCommand>("status")

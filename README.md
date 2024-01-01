@@ -199,19 +199,28 @@ EUR - European Euro
 CAD - Canadian Dollar
 GBP - British Pound
 JPY - Japanese Yen
-KRW - South Korean Won
-INR - Indian Rupee
+AED - E.A.U. Durham
+AUD - Australian Dollar
+BTC - Bitcoin
+CHF - Swiss Franc
+CNY - Chinese/Yuan Renminbi
 CZK - Czech Krona
+EGP - Egyptian Pound
+HKD - Hong Kong Dollar
+INR - Indian Rupee
+JOD - Jordanian Dinar
+KRW - South Korean Won
+KWD - Kuwaiti Dinar
+MXN - Mexican Peso
+MYR - Malaysian Ringgit
+OMR - Omani Rial
 PLN - Polish Zloty
 RUB - Russian Ruble
-MYR - Malaysian Ringgit
-SGD - Singapore Dollar
-AED - E.A.U. Durham
-OMR - Omani Rial
 SAR - Saudi Riyal
-HKD - Hong Kong Dollar
-MXN - Mexican Peso
-JOD - Jordanian Dinar
+SGD - Singapore Dollar
+THB - Thai Baht
+XAG - Gold/Silver Ratio
+ZAR - South African Rand
 ```
 
 #### Only U.S. Non-Holiday Week Days Are Processed

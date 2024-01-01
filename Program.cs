@@ -48,7 +48,7 @@ class Program
         services.AddSingleton(new ApiServer() { 
             Token = apiServer["Token"], CacheFile = apiServer["CacheFile"], BaseUrl = apiServer["BaseUrl"], 
             Gold = apiServer["Gold"], Palladium = apiServer["Palladium"], 
-            Platinum = apiServer["Platinum"], Silver = apiServer["Silver"], 
+            Platinum = apiServer["Platinum"], Silver = apiServer["Silver"],
             Currency= apiServer["Currency"], MonthlyAllowance = apiServer["MonthlyAllowance"] 
         });
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });

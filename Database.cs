@@ -26,6 +26,8 @@ namespace MetalPriceConsole
                 if (Save(metalPrice, connectionString, cacheFile))
                     success++;
             }
+            if (success != metalPrices.Count)
+                CacheData(metalPrices, cacheFile);
             return (success == metalPrices.Count);
         }
         /// <summary>
@@ -58,13 +60,11 @@ namespace MetalPriceConsole
                 sqlCommand.Parameters.AddWithValue("price_gram_18k", metalPrice.PriceGram18k);
  
                 var recs = sqlCommand.ExecuteNonQuery();
-                CacheData(metalPrice, cacheFile);
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine("Could not insert new metal rate, caching data.");
+                Console.WriteLine("Could not insert new metal rate.");
                 Console.WriteLine("Exception: {0}", ex.Message);
-                CacheData(metalPrice, cacheFile);
                 return false;
             }
             finally
@@ -76,20 +76,24 @@ namespace MetalPriceConsole
             }
             return true;
         }
-        public static bool CacheData(MetalPrice metalPrice, string cacheFile)
+        public static bool CacheData(List<MetalPrice> metalPrices, string cacheFile)
         {
-            List<MetalPrice> metalPrices = new();
             string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string file = Path.Combine(path, cacheFile);
             if (File.Exists(file))
             {
                 var json = File.ReadAllText(file);
-                metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(json);
+                List<MetalPrice> cache = JsonSerializer.Deserialize<List<MetalPrice>>(json);
+                foreach (var metalPrice in cache)
+                    cache.Add(metalPrice);
+                string result = JsonSerializer.Serialize(metalPrices);
+                File.WriteAllText(file, result);
             }
-            metalPrices.Add(metalPrice);
-            string result = JsonSerializer.Serialize(metalPrices);
-            File.WriteAllText(file, result);
-
+            else
+            {
+                string result = JsonSerializer.Serialize(metalPrices);
+                File.WriteAllText(file, result);
+            }
             return true;
         }
     }
