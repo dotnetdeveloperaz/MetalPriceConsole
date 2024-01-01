@@ -32,7 +32,8 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
         string url = _apiServer.BaseUrl + "stat";
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, url);
+            if (!DebugDisplay.Print(settings, _apiServer, url))
+                return 0;
         }
         //AnsiConsole.WriteLine();
         //AnsiConsole.WriteLine();
