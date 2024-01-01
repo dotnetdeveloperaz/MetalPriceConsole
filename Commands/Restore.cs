@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,28 +30,28 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
         // There are no special settings for this command
 
     }
-    public override Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A");
+            if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
+                return 0;
         }
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();
         table.BorderColor(Color.Yellow);
         table.Border(TableBorder.Rounded);
-        table.Border(TableBorder.Simple);
         table.AddColumns(new[] { "" });
         table.Expand();
 
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .Start(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -58,38 +59,26 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
-                Update(
-                    70,
-                    () =>
-                        table.Columns[0].Footer(
-                            $"[red bold]Status[/] [green bold]Checking For Cache File[/]"
-                        )
-                );
+                Update(70, () => table.AddRow($"[red bold]Status[/] [green bold]Checking For Cache File[/]"));
                 string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string file = Path.Combine(path, _apiServer.CacheFile);
                 // Content
                 if (!File.Exists(file))
                 { 
-                    Update(70, () => table.AddRow($"[red]No Cache File Exists. Exiting.[/]"));
-                    Update(70, () => table.Columns[0].Footer("[blue]No Cache File To Process. Finishing.[/]"));
+                    Update(70, () => table.AddRow($"[red]No Cache File Exists ({file}). Exiting.[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Loading [/][green]{_apiServer.CacheFile}[/]"));
-                string cache = File.ReadAllText(file);
-                var metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(cache);
+                Update(70, () => table.AddRow($"[yellow]Loading [/][green]{_apiServer.CacheFile}[/]"));
+                string cache;
+                using (StreamReader sr = new StreamReader(file)) 
+                { 
+                    cache = sr.ReadToEnd();
+                }
+                List<MetalPrice> metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(new MemoryStream(Encoding.UTF8.GetBytes(cache)));
                 table.Columns[0].LeftAligned().Width(30).PadRight(20);
-                Update(70, () => table.AddRow($":check_mark: [yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
+                Update(70, () => table.AddRow($"[yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
                 Update(70, () => table.Columns[0].Footer("[blue]Cache File Loaded[/]"));
 
-                table.Columns[0].LeftAligned();
-                Update(70, () => table.AddRow($":hourglass_not_done: [yellow]Saving To Database[/]"));
-                Update(
-                    70,
-                    () =>
-                        table.AddRow(
-                            $":plus: [red bold]Adding Data To Database...[/]"
-                        )
-                );
                 int saved = 0;
                 foreach (MetalPrice metalPrice in metalPrices)
                 {
@@ -97,14 +86,14 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                         70,
                         () =>
                             table.AddRow(
-                                $"      :check_mark: [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
+                                $"      [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
                             )
                     );
                     Update(
                         70,
                         () =>
                             table.AddRow(
-                                $"           :check_mark: [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
+                                $"           [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
                             )
                     );
                     if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
@@ -113,11 +102,18 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                             70,
                             () =>
                                 table.AddRow(
-                                    $":check_mark: [green bold]Saved Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
+                                    $"[green bold]Saved Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
                                 )
                         );
                         saved++;
                     }
+                    // More rows than we can display?
+                    if (table.Rows.Count > Console.WindowHeight - 30)
+                    {
+                        // Remove the first one
+                        table.Rows.RemoveAt(0);
+                    }
+
                 }
                 if (saved == metalPrices.Count)
                 {
@@ -125,13 +121,13 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                         70,
                         () =>
                             table.AddRow(
-                                $":minus: [red bold]Removing Cache File {file}[/]"
+                                $"[red bold]Removing Cache File {file}[/]"
                             )
                     );
                     File.Delete(file);
                 }
-                Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
+                Update(70, () => table.AddRow("[blue]Complete[/]"));
             });
-        return Task.FromResult(0);
+        return 0;
     }
 }
