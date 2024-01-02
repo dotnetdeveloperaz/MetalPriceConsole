@@ -15,7 +15,7 @@ namespace MetalPriceConsole
                 config
                     .AddCommand<MetalPriceCommand>("metalprice")
                     .WithAlias("price")
-                    .WithDescription("Testing new method")
+                    .WithDescription("Get Metal Price")
                     .WithExample(
                         new[]
                         {
