@@ -154,7 +154,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                             string url = $"{_apiServer.BaseUrl}{metal}/{settings.Currency}";
                             // Platinum and Palladium do not support historical so dates cannot be used.
                             if (settings.StartDate != String.Empty)
-                                url += "/{date:yyyyMMdd}";
+                                url += $"/{date:yyyyMMdd}";
                             Update(70, () => table.AddRow($"[green]Calling {url}[/]"));
                             MetalPrice metalPrice = await GetPriceAsync(url, _apiServer.Token);
                             if (metalPrice != null)
