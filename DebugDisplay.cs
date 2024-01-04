@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using System.Threading;
-using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using MetalPriceConsole.Models;
@@ -10,75 +9,65 @@ namespace MetalPriceConsole;
 
 public class DebugDisplay
 {
-    internal static void Print(CommandSettings settings, ApiServer server, ILogger logger)
+    internal static bool Print(CommandSettings settings, ApiServer server, string Url)
     {
-        Print(settings, server, logger, "");
+        return Print(settings, server, "", Url);
     }
-    internal static void Print(CommandSettings settings, ApiServer server, ILogger logger, string connectionString)
+    internal static bool Print(CommandSettings settings, ApiServer server, string connectionString, string Url)
     {
         // Debug Window
         var table = new Table().Centered();
-        //table.HideHeaders();
+        table.BorderColor(Color.BlueViolet);
+        table.Border(TableBorder.DoubleEdge);
         table.Expand();
 
-        // Animate
-        AnsiConsole
-            .Live(table)
-            .AutoClear(false)
-            .Overflow(VerticalOverflow.Ellipsis)
-            .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+        // Columns
+        table.AddColumn("Setting Key");
+        table.AddColumn("Value");
+
+        // Column alignment
+        table.Columns[0].RightAligned();
+        table.Columns[1].RightAligned();
+
+        bool isDebug = false;
+        bool showHidden = false;
+
+        PropertyInfo[] properties = settings.GetType().GetProperties();
+        foreach (PropertyInfo property in properties)
+        {
+            object value = property.GetValue(settings);
+            if (property.Name == "Debug")
+                isDebug = (bool)value;
+            if (property.Name == "ShowHidden")
+                showHidden = (bool)value;
+        }
+        if (isDebug)
+        {
+            if (showHidden)
             {
-                void Update(int delay, Action action)
-                {
-                    action();
-                    ctx.Refresh();
-                    Thread.Sleep(delay);
-                }
+                if (connectionString != String.Empty)
+                    table.AddRow($"Database Connection:", $"{connectionString}");
 
-                // Columns
-                Update(70, () => table.AddColumn(""));
-                Update(70, () => table.AddColumn(""));
+                table.AddRow($"Token:", $"{server.Token}");
+                table.AddRow($"Url:", $"{Url}");
+            }
+            foreach (PropertyInfo property in properties)
+            {
+                object value = property.GetValue(settings);
 
-                // Column alignment
-                Update(70, () => table.Columns[0].RightAligned());
-                Update(70, () => table.Columns[1].RightAligned());
+                if (property.PropertyType == typeof(bool))
+                    table.AddRow($"{property.Name}", $"[yellow]{(bool)value}[/]");
+                else
+                    if (value is not null)
+                    table.AddRow($"{property.Name}", $"{value}");
+            }
+            AnsiConsole.Write(table);
+            if (AnsiConsole.Confirm("Continue?"))
+                Title.Print();
+            else
+                return false;
 
-                // Borders
-                Update(70, () => table.BorderColor(Color.Yellow));
-                Update(70, () => table.MinimalBorder());
-                Update(70, () => table.SimpleBorder());
-
-                bool isDebug = false;
-                bool showHidden = false;
-                PropertyInfo[] properties = settings.GetType().GetProperties();
-                foreach (PropertyInfo property in properties)
-                {
-                    object value = property.GetValue(settings);
-                    if (property.Name == "Debug")
-                        isDebug = (bool)value;
-                    if (property.Name == "ShowHidden")
-                        showHidden = (bool)value;
-                }
-                if (isDebug)
-                {
-                    if (showHidden)
-                    {
-                        if (connectionString != String.Empty)
-                            Update(70, () => table.AddRow($"Database Connection:", $"{connectionString}"));
-                        Update(70, () => table.AddRow($"Token:", $"{server.Token}"));
-                    }
-                    foreach (PropertyInfo property in properties)
-                    {
-                        object value = property.GetValue(settings);
- 
-                        if (property.PropertyType == typeof(bool))
-                            Update(70, () => table.AddRow($"{property.Name}", $"[yellow]{(bool)value}[/]"));
-                        else
-                            if ((object)value != null)
-                            Update(70, () => table.AddRow($"{property.Name}", $"{value}"));
-                    }
-                }
-            });
+        }
+        return true;
     }
 }

@@ -1,67 +1,57 @@
 using System;
-using System.ComponentModel;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
-using Microsoft.Extensions.Logging;
-using RestSharp;
+using System.Threading.Tasks;
 using Spectre.Console;
 using Spectre.Console.Cli;
 using MetalPriceConsole.Models;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace MetalPriceConsole.Commands;
 
-public class AccountCommand : Command<AccountCommand.Settings>
+public class AccountCommand : AsyncCommand<AccountCommand.Settings>
 {
     private readonly ApiServer _apiServer;
-    private ILogger _logger;
+    private static readonly string[] columns = new[] { "" };
 
-    public AccountCommand(ApiServer apiServer, ILogger<AccountCommand> logger)
+    public AccountCommand(ApiServer apiServer)
     {
         _apiServer = apiServer;
-        _logger = logger;
     }
 
-    public class Settings : CommandSettings
+    public class Settings : BaseCommandSettings
     {
-        [Description("Get Account Statistics.")]
-        [DefaultValue(false)]
-        public bool Account { get; set; }
-
-        [CommandOption("--debug")]
-        [Description("Enable Debug Output")]
-        [DefaultValue(false)]
-        public bool Debug { get; set; }
-
-        [CommandOption("--hidden")]
-        [Description("Enable Secret Debug Output")]
-        [DefaultValue(false)]
-        public bool ShowHidden { get; set; }
+        // There are no special settings for this command
     }
 
-    public override int Execute(CommandContext context, Settings settings)
+    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        settings.Account = true;
+        string url = _apiServer.BaseUrl + "stat";
         if (settings.Debug)
         {
-            DebugDisplay.Print(settings, _apiServer, _logger);
+            if (!DebugDisplay.Print(settings, _apiServer, url))
+                return 0;
         }
-        AnsiConsole.WriteLine();
+        //AnsiConsole.WriteLine();
+        //AnsiConsole.WriteLine();
         // Process Window
         var table = new Table().Centered();
-//        table.HideHeaders();
-        table.BorderColor(Color.Yellow);
+        table.HideHeaders();
+        table.BorderColor(Color.Green3);
         table.Border(TableBorder.Rounded);
-        table.Border(TableBorder.Simple);
-        table.AddColumns(new[] { "", ""});
+        table.AddColumns(columns);
         table.Expand();
 
         // Animate
-        AnsiConsole
+        await AnsiConsole
             .Live(table)
             .AutoClear(false)
             .Overflow(VerticalOverflow.Ellipsis)
             .Cropping(VerticalOverflowCropping.Top)
-            .Start(ctx =>
+            .StartAsync(async ctx =>
             {
                 void Update(int delay, Action action)
                 {
@@ -69,10 +59,7 @@ public class AccountCommand : Command<AccountCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
- //               Update(230, () => table.AddColumn(""));
- //               Update(230, () => table.AddColumn(""));
-                // Borders
-                // Footers
+
                 Update(
                     70,
                     () =>
@@ -81,37 +68,42 @@ public class AccountCommand : Command<AccountCommand.Settings>
                         )
                 );
                 // Content
-                var client = new RestClient(_apiServer.BaseUrl + "stat");
-                var request = new RestRequest("", Method.Get);
-                request.AddHeader("x-access-token", _apiServer.Token);
-                request.AddHeader("Content-Type", "application/json");
+                Update(70, () => table.Columns[0].Footer($"[green]Calling {url}[/]"));
+                if (settings.TokenOverride != null)
+                    _apiServer.Token = settings.TokenOverride;
                 Account account;
                 try
                 {
-                    RestResponse response = client.Execute(request);
-                    account = JsonSerializer.Deserialize<Account>(response.Content);
+                    if(!settings.Fake)
+                        account = await AccountDetails.GetDetailsAsync(_apiServer, url);
+                    else
+                    {
+                        string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                        string file = Path.Combine(path, "Account.sample");
+                        string cache = File.ReadAllText(file);
+                        account = JsonSerializer.Deserialize<Account>(cache);
+
+                    }
                 }
-                catch (Exception ex)
+                catch ( Exception ex ) 
                 {
-                    Update(70, () => table.AddRow($"[red]Error: {ex.Message}[/]", $"[red]Calling Url: {_apiServer.BaseUrl}stat[/]"));
+                    Update(70, () => table.AddRow($"[red]Request Error: {ex.Message} Calling Url: {_apiServer.BaseUrl}stat[/]"));
                     return;
                 }
-                table.Columns[1].RightAligned().Width(30).PadRight(20);
-                table.Columns[0].RightAligned();
-                Update(70, () => table.AddRow($"[yellow]Requests Today[/]", $"[yellow]{account.RequestsToday}[/]"));
-                Update(70, () => table.AddRow($"[yellow]Requests Yesterday[/]", $"[yellow]{account.RequestsYesterday}[/]"));
-                Update(70, () => table.AddRow($"[yellow]Requests This Month[/]", $"[yellow]{account.RequestsMonth}[/]"));
-                Update(70, () => table.AddRow($"[yellow]Requests Last Month[/]", $"[yellow]{account.RequestsLastMonth}[/]"));
 
-                int allowance = 0;
-                int.TryParse(_apiServer.MonthlyAllowance, out allowance);
+                table.Columns[0].Centered();
+                Update(70, () => table.AddRow($"[yellow]     Requests Today[/] [yellow]{account.RequestsToday}[/]"));
+                Update(70, () => table.AddRow($"[yellow] Requests Yesterday[/] [yellow]{account.RequestsYesterday}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Requests This Month[/] [yellow]{account.RequestsMonth}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Requests Last Month[/] [yellow]{account.RequestsLastMonth}[/]"));
+
+                _ = int.TryParse(_apiServer.MonthlyAllowance, out int allowance);
                 Update(
                     70,
                     () =>
                     table.AddRow(
-                        $":check_mark: [green bold italic]Remaining WebAPI Requests:[/]", 
-                        $"[green bold italic]{allowance - account.RequestsMonth}[/]"));
-                Update(70, () => table.Columns[0].Footer("[blue]Complete[/]"));
+                        $"[green bold italic]Remaining WebAPI Requests: {allowance - account.RequestsMonth}[/]"));
+                Update(70, () => table.Columns[0].Footer($"[blue]Finished Retrieving Account Details From {url}[/]"));
             });
         return 0;
     }

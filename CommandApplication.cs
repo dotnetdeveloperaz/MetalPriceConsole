@@ -13,50 +13,43 @@ namespace MetalPriceConsole
                 config.ValidateExamples();
 
                 config
-                    .AddCommand<AccountCommand>("account")
-                    .WithDescription("Retrieves account information.");
-
-                config
-                    .AddCommand<HistoryCommand>("history")
-                    .WithDescription(
-                        "Retrieves historical gold prices. Use --save to save to the database.\r\nWeekends and holidays are skipped because markets are closed."
-                    )
+                    .AddCommand<MetalPriceCommand>("metalprice")
+                    .WithAlias("price")
+                    .WithDescription("Get Metal Price")
                     .WithExample(
                         new[]
                         {
-                        "history",
-                        "--start",
-                        "YYYY-MM-DD",
-                        "--end",
-                        "YYYY-MM-DD",
-                        "--currency",
-                        "USD",
-                        "--gold",
-                        "--silver",
-                        "--fake",
-                        "--save",
-                        "--debug",
-                        "--hidden"
+                            "metalprice",
+                            "--start",
+                            "YYYY-MM-DD",
+                            "--end",
+                            "YYYY-MM-DD",
+                            "--currency",
+                            "USD",
+                            "--gold",
+                            "--palladium",
+                            "--platinum",
+                            "--silver",
+                            "--fake",
+                            "--save",
+                            "--cache",
+                            "--debug",
+                            "--token",
+                            "<token>"
                         }
-                    );
+                     );
 
                 config
-                    .AddCommand<PriceCommand>("price")
-                    .WithDescription(
-                        "Retrieves the current gold price. Use --save to save to database. Weekends and holidays are skipped."
-                    )
-                    .WithExample(
-                        new[] { "price", "--date", "YYYY-MM-DD", "--currency", "USD", "--gold", "--silver", "--fake", "--save", "--debug", "--hidden" }
-                );
-                config
-                    .AddCommand<AccountCommand>("acct")
-                    .WithDescription("Retrieves Account Statistics.")
-                    .WithExample(new[] { "acct", "--debug", "--hidden" });
+                    .AddCommand<AccountCommand>("account")
+                    .WithAlias("acct")
+                    .WithDescription("Retrieves account information.")
+                    .WithExample(new[] { "account", "--fake", "--debug", "--hidden", "--token", "<token>" })
+                    .WithExample(new[] { "acct", "--fake", "--debug", "--hidden", "--token", "<token>" });
 
                 config
                     .AddCommand<StatusCommand>("status")
                     .WithDescription("Retrieves WebApi Status.")
-                    .WithExample(new[] { "status", "--debug", "--hidden" });
+                    .WithExample(new[] { "status", "--debug", "--hidden", "--token", "<token>" });
 
                 config
                     .AddCommand<RestoreCommand>("restore")

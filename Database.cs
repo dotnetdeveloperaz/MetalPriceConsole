@@ -5,6 +5,7 @@ using System.Data;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Reflection;
 
 namespace MetalPriceConsole
 {
@@ -17,14 +18,16 @@ namespace MetalPriceConsole
         /// <param name="metalPrices"></param>
         /// <param name="connectionString"></param>
         /// <returns></returns>
-        public static bool Save(List<MetalPrice> metalPrices, string connectionString)
+        public static bool Save(List<MetalPrice> metalPrices, string connectionString, string cacheFile)
         {
             int success = 0;
             foreach (MetalPrice metalPrice in metalPrices)
             {
-                if (Save(metalPrice, connectionString))
+                if (Save(metalPrice, connectionString, cacheFile))
                     success++;
             }
+            if (success != metalPrices.Count)
+                CacheData(metalPrices, cacheFile);
             return (success == metalPrices.Count);
         }
         /// <summary>
@@ -33,7 +36,7 @@ namespace MetalPriceConsole
         /// <param name="metalPrice">Type metalPrice</param>
         /// <param name="connectionString"Database connectionstring></param>
         /// <returns></returns>
-        public static bool Save(MetalPrice metalPrice, string connectionString)
+        public static bool Save(MetalPrice metalPrice, string connectionString, string cacheFile)
         {
             if (metalPrice.Date.Year < 1900)
                 return false;
@@ -60,18 +63,8 @@ namespace MetalPriceConsole
             }
             catch (MySqlException ex)
             {
-                Console.WriteLine("Could not insert new gold rate.");
+                Console.WriteLine("Could not insert new metal rate.");
                 Console.WriteLine("Exception: {0}", ex.Message);
-                List<MetalPrice> metalPrices = new();
-                if (File.Exists("MetalPrice.cache"))
-                {
-                    var file = File.ReadAllText("MetalPrice.cache");
-                    metalPrices = JsonSerializer.Deserialize<List<MetalPrice>>(file);
-                }
-                metalPrices.Add(metalPrice);
-                string result = JsonSerializer.Serialize(metalPrices);
-                File.WriteAllText($"MetalPrice.cache", result);
-
                 return false;
             }
             finally
@@ -80,6 +73,26 @@ namespace MetalPriceConsole
                     sqlConnection.Close();
                 sqlCommand.Dispose();
                 sqlConnection.Dispose();
+            }
+            return true;
+        }
+        public static bool CacheData(List<MetalPrice> metalPrices, string cacheFile)
+        {
+            string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string file = Path.Combine(path, cacheFile);
+            if (File.Exists(file))
+            {
+                var json = File.ReadAllText(file);
+                List<MetalPrice> cache = JsonSerializer.Deserialize<List<MetalPrice>>(json);
+                foreach (var metalPrice in cache)
+                    cache.Add(metalPrice);
+                string result = JsonSerializer.Serialize(metalPrices);
+                File.WriteAllText(file, result);
+            }
+            else
+            {
+                string result = JsonSerializer.Serialize(metalPrices);
+                File.WriteAllText(file, result);
             }
             return true;
         }
