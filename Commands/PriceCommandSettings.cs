@@ -10,6 +10,16 @@ namespace MetalPriceConsole.Commands
         [DefaultValue("USD")]
         public string Currency { get; set; }
 
+        [CommandOption("--start <date>")]
+        [Description("Date Or Start Date To Get Price(s) For")]
+        [DefaultValue("")]
+        public string StartDate { get; set; }
+
+        [CommandOption("--end <date>")]
+        [Description("End Date To Get Price(s) For - Not Required For Single Day")]
+        [DefaultValue("")]
+        public string EndDate { get; set; }
+
         [CommandOption("--gold")]
         [Description("Get Gold Price - This is the default and is optional")]
         [DefaultValue(false)]

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +10,6 @@ using MetalPriceConsole.Models;
 using PublicHoliday;
 using Spectre.Console;
 using Spectre.Console.Cli;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace MetalPriceConsole.Commands;
 
@@ -30,16 +27,6 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
 
     public class Settings : PriceCommandSettings
     {
-        [CommandOption("--start <date>")]
-        [Description("Date Or Start Date To Get Price(s) For")]
-        [DefaultValue("")]
-        public string StartDate { get; set; }
-
-        [CommandOption("--end <date>")]
-        [Description("End Date To Get Price(s) For - Not Required For Single Day")]
-        [DefaultValue("")]
-        public string EndDate { get; set; }
-
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
@@ -58,11 +45,17 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
         {
             metalName = "Palladium";
             metal = _apiServer.Palladium;
+            // Historical data is not supported yet, so we can only get the current day
+            settings.StartDate = String.Empty;
+            settings.EndDate = String.Empty;
         }
         else if (settings.GetPlatinum)
         {
             metalName = "Platinum";
             metal = _apiServer.Platinum;
+            // Historical data is not supported yet, so we can only get one day
+            settings.StartDate = String.Empty;
+            settings.EndDate = String.Empty;
         }
         else
         {
@@ -96,19 +89,25 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
+
                 if (settings.StartDate == DateTime.Now.ToString("yyyy-MM-dd"))
                 {
                     Update(70, () => table.AddRow($"[red bold]Date {settings.StartDate} Cannot Be Current Or Future Date[/]"));
                     return;
                 }
-                Update(
-                    70,
-                    () =>
-                        table.AddRow(
-                            $"[red bold]Status[/] [green bold]Calculating Non-Weekend/Holiday Dates For {settings.StartDate} to {settings.EndDate}[/]"
-                        )
-                );
+                if (settings.StartDate != String.Empty)
+                {
+                    Update(
+                        70,
+                        () =>
+                            table.AddRow(
+                                $"[red bold]Status[/] [green bold]Calculating Non-Weekend/Holiday Dates For {settings.StartDate} to {settings.EndDate}[/]"
+                            )
+                    );
+                }
+
                 List<DateTime> days = GetNumberOfDays(settings.StartDate, settings.EndDate);
+        
                 string msg = days.Count == 1 ? $"[green bold]There is {days.Count} Day To Process For {metalName}...[/]" : $"[green bold]There are {days.Count} Days To Process For {metalName}...[/]";
                 Update(70, () => table.AddRow(msg));
 
@@ -152,7 +151,10 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                             int i = 0;
                             Update(70, () => table.AddRow($"[yellow bold]Retrieving {metal} Price for {date:yyyy-MM-dd}...[/]"));
 
-                            string url = $"{_apiServer.BaseUrl}{metal}/{settings.Currency}/{date:yyyyMMdd}";
+                            string url = $"{_apiServer.BaseUrl}{metal}/{settings.Currency}";
+                            // Platinum and Palladium do not support historical so dates cannot be used.
+                            if (settings.StartDate != String.Empty)
+                                url += "/{date:yyyyMMdd}";
                             Update(70, () => table.AddRow($"[green]Calling {url}[/]"));
                             MetalPrice metalPrice = await GetPriceAsync(url, _apiServer.Token);
                             if (metalPrice != null)
@@ -219,9 +221,17 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
 
     private static List<DateTime> GetNumberOfDays(string startDate, string endDate)
     {
+        bool isHoliday = false;
+        List<DateTime> dates = new();
+        if (startDate == String.Empty || endDate == String.Empty) 
+        {
+            isHoliday = new USAPublicHoliday().IsPublicHoliday(DateTime.Now);
+            if (!isHoliday)
+                dates.Add(DateTime.Now);
+            return dates;
+        }
         DateTime start = DateTime.Parse(startDate);
         DateTime end = DateTime.Parse(endDate);
-        List<DateTime> dates = new();
         var res = DateTime.Compare(end, DateTime.Now);
 
         // We do not want the end date to be the current date or future date.
@@ -230,7 +240,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
 
         while (start <= end)
         {
-            bool isHoliday = new USAPublicHoliday().IsPublicHoliday(start);
+            isHoliday = new USAPublicHoliday().IsPublicHoliday(start);
             if (!isHoliday && start.DayOfWeek != DayOfWeek.Saturday && start.DayOfWeek != DayOfWeek.Sunday)
                 dates.Add(start);
             start = start.AddDays(1);
