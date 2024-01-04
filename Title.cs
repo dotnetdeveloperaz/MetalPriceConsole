@@ -16,7 +16,7 @@ public class Title
         titleTable.AddColumn(
             new TableColumn(
                 new Markup(
-                    $"[yellow]Metal :pick:  Price Console[/] {version}\r\n[green bold italic]Written By Scott Glasgow[/]"
+                    $"[yellow]Metal Price Console[/] {version}\r\n[green bold italic]Written By Scott Glasgow[/]"
                 )
             ).Centered()
         );

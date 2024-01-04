@@ -102,7 +102,7 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                     70,
                     () =>
                     table.AddRow(
-                        $":check_mark: [green bold italic]Remaining WebAPI Requests: {allowance - account.RequestsMonth}[/]"));
+                        $"[green bold italic]Remaining WebAPI Requests: {allowance - account.RequestsMonth}[/]"));
                 Update(70, () => table.Columns[0].Footer($"[blue]Finished Retrieving Account Details From {url}[/]"));
             });
         return 0;

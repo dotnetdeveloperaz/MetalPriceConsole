@@ -43,7 +43,7 @@ namespace MetalPriceConsole
                     .AddCommand<AccountCommand>("account")
                     .WithAlias("acct")
                     .WithDescription("Retrieves account information.")
-                    .WithExample(new[] { "account", "--fake", "--debug", "--hidden" })
+                    .WithExample(new[] { "account", "--fake", "--debug", "--hidden", "--token", "<token>" })
                     .WithExample(new[] { "acct", "--fake", "--debug", "--hidden", "--token", "<token>" });
 
                 config

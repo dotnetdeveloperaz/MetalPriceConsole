@@ -6,7 +6,7 @@
 
 #### *However, for some reason, the third-party api does not appear to return data when a date is supplied, so only the latest price information is retrieved.*
 
-#### *Date is NOT used in the code currently, thus, **DO NOT USE** the history command with the --palladium and --platinum switch and note that the --date switch for price command is ignored.*
+#### *Note that the --start and --end date switches are ignored.*
 
 #### I have emailed the developers in hopes to get feedback on this issue, as all four metals should function the same, based on their documentation, but even their documentation page behaves in the same manner.
 
@@ -35,12 +35,6 @@ This application uses the following open source libraries.
 
 ## Status
 
-.NET 6
-[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet6.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet6.yml)
-
-.NET 7
-[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet7.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet7.yml)
-
 .NET 8
 [![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml)
 
@@ -61,17 +55,16 @@ These instructions will get you a copy of the project up and running on your loc
 **Note: Setting this above your allowance will only make the API calls fail once you hit your limit.**
 
 ```json
-{
-  "ApiServer": {
+"ApiServer": {
     "Token": "",
     "CacheFile": "MetalPrice.cache",
     "BaseURL": "https://www.goldapi.io/api/",
     "Gold": "XAU",
+    "Silver": "XAG",
     "Palladium": "XPD",
-    "Platinum": "XPT",
-    "Silver":  "XAG",
-    "Currency":  "USD",
-    "MonthlyAllowance": "100",
+    "Platinum":  "XPT",
+    "Currency": "USD",
+    "MonthlyAllowance": "100"
   },
   "Logging": {
     "LogLevel": {
@@ -129,18 +122,26 @@ dotnet run acct
 You should see something similar to:
 
 ```bash
-  ⏳ Start Processing Get Account Information...                                                    
-  ✔ Finished Getting Account Information...                                                         
-      Requests Today: 9 Requests Yesterday: 0                                                       
-      Requests This Month: 20 Requests Last Month: 46                                               
-  ✔ Remaining WebAPI Requests: 280    
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                               Metal Price Console v3.0                                               │
+│                                               Written By Scott Glasgow                                               │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                     Requests Today 14                                                │
+│                                                 Requests Yesterday 2                                                 │
+│                                                Requests This Month 27                                                │
+│                                                Requests Last Month 54                                                │
+│                                            Remaining WebAPI Requests: 73                                             │
+├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                       Finished Retrieving Account Details From https://www.goldapi.io/api/stat                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Usage
 
 Commands
 
-acct
+acct or account
 
 - Gets details of your account (like sample above) at the third party web service.
 
@@ -183,6 +184,8 @@ price --start YYYY-MM-DD --end YYYY-MM-DD
 
 - --currency EUR Specifies the base currency, in ISO 4217 format,  which the default is USD. This can also just be set in the appsettings.json file. See goldapi.io for the supported base currencies. List below as of Jan, 1, 2024.
 
+- --token <YourApiToken> This will override the token in appsettings.json or in user-secrets.
+
 Example:
 
 ```bash
@@ -224,38 +227,34 @@ ZAR - South African Rand
 
 #### Only U.S. Non-Holiday Week Days Are Processed
 
-Passing --debug will output configuration data. If you pass --debug --hidden, it will also output  private configuration data (eg: DB connection string, token) even when not put into appsettings.json but in user-secrets instead.
+Passing --debug will output configuration data. If you pass --debug --hidden, it will also output private configuration data (eg: DB connection string, token) even when not put into appsettings.json but in user-secrets instead.
 
 Run the application with no commands (dotnet run) and you will get the following usage screen.
 
 ```bash
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                              Gold ⛏  Price Console v3.0                                             │
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                               Metal Price Console v3.0                                               │
 │                                               Written By Scott Glasgow                                               │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│                                 Cache file exists. Use restore to load to database.                                  │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 USAGE:
-    metalPriceConsole.dll [OPTIONS] <COMMAND>
+    MetalPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    dotnet run  price --start YYYY-MM-DD --end YYYY-MM-DD --silver --currency USD --fake --save --debug --hidden
-    dotnet run  metalprice --start YYYY-MM-DD --silver --currency USD --fake --save --debug --hidden
-    dotnet run  acct --debug --hidden --fake
-    dotnet run  status --debug --hidden
-    dotnet run restore --debug --hidden
+    MetalPriceConsole.dll metalprice --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum
+--silver --fake --save --cache --debug --token <token>
+    MetalPriceConsole.dll account --fake --debug --hidden --token <token>
+    MetalPriceConsole.dll acct --fake --debug --hidden --token <token>
+    MetalPriceConsole.dll status --debug --hidden --token <token>
+    MetalPriceConsole.dll restore --debug --hidden
 
 OPTIONS:
     -h, --help       Prints help information
     -v, --version    Prints version information
 
 COMMANDS:
-    account    Retrieves account information
-    price    Retrieves historical gold prices. Use --save to save to the database.
-               Weekends and holidays are skipped because markets are closed
-    metalprice Alias of above price command
-    acct       Retrieves Account Statistics
-    restore    Restores cache file
-    status     Retrieves WebApi Status
+    metalprice    Get Metal Price
+    account       Retrieves account information
+    status        Retrieves WebApi Status
+    restore       Restores Cache File
+    testdb        Tests The Database Connection
 ```
