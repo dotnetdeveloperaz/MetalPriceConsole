@@ -25,7 +25,7 @@
 
 ## About
 
-Simple console application utility that calls a third party web api to retrieve Gold or Silver prices and stores the data in a database.
+Simple console application utility that calls a third party web api to retrieve Gold, Silver, Palladium, or Platinum prices and can also store the data in a database or can be stored in a json file using the --cache switch.
 
 This application uses the following open source libraries.
 
@@ -48,8 +48,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 1. .NET 6, .NET 7 or .NET 8.
 2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 free (was 300 but they changed this in May 2023) api calls per month.
-3. MariaDB (or MySQL).
-4. Configure appsettings **(Token) (DefaultDB) keys**
+3. MariaDB (or MySQL) if using the --save switch. This is optional.
+4. Configure appsettings or user-secrets **(Token) (DefaultDB) keys**
 5. Set MonthlyAllowance if your account has a difference allowance amount.
 
 **Note: Setting this above your allowance will only make the API calls fail once you hit your limit.**
