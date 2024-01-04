@@ -69,6 +69,8 @@ public class AccountCommand : AsyncCommand<AccountCommand.Settings>
                 );
                 // Content
                 Update(70, () => table.Columns[0].Footer($"[green]Calling {url}[/]"));
+                if (settings.TokenOverride != null)
+                    _apiServer.Token = settings.TokenOverride;
                 Account account;
                 try
                 {

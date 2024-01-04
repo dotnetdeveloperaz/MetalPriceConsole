@@ -125,6 +125,9 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                 Account account;
                 try
                 {
+                    if (settings.TokenOverride != null)
+                        _apiServer.Token = settings.TokenOverride;
+                    // Need to decide if we want to get account details when fake is used. Guessing yes to show actual use.
                     string accountUrl = _apiServer.BaseUrl + "stat";
                     Update(70, () => table.AddRow($"[red bold]Status[/] [green]Retrieving Account Details...[/]"));
                     if (!settings.Fake)

@@ -31,6 +31,7 @@ public class DebugDisplay
 
         bool isDebug = false;
         bool showHidden = false;
+
         PropertyInfo[] properties = settings.GetType().GetProperties();
         foreach (PropertyInfo property in properties)
         {
@@ -46,6 +47,7 @@ public class DebugDisplay
             {
                 if (connectionString != String.Empty)
                     table.AddRow($"Database Connection:", $"{connectionString}");
+
                 table.AddRow($"Token:", $"{server.Token}");
                 table.AddRow($"Url:", $"{Url}");
             }

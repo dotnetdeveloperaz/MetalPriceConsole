@@ -19,5 +19,10 @@ namespace MetalPriceConsole.Commands
         [Description("Does Not Call WebApi")]
         [DefaultValue(false)]
         public bool Fake { get; set; }
+
+        [CommandOption("--token")]
+        [Description("Provide Or Override The Api Authorization Token")]
+        [DefaultValue(null)]
+        public string TokenOverride { get; set; }
     }
 }

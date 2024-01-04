@@ -34,6 +34,8 @@ namespace MetalPriceConsole
                             "--save",
                             "--cache",
                             "--debug",
+                            "--token",
+                            "<token>"
                         }
                      );
 
@@ -42,12 +44,12 @@ namespace MetalPriceConsole
                     .WithAlias("acct")
                     .WithDescription("Retrieves account information.")
                     .WithExample(new[] { "account", "--fake", "--debug", "--hidden" })
-                    .WithExample(new[] { "acct", "--fake", "--debug", "--hidden" });
+                    .WithExample(new[] { "acct", "--fake", "--debug", "--hidden", "--token", "<token>" });
 
                 config
                     .AddCommand<StatusCommand>("status")
                     .WithDescription("Retrieves WebApi Status.")
-                    .WithExample(new[] { "status", "--debug", "--hidden" });
+                    .WithExample(new[] { "status", "--debug", "--hidden", "--token", "<token>" });
 
                 config
                     .AddCommand<RestoreCommand>("restore")

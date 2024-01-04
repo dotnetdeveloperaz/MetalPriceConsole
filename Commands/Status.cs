@@ -65,6 +65,8 @@ public class StatusCommand : AsyncCommand<StatusCommand.Settings>
                 // Content
                 ApiStatus apiStatus;
                 HttpClient client = new();
+                if (settings.TokenOverride != null)
+                    _apiServer.Token = settings.TokenOverride;
                 client.DefaultRequestHeaders.Add("x-access-token", _apiServer.Token);
                 using (HttpRequestMessage request = new(HttpMethod.Get, url))
                 {
