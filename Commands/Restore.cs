@@ -68,7 +68,7 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                     Update(70, () => table.AddRow($"[red]No Cache File Exists ({file}). Exiting.[/]"));
                     return;
                 }
-                Update(70, () => table.AddRow($"[yellow]Loading [/][green]{_apiServer.CacheFile}[/]"));
+                Update(70, () => table.AddRow($"[yellow]Loading [/][green]{file}[/]"));
                 string cache;
                 using (StreamReader sr = new StreamReader(file)) 
                 { 
