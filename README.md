@@ -2,7 +2,7 @@
 
 ## **<span style="color: red;">Important Note:</span>**
 
-#### *This version in the development branch contains code that includes the --palladium and --platinum switches to retrieve prices for those metals.*
+#### *This version contains code that includes the --palladium and --platinum switches to retrieve prices for those metals.*
 
 #### *However, for some reason, the third-party api does not appear to return data when a date is supplied, so only the latest price information is retrieved.*
 
@@ -10,7 +10,7 @@
 
 #### I have emailed the developers in hopes to get feedback on this issue, as all four metals should function the same, based on their documentation, but even their documentation page behaves in the same manner.
 
-#### Update 8/23/2023 Got a response from one of the developers, and they confirmed that historical data is not currently supported in these two metals, but they are looking to add support for it. I will leave the supporting code in, and re-enable the date support when it's available.
+#### Update 8/23/2023 Got a response from one of the developers, and they confirmed that historical data is not currently supported in these two metals, but they are looking to add support for it. I will re-add support for specifying dates once they support it.
 
 #### As of Jan 1, 2024, Palladium and Platinum do NOT support historical data still. The current code does NOT account for this, as this went through a rewrite during New Years Eve.
 
