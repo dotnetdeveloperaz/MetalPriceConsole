@@ -63,11 +63,14 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                 string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 string file = Path.Combine(path, _apiServer.CacheFile);
                 // Content
+
                 if (!File.Exists(file))
+
                 { 
                     Update(70, () => table.AddRow($"[red]No Cache File Exists ({file}). Exiting.[/]"));
                     return;
                 }
+
                 Update(70, () => table.AddRow($"[yellow]Loading [/][green]{file}[/]"));
                 string cache;
                 using (StreamReader sr = new StreamReader(file)) 
@@ -75,7 +78,7 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                     cache = sr.ReadToEnd();
                 }
                 List<MetalPrice> metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(new MemoryStream(Encoding.UTF8.GetBytes(cache)));
-                table.Columns[0].LeftAligned().Width(30).PadRight(20);
+
                 Update(70, () => table.AddRow($"[yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
                 Update(70, () => table.Columns[0].Footer("[blue]Cache File Loaded[/]"));
 
@@ -124,6 +127,7 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                                 $"[red bold]Removing Cache File {file}[/]"
                             )
                     );
+
                     File.Delete(file);
                 }
                 Update(70, () => table.AddRow("[blue]Complete[/]"));
