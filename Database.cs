@@ -84,9 +84,9 @@ namespace MetalPriceConsole
             {
                 var json = File.ReadAllText(file);
                 List<MetalPrice> cache = JsonSerializer.Deserialize<List<MetalPrice>>(json);
-                foreach (var metalPrice in cache)
+                foreach (var metalPrice in metalPrices)
                     cache.Add(metalPrice);
-                string result = JsonSerializer.Serialize(metalPrices);
+                string result = JsonSerializer.Serialize(cache);
                 File.WriteAllText(file, result);
             }
             else
