@@ -40,6 +40,31 @@ namespace MetalPriceConsole
                      );
 
                 config
+                    .AddCommand<ViewCommand>("view")
+                    .WithDescription("Display From Cache File Or Database")
+                    .WithExample(
+                        new[]
+                        {
+                            "view",
+                            "--start",
+                            "YYYY-MM-DD",
+                            "--end",
+                            "YYYY-MM-DD",
+                            "--currency",
+                            "USD",
+                            "--gold",
+                            "--palladium",
+                            "--platinum",
+                            "--silver",
+                            "--fake",
+                            "--cache",
+                            "--debug",
+                            "--token",
+                            "<token>"
+                        }
+                     );
+
+                config
                     .AddCommand<AccountCommand>("account")
                     .WithAlias("acct")
                     .WithDescription("Retrieves account information.")
