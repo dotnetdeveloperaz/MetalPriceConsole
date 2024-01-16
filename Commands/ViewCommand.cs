@@ -68,6 +68,8 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
                 return 0;
         }
+        DateTime startDate = DateTime.Parse(settings.StartDate);
+        DateTime endDate = DateTime.Parse (settings.EndDate);   
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();
@@ -111,7 +113,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                     }
                     metalPrices = await JsonSerializer.DeserializeAsync<List<MetalPrice>>(new MemoryStream(Encoding.UTF8.GetBytes(cache)));
                     
-                    Update(70, () => table.AddRow($"[yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records Loaded[/]"));
+                    Update(70, () => table.AddRow($"[yellow]Cache File Loaded[/] [green]{metalPrices.Count} Records[/]"));
                     Update(70, () => table.Columns[0].Footer("[blue]Cache File Loaded[/]"));
                 }
                 else
@@ -123,7 +125,9 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                 if (metalPrices == null)
                     return;
                 int rowCnt = 0;
-                foreach (MetalPrice metalPrice in metalPrices.Where(x => x.Metal == metal).OrderBy(x => x.Date))
+                foreach (MetalPrice metalPrice in metalPrices
+                    .Where(x => x.Metal == metal && x.Currency == settings.Currency && x.Date >= startDate && x.Date <= endDate)
+                    .OrderBy(x => x.Date))
                 {
                     rowCnt++;
 
@@ -150,7 +154,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                     }
                 }
 
-                Update(70, () => table.Columns[0].Footer($"[blue]Complete. Displayed {metalPrices.Count} Days Prices[/]"));
+                Update(70, () => table.Columns[0].Footer($"[blue]Complete. Displayed {rowCnt} of {metalPrices.Count} Days Prices[/]"));
             });
         return 0;
     }
