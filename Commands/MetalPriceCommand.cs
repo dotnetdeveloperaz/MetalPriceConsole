@@ -141,6 +141,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
 
                     _ = int.TryParse(_apiServer.MonthlyAllowance, out int monthlyAllowance);
                     var willBeLeft = (monthlyAllowance - account.RequestsMonth) - days.Count;
+                    Update(70, () => table.Columns[0].Footer($"[green]Calls Remaing Is {monthlyAllowance - account.RequestsMonth}[/]"));
                     if (willBeLeft > 0)
                     {
                         List<MetalPrice> metalPrices = new();
@@ -191,6 +192,10 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                             else
                                 Update(70, () => table.AddRow($"[green bold]Data Saved To Database.[/]"));
                         Update(70, () => table.Columns[0].Footer($"[green bold]Completed. Processed {days.Count} Days With Total Of {metalPrices.Count}.[/]"));
+                    }
+                    else 
+                    {
+                        Update(70, () => table.AddRow($"[red bold]Not Enough Calls Left ({monthlyAllowance - account.RequestsMonth}). This Requires {days.Count} Total Calls.[/]"));
                     }
                 }
                 catch (Exception ex)
