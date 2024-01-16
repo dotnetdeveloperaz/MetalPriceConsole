@@ -13,13 +13,12 @@ namespace MetalPriceConsole
                 config.ValidateExamples();
 
                 config
-                    .AddCommand<MetalPriceCommand>("metalprice")
-                    .WithAlias("price")
+                    .AddCommand<MetalPriceCommand>("price")
                     .WithDescription("Get Metal Price")
                     .WithExample(
                         new[]
                         {
-                            "metalprice",
+                            "price",
                             "--start",
                             "YYYY-MM-DD",
                             "--end",

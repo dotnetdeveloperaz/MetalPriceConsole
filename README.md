@@ -154,7 +154,7 @@ restore
 
   ###### The cache file is created automatically when the call to the database fails during normal processing. The restore process is manual and you have to use the restore command.
 
-price (or metalprice)
+price 
 
 - Gets yesterday's (Prices are available for previous days close) Gold rate and saves to the configured database if passing --save or to a json file is passing --cache.
 
@@ -248,7 +248,7 @@ USAGE:
     MetalPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    MetalPriceConsole.dll metalprice --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum
+    MetalPriceConsole.dll price --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum
 --silver --fake --save --cache --debug --token <token>
     MetalPriceConsole.dll view --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum --silver
 --fake --cache --debug --token <token>
@@ -262,7 +262,8 @@ OPTIONS:
     -v, --version    Prints version information
 
 COMMANDS:
-    metalprice    Get Metal Price
+    price         Get Metal Price
+    view          Display From Cache File Or Database
     account       Retrieves account information
     status        Retrieves WebApi Status
     restore       Restores Cache File
