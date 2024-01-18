@@ -8,7 +8,7 @@ using MySqlConnector;
 
 using MetalPriceConsole.Commands;
 using MetalPriceConsole.Models;
-using System.Reflection.PortableExecutable;
+using System.Linq;
 
 namespace MetalPriceConsole
 {
@@ -41,6 +41,7 @@ namespace MetalPriceConsole
         /// <returns></returns>
         public static bool Save(MetalPrice metalPrice, string connectionString, string cacheFile)
         {
+            //metalPrice.Date = DateTimeOffset.Parse(metalPrice.Timestamp.ToString()).Date;
             if (metalPrice.Date.Year < 1900)
                 return false;
             MySqlConnection sqlConnection = new(connectionString);

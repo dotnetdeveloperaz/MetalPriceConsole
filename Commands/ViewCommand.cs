@@ -36,7 +36,12 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
             _apiServer.Currency = settings.Currency;
         string metalName = "Gold";
         string metal;
-        if (settings.GetSilver)
+        if (settings.GetGold)
+        {
+            metalName = "Gold";
+            metal = _apiServer.Gold;
+        }
+        else if (settings.GetSilver)
         {
             metalName = "Silver";
             metal = _apiServer.Silver;
@@ -45,22 +50,16 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
         {
             metalName = "Palladium";
             metal = _apiServer.Palladium;
-            // Historical data is not supported yet, so we can only get the current day
-            settings.StartDate = String.Empty;
-            settings.EndDate = String.Empty;
         }
         else if (settings.GetPlatinum)
         {
             metalName = "Platinum";
             metal = _apiServer.Platinum;
-            // Historical data is not supported yet, so we can only get one day
-            settings.StartDate = String.Empty;
-            settings.EndDate = String.Empty;
         }
         else
         {
-            metal = _apiServer.Gold;
-            settings.GetGold = true;
+            metalName = "All";
+            metal = "XAU,XAG,XPD,XPT";
         }
 
         if (settings.Debug)
@@ -68,8 +67,8 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
                 return 0;
         }
-        DateTime startDate = DateTime.Parse(settings.StartDate);
-        DateTime endDate = DateTime.Parse (settings.EndDate);   
+        DateTime startDate = settings.StartDate == string.Empty ?  DateTime.MinValue : DateTime.Parse(settings.StartDate);
+        DateTime endDate = settings.EndDate == string.Empty ? DateTime.Now : DateTime.Parse(settings.EndDate);
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();
@@ -118,7 +117,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                 }
                 else
                 {
-                    Update(70, () => table.AddRow($"[red bold]Retrieving {metalName} Data From Database[/]"));
+                    Update(70, () => table.AddRow($"[red bold]Retrieving {metalName} Metals Data From Database From {settings.StartDate} to {settings.EndDate}[/]"));
                     metalPrices =  Database.GetData(_connectionString, metal, settings);
                     Update(70, () => table.AddRow("[green bold]Finished Retrieving Data[/]")); 
                 }
@@ -126,16 +125,34 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                     return;
                 int rowCnt = 0;
                 foreach (MetalPrice metalPrice in metalPrices
-                    .Where(x => x.Metal == metal && x.Currency == settings.Currency && x.Date >= startDate && x.Date <= endDate)
-                    .OrderBy(x => x.Date))
+                    .Where(x => metal.Contains(x.Metal) && x.Currency == settings.Currency && x.Date >= startDate && x.Date <= endDate)
+                    .OrderBy(x => x.Date).ThenBy(x => x.Metal))
                 {
                     rowCnt++;
-
+                    string displayName = string.Empty;
+                    switch (metalPrice.Metal)
+                    { 
+                        case "XAU":
+                            displayName = "Gold";
+                            break;
+                        case "XAG":
+                            displayName = "Silver";
+                            break;
+                        case "XPD":
+                            displayName = "Palladium";
+                            break;
+                        case "XPT":
+                            displayName = "Platinum";
+                            break;
+                        default:
+                            displayName = "Undefined";
+                            break;
+                    }
                     Update(
                         70,
                         () =>
                             table.AddRow(
-                                $"    [red]{metalName} - {metalPrice.Date.ToShortDateString()}[/]      [green bold italic]Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
+                                $"    [red]{displayName} ({metalPrice.Metal})  {metalPrice.Date.ToShortDateString()}[/]      [green bold italic]Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
                             )
                     );
                     Update(
@@ -157,5 +174,18 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                 Update(70, () => table.Columns[0].Footer($"[blue]Complete. Displayed {rowCnt} of {metalPrices.Count} Days Prices[/]"));
             });
         return 0;
+    }
+
+    public override ValidationResult Validate(CommandContext context, Settings settings)
+    {
+        if (settings.StartDate == "")
+            settings.StartDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+        if (!DateTime.TryParse(settings.StartDate, out _))
+            return ValidationResult.Error($"Invalid date - {settings.StartDate}");
+        if (settings.EndDate == "")
+            settings.EndDate = settings.StartDate;
+        if (!DateTime.TryParse(settings.EndDate, out _))
+            return ValidationResult.Error($"Invalid date - {settings.EndDate}");
+        return base.Validate(context, settings);
     }
 }

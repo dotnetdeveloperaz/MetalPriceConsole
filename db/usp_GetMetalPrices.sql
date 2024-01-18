@@ -1,7 +1,7 @@
 CREATE DEFINER=`root`@`%` PROCEDURE `Personal`.`usp_GetMetalPrices`(
 	IN startDate varchar(10),
 	IN endDate varchar(10),
-	IN metalName varchar(3),
+	IN metalName varchar(15),
 	IN baseCurrency varchar(3)
 )
 BEGIN
@@ -21,6 +21,6 @@ BEGIN
 	FROM MetalPrices
 	WHERE RateDate >= startDate
 	AND RateDate <= endDate
-	AND Metal = metalName
+	AND FIND_IN_SET(Metal, metalName) > 0
 	AND Currency = baseCurrency;
 END;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
@@ -160,11 +161,12 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                             MetalPrice metalPrice = await GetPriceAsync(url, _apiServer.Token);
                             if (metalPrice != null)
                             {
+                                metalPrice.Date = date;
                                 Update(
                                     70,
                                     () =>
                                         table.AddRow(
-                                            $"       [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
+                                            $"{metalPrice.Date.ToShortDateString()}       [green bold italic]Current Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
                                         )
                                 );
                                 Update(
@@ -260,7 +262,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
         if (!DateTime.TryParse(settings.StartDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.StartDate}");
         if (settings.EndDate == "")
-            settings.EndDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            settings.EndDate = settings.StartDate;
         if (!DateTime.TryParse(settings.EndDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.EndDate}");
         return base.Validate(context, settings);
