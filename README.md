@@ -154,9 +154,9 @@ restore
 
   ###### The cache file is created automatically when the call to the database fails during normal processing. The restore process is manual and you have to use the restore command.
 
-price
+price 
 
-- Gets yesterday's (Prices are available for previous days close) Gold rate and saves to the configured database if passing --save
+- Gets yesterday's (Prices are available for previous days close) Gold rate and saves to the configured database if passing --save or to a json file is passing --cache.
 
 price --start YYYY-MM-DD
 
@@ -166,11 +166,18 @@ price --start YYYY-MM-DD --end YYYY-MM-DD
 
 - Gets prices from the start date specified to the end date. It will skip weekends and holidays and the current date to avoid unnecessary api calls.
 
+view
+- Works like price, except that it will display data from either the cache file (when using --cache) or the database if the --cache switch is not used.
+- all switches work with exception of --save --fake --token
+- Dates are NOT checked for holiday or weekends since there would never be data for those dates stored in the cache or database.
+- if no metal switch is used (eg: --silver) the gold is the default just like when using the price command.
+view --start YYYY-MM-DD --end YYYY-MM-DD --silver
+
 ### Switches
 
 - --save writes the price data to the database on commands price and backtrack.
 
-- --cache writes the data to a json file which later can be restored to the configured database.
+- --cache writes the data to a json file which later can be restored to the configured database, except when using the view command, which then will display data from the cache file.
 
 - --fake will load sample data, instead of calling the WebApi. This is available for price, history and acct commands.
 
@@ -230,6 +237,7 @@ ZAR - South African Rand
 Passing --debug will output configuration data. If you pass --debug --hidden, it will also output private configuration data (eg: DB connection string, token) even when not put into appsettings.json but in user-secrets instead.
 
 Run the application with no commands (dotnet run) and you will get the following usage screen.
+*NOTE: view command does not use --fake or --token and they are ignored.
 
 ```bash
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -240,8 +248,10 @@ USAGE:
     MetalPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
-    MetalPriceConsole.dll metalprice --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum
+    MetalPriceConsole.dll price --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum
 --silver --fake --save --cache --debug --token <token>
+    MetalPriceConsole.dll view --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum --silver
+--fake --cache --debug --token <token>
     MetalPriceConsole.dll account --fake --debug --hidden --token <token>
     MetalPriceConsole.dll acct --fake --debug --hidden --token <token>
     MetalPriceConsole.dll status --debug --hidden --token <token>
@@ -252,7 +262,8 @@ OPTIONS:
     -v, --version    Prints version information
 
 COMMANDS:
-    metalprice    Get Metal Price
+    price         Get Metal Price
+    view          Display From Cache File Or Database
     account       Retrieves account information
     status        Retrieves WebApi Status
     restore       Restores Cache File
