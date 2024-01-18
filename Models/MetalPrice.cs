@@ -1,14 +1,15 @@
 using System;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace MetalPriceConsole.Models;
 
 public class MetalPrice
 {
-    [JsonPropertyName("date")]
-    public DateTime Date { get; set; }
     [JsonPropertyName("timestamp")]
     public long Timestamp { get; set; }
+    [JsonPropertyName("date")]
+    public DateTime Date { get; set; }
     [JsonPropertyName("metal")]
     public string Metal { get; set; }
     [JsonPropertyName("exchange")]
