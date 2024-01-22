@@ -49,5 +49,10 @@ namespace MetalPriceConsole.Commands
         [Description("Cache Results To File")]
         [DefaultValue(false)]
         public bool Cache { get; set; }
+
+        [CommandOption("--file")]
+        [Description("Cache File to Use - Override Default")]
+        [DefaultValue(null)]
+        public string CacheFile { get; set; } = null;
     }
 }

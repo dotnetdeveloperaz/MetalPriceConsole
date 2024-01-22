@@ -34,6 +34,12 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
     {
         if (settings.Currency.Length > 0)
             _apiServer.Currency = settings.Currency;
+
+        if (settings.CacheFile == null)
+            settings.CacheFile = Path.GetFullPath(_apiServer.CacheFile);
+        else
+            settings.CacheFile = Path.GetFullPath(settings.CacheFile);
+        string file = settings.CacheFile;
         string metalName = "Gold";
         string metal;
         if (settings.GetGold)
@@ -67,8 +73,9 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
                 return 0;
         }
-        DateTime startDate = settings.StartDate == string.Empty ?  DateTime.MinValue : DateTime.Parse(settings.StartDate);
-        DateTime endDate = settings.EndDate == string.Empty ? DateTime.Now : DateTime.Parse(settings.EndDate);
+        // Default to the current day if no date is specified. Or should we just display all data?
+        DateTime startDate = settings.StartDate == string.Empty ?  DateTime.Now : DateTime.Parse(settings.StartDate);
+        DateTime endDate = settings.EndDate == string.Empty ? DateTime.Now : DateTime.Parse(settings.StartDate);
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();
@@ -96,9 +103,7 @@ public class ViewCommand : AsyncCommand<ViewCommand.Settings>
                 if(settings.Cache)
                 {
                     Update(70, () => table.AddRow($"[red bold]Status[/] [green bold]Checking For Cache File[/]"));
-                    string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                    string file = Path.Combine(path, _apiServer.CacheFile);
-                    if (!File.Exists(file) && settings.Cache)
+                    if (!File.Exists(file))
                     {
                         Update(70, () => table.AddRow($"[red]No Cache File Exists ({file}). Exiting.[/]"));
                         return;

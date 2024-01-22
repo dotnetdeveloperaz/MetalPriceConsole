@@ -32,6 +32,8 @@ namespace MetalPriceConsole
                             "--fake",
                             "--save",
                             "--cache",
+                            "--file",
+                            "<file>",
                             "--debug",
                             "--token",
                             "<token>"
@@ -57,6 +59,8 @@ namespace MetalPriceConsole
                             "--silver",
                             "--fake",
                             "--cache",
+                            "--file",
+                            "<file>",
                             "--debug",
                             "--token",
                             "<token>"
