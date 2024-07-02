@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using MetalPriceConsole.Commands.Settings;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;

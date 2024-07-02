@@ -11,6 +11,7 @@ BEGIN
 		, Price 
 		, PrevPriceClose 
 		, RateDate 
+		, `Timestamp`
 		, Chg
 		, ChgPct 
 		, Price_Gram_24k 

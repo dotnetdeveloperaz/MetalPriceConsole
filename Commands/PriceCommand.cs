@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text.Json;
@@ -15,66 +14,43 @@ using Spectre.Console.Cli;
 
 namespace MetalPriceConsole.Commands;
 
-internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
+public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
 {
+    private string _defaultDB;
     private readonly ApiServer _apiServer;
-    private readonly string _connectionString;
-    private static readonly string[] columns = new[] { "" };
+    private readonly ConnectionStrings _connectionStrings;
 
-    public MetalPriceCommand(ApiServer apiServer, ConnectionStrings connectionStrings)
+    public PriceCommand(ApiServer apiServer, ConnectionStrings connectionStrings) : base(apiServer, connectionStrings)
     {
         _apiServer = apiServer;
-        _connectionString = connectionStrings.DefaultDB;
+        _connectionStrings = connectionStrings;
     }
 
     public class Settings : PriceCommandSettings
     {
+        // There are no special settings for this command
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
+    protected override async Task<int> ExecuteDerivedAsync(CommandContext context, PriceCommandSettings settings)
     {
-        string url = _apiServer.BaseUrl;
-        if (settings.Currency.Length > 0)
-            _apiServer.Currency = settings.Currency;
-        string metalName = "Gold";
-        string metal;
-        if (settings.GetSilver)
-        {
-            metalName = "Silver";
-            metal = _apiServer.Silver;
-        }
-        else if (settings.GetPalladium)
-        {
-            metalName = "Palladium";
-            metal = _apiServer.Palladium;
-            // Historical data is not supported yet, so we can only get the current day
-            settings.StartDate = String.Empty;
-            settings.EndDate = String.Empty;
-        }
-        else if (settings.GetPlatinum)
-        {
-            metalName = "Platinum";
-            metal = _apiServer.Platinum;
-            // Historical data is not supported yet, so we can only get one day
-            settings.StartDate = String.Empty;
-            settings.EndDate = String.Empty;
-        }
-        else
-        {
-            metal = _apiServer.Gold;
-            settings.GetGold = true;
-        }
-        if (settings.Debug)
-        {
-            if (!DebugDisplay.Print(settings, _apiServer, url))
-                return 0;
-        }
-        // Process Window
+        string metalName = base.MetalName;
+        string metal = base.Metal;
+        _defaultDB = _connectionStrings.DefaultDB;
+
         var table = new Table().Centered();
-        table.HideHeaders();
-        table.BorderColor(Color.Yellow);
-        table.Border(TableBorder.Rounded);
-        table.AddColumns(columns);
+        // Borders
+        table.BorderColor(Color.Blue);
+        table.MinimalBorder();
+        table.SimpleBorder();
+        table.AddColumn(
+            new TableColumn(
+                new Markup(
+                    "[yellow bold]Running Database Connection Configuration Test[/]"
+                ).Centered()
+            )
+        );
+        table.BorderColor(Color.Blue);
+        table.Border(TableBorder.DoubleEdge);
         table.Expand();
 
         // Animate
@@ -109,7 +85,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                 }
 
                 List<DateTime> days = GetNumberOfDays(settings.StartDate, settings.EndDate);
-        
+
                 string msg = days.Count == 1 ? $"[green bold]There is {days.Count} Day To Process For {metalName}...[/]" : $"[green bold]There are {days.Count} Days To Process For {metalName}...[/]";
                 Update(70, () => table.AddRow(msg));
 
@@ -162,7 +138,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                             MetalPrice metalPrice = await GetPriceAsync(url, _apiServer.Token);
                             if (metalPrice != null)
                             {
-                                metalPrice.Date = date;
+                                //metalPrice.Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(metalPrice.Timestamp);
                                 Update(
                                     70,
                                     () =>
@@ -177,7 +153,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                                             $"            [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
                                         )
                                 );
-                                metalPrices.Add( metalPrice );
+                                metalPrices.Add(metalPrice);
                             }
                             i++;
                             // More rows than we can display Remove first one
@@ -190,13 +166,13 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
                             else
                                 Update(70, () => table.AddRow($"[green bold]Cache File Written.[/]"));
                         if (settings.Save)
-                            if (!Database.Save(metalPrices, _connectionString, _apiServer.CacheFile))
+                            if (!Database.Save(metalPrices, _defaultDB, _apiServer.CacheFile))
                                 Update(70, () => table.AddRow($"[red bold]Error Saving Data To Database. Saved To Cache File.[/]"));
                             else
                                 Update(70, () => table.AddRow($"[green bold]Data Saved To Database.[/]"));
                         Update(70, () => table.Columns[0].Footer($"[green bold]Completed. Processed {days.Count} Days With Total Of {metalPrices.Count}.[/]"));
                     }
-                    else 
+                    else
                     {
                         Update(70, () => table.AddRow($"[red bold]Not Enough Calls Left ({monthlyAllowance - account.RequestsMonth}). This Requires {days.Count} Total Calls.[/]"));
                     }
@@ -231,7 +207,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
     {
         bool isHoliday = false;
         List<DateTime> dates = new();
-        if (startDate == String.Empty || endDate == String.Empty) 
+        if (startDate == String.Empty || endDate == String.Empty)
         {
             isHoliday = new USAPublicHoliday().IsPublicHoliday(DateTime.Now);
             if (!isHoliday)
@@ -255,8 +231,7 @@ internal class MetalPriceCommand : AsyncCommand<MetalPriceCommand.Settings>
         }
         return dates;
     }
-
-    public override ValidationResult Validate(CommandContext context, Settings settings)
+    public override ValidationResult Validate(CommandContext context, PriceCommandSettings settings)
     {
         if (settings.StartDate == "")
             settings.StartDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");

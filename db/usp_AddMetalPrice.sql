@@ -3,7 +3,8 @@ CREATE DEFINER=`root`@`%` PROCEDURE `personal`.`usp_AddMetalPrice`(
 	IN currency char(3),
 	IN price double, 
 	IN prev_price double,
-	IN ratedate date, 
+	IN ratedate date,
+	IN unixtime timestamp,
 	IN chg double, 
 	IN chg_pct double,
 	IN price_gram_24k double,
@@ -14,8 +15,8 @@ CREATE DEFINER=`root`@`%` PROCEDURE `personal`.`usp_AddMetalPrice`(
 )
 BEGIN
 	INSERT INTO MetalPrices 
-		(Metal, Currency, Price, PrevPriceClose, RateDate, Chg, ChgPct, price_gram_24k, price_gram_22k, price_gram_21k, price_gram_20k, price_gram_18k)
-		VALUES (metal, currency, price, prev_price, ratedate, chg, chg_pct, price_gram_24k, price_gram_22k, price_gram_21k, price_gram_20k, price_gram_18k
+		(Metal, Currency, Price, PrevPriceClose, RateDate, `Timestamp`, Chg, ChgPct, price_gram_24k, price_gram_22k, price_gram_21k, price_gram_20k, price_gram_18k)
+		VALUES (metal, currency, price, prev_price, ratedate, unixtime, chg, chg_pct, price_gram_24k, price_gram_22k, price_gram_21k, price_gram_20k, price_gram_18k
 )
 	ON DUPLICATE KEY update
 		Metal = metal

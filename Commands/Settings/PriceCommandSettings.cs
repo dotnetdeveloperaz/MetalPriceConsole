@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Spectre.Console.Cli;
 
-namespace MetalPriceConsole.Commands
+namespace MetalPriceConsole.Commands.Settings
 {
     public class PriceCommandSettings : BaseCommandSettings
     {
@@ -19,6 +19,8 @@ namespace MetalPriceConsole.Commands
         [Description("End Date To Get Price(s) For - Not Required For Single Day")]
         [DefaultValue("")]
         public string EndDate { get; set; }
+
+        public bool GetAll { get; set; } = false;
 
         [CommandOption("--gold")]
         [Description("Get Gold Price - This is the default and is optional")]

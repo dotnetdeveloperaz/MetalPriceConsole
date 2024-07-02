@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
+using MetalPriceConsole.Commands.Settings;
 using MetalPriceConsole.Models;
 using MySqlConnector;
 using Spectre.Console;

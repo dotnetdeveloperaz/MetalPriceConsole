@@ -41,6 +41,34 @@ namespace MetalPriceConsole
                      );
 
                 config
+                    .AddCommand<PriceCommand>("newprice")
+                    .WithDescription("Get Metal Price")
+                    .WithExample(
+                        new[]
+                        {
+                            "newprice",
+                            "--start",
+                            "YYYY-MM-DD",
+                            "--end",
+                            "YYYY-MM-DD",
+                            "--currency",
+                            "USD",
+                            "--gold",
+                            "--palladium",
+                            "--platinum",
+                            "--silver",
+                            "--fake",
+                            "--save",
+                            "--cache",
+                            "--file",
+                            "<file>",
+                            "--debug",
+                            "--token",
+                            "<token>"
+                        }
+                     );
+
+                config
                     .AddCommand<ViewCommand>("view")
                     .WithDescription("Display From Cache File Or Database")
                     .WithExample(
