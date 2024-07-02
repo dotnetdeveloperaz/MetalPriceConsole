@@ -145,7 +145,6 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
                                 $"  [red]{displayName} ({metalPrice.Metal})  {metalPrice.Date.ToShortDateString()}[/]      [green bold italic]Ounce Price: {metalPrice.Price:C} Previous Ounce Price: {metalPrice.PrevClosePrice:C}[/]"
                             )
                     );
-                    rowCnt++;
                     Update(
                         70,
                         () =>
@@ -154,8 +153,8 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
                             )
                     );
                     // More rows than we can display on screen?
-                    //if (table.Rows.Count > Console.WindowHeight - 10)
-                    if (rowCnt > 3)
+                    if (table.Rows.Count > Console.WindowHeight - 12)
+                    //if (rowCnt > 6)
                     {
                         table.Rows.RemoveAt(0);
                         table.Rows.RemoveAt(0);
