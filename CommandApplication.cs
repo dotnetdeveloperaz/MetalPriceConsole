@@ -12,35 +12,6 @@ namespace MetalPriceConsole
             {
                 config.ValidateExamples();
 
-                /*
-                config
-                    .AddCommand<MetalPriceCommand>("price")
-                    .WithDescription("Get Metal Price")
-                    .WithExample(
-                        new[]
-                        {
-                            "price",
-                            "--start",
-                            "YYYY-MM-DD",
-                            "--end",
-                            "YYYY-MM-DD",
-                            "--currency",
-                            "USD",
-                            "--gold",
-                            "--palladium",
-                            "--platinum",
-                            "--silver",
-                            "--fake",
-                            "--save",
-                            "--cache",
-                            "--file",
-                            "<file>",
-                            "--debug",
-                            "--token",
-                            "<token>"
-                        }
-                     );
-                */
                 config
                     .AddCommand<PriceCommand>("price")
                     .WithDescription("Get Metal Price")
@@ -117,6 +88,12 @@ namespace MetalPriceConsole
                     .AddCommand<TestDatabaseCommand>("testdb")
                     .WithDescription("Tests The Database Connection.")
                     .WithExample(new[] { "testdb", "--debug", "--hidden" });
+                config
+                    .AddCommand<CacheStatsCommand>("cachestats")
+                    .WithAlias("cstats")
+                    .WithDescription("Gets Cache File Statistics")
+                    .WithExample(new[] { "cachestats", "--cachefile",  "<filename>" })
+                    .WithExample(new[] { "cstats", "--cachefile", "<filename>" });
 #if DEBUG
                 config.PropagateExceptions();
 #endif
