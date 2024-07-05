@@ -43,8 +43,8 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
             // Historical data is not supported yet, so we can only get the current day
             // Commenting out, will move to PriceCommand as ViewCommand inherits and
             // we can obviously query the database or cache file by date
-            settings.StartDate = String.Empty;
-            settings.EndDate = String.Empty;
+            //settings.StartDate = String.Empty;
+            //settings.EndDate = String.Empty;
         }
         else if (settings.GetPlatinum)
         {
@@ -53,8 +53,8 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
             // Historical data is not supported yet, so we can only get one day
             // Commenting out, will move to PriceCommand as ViewCommand inherits and
             // we can obviously query the database or cache file by date
-            settings.StartDate = String.Empty;
-            settings.EndDate = String.Empty;
+            //settings.StartDate = String.Empty;
+            //settings.EndDate = String.Empty;
         }
         else if (settings.GetGold)
         {
@@ -74,11 +74,11 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
     }
     public override ValidationResult Validate(CommandContext context, PriceCommandSettings settings)
     {
-/*
-            if (!context.Name.Contains("view"))
+
+        if (!context.Name.Contains("view"))
         { 
             if (settings.StartDate == "")
-                settings.StartDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+                settings.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
             if (!DateTime.TryParse(settings.StartDate, out _))
                 return ValidationResult.Error($"Invalid date - {settings.StartDate}");
             if (settings.EndDate == "")
@@ -86,7 +86,7 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
             if (!DateTime.TryParse(settings.EndDate, out _))
                 return ValidationResult.Error($"Invalid date - {settings.EndDate}");
         }
-*/
+
         settings.GetAll = !settings.GetGold && !settings.GetSilver && !settings.GetPalladium && !settings.GetPlatinum;
         return base.Validate(context, settings);
     }

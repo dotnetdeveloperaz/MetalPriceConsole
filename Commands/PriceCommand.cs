@@ -42,15 +42,9 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
         table.BorderColor(Color.Blue);
         table.MinimalBorder();
         table.SimpleBorder();
-        table.AddColumn(
-            new TableColumn(
-                new Markup(
-                    "[yellow bold]Running Database Connection Configuration Test[/]"
-                ).Centered()
-            )
-        );
         table.BorderColor(Color.Blue);
         table.Border(TableBorder.DoubleEdge);
+        table.AddColumns(new[] { "" });
         table.Expand();
 
         // Animate
@@ -67,12 +61,13 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
                     ctx.Refresh();
                     Thread.Sleep(delay);
                 }
-
+/*
                 if (settings.StartDate == DateTime.Now.ToString("yyyy-MM-dd"))
                 {
                     Update(70, () => table.AddRow($"[red bold]Date {settings.StartDate} Cannot Be Current Or Future Date[/]"));
                     return;
                 }
+*/
                 if (settings.StartDate != String.Empty)
                 {
                     Update(
@@ -132,7 +127,7 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
 
                             string url = $"{_apiServer.BaseUrl}{metal}/{settings.Currency}";
                             // Platinum and Palladium do not support historical so dates cannot be used.
-                            if (settings.StartDate != String.Empty)
+                            if (!settings.GetPalladium && !settings.GetPlatinum)
                                 url += $"/{date:yyyyMMdd}";
                             Update(70, () => table.AddRow($"[green]Calling {url}[/]"));
 
@@ -140,6 +135,8 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
                             MetalPrice metalPrice = await GetPriceAsync(url, _apiServer.Token);
                             if (metalPrice != null)
                             {
+                                if (settings.GetPalladium || settings.GetPlatinum)
+                                    metalPrice.Date = date;
                                 Update(
                                     70,
                                     () =>
@@ -161,16 +158,29 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
                             if (table.Rows.Count > Console.WindowHeight - 10)
                                 table.Rows.RemoveAt(0);
                         }
-                        if (settings.Cache)
-                            if (!Database.CacheData(metalPrices, _apiServer.CacheFile))
-                                Update(70, () => table.AddRow($"[red bold]Error Caching Data[/]"));
-                            else
-                                Update(70, () => table.AddRow($"[green bold]Cache File Written.[/]"));
                         if (settings.Save)
-                            if (!Database.Save(metalPrices, _defaultDB, _apiServer.CacheFile))
-                                Update(70, () => table.AddRow($"[red bold]Error Saving Data To Database. Saved To Cache File.[/]"));
+                        {
+                            if (settings.Cache)
+                            {
+                                if (!Database.CacheData(metalPrices, settings.CacheFile))
+                                    Update(70, () => table.AddRow($"[red bold]Error Caching Data[/]"));
+                                else
+                                    Update(70, () => table.AddRow($"[green bold]Cache File Written.[/]"));
+                            }
                             else
-                                Update(70, () => table.AddRow($"[green bold]Data Saved To Database.[/]"));
+                            {
+                                if (!Database.Save(metalPrices, _defaultDB, settings.CacheFile))
+                                {
+                                    bool cacheSaved = Database.CacheData(metalPrices, settings.CacheFile);
+                                    if (!cacheSaved)
+                                        Update(70, () => table.AddRow($"[red bold]Error Saving Data To Database. Could Not Save To Cache File.[/]"));
+                                    else
+                                        Update(70, () => table.AddRow($"[red bold]Error Saving Data To Database. Saved To Cache File.[/]"));
+                                }
+                                else
+                                    Update(70, () => table.AddRow($"[green bold]Data Saved To Database.[/]"));
+                            }
+                        }
                         Update(70, () => table.Columns[0].Footer($"[green bold]Completed. Processed {days.Count} Days With Total Of {metalPrices.Count}.[/]"));
                     }
                     else
@@ -235,7 +245,7 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
     public override ValidationResult Validate(CommandContext context, PriceCommandSettings settings)
     {
         if (settings.StartDate == "")
-            settings.StartDate = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd");
+            settings.StartDate = DateTime.Now.ToString("yyyy-MM-dd");
         if (!DateTime.TryParse(settings.StartDate, out _))
             return ValidationResult.Error($"Invalid date - {settings.StartDate}");
         if (settings.EndDate == "")

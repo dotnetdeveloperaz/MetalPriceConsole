@@ -14,6 +14,7 @@
 
 	<ItemGroup>
 	  <Compile Remove="Commands\History.cs" />
+	  <Compile Remove="Commands\MetalPriceCommand.cs" />
 	  <Compile Remove="Commands\Price.cs" />
 	</ItemGroup>
 
