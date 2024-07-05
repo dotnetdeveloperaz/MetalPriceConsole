@@ -12,6 +12,7 @@ namespace MetalPriceConsole
             {
                 config.ValidateExamples();
 
+                /*
                 config
                     .AddCommand<MetalPriceCommand>("price")
                     .WithDescription("Get Metal Price")
@@ -39,14 +40,14 @@ namespace MetalPriceConsole
                             "<token>"
                         }
                      );
-
+                */
                 config
-                    .AddCommand<PriceCommand>("newprice")
+                    .AddCommand<PriceCommand>("price")
                     .WithDescription("Get Metal Price")
                     .WithExample(
                         new[]
                         {
-                            "newprice",
+                            "price",
                             "--start",
                             "YYYY-MM-DD",
                             "--end",

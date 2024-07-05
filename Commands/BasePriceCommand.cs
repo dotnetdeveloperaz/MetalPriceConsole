@@ -43,8 +43,8 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
             // Historical data is not supported yet, so we can only get the current day
             // Commenting out, will move to PriceCommand as ViewCommand inherits and
             // we can obviously query the database or cache file by date
-            //settings.StartDate = String.Empty;
-            //settings.EndDate = String.Empty;
+            settings.StartDate = String.Empty;
+            settings.EndDate = String.Empty;
         }
         else if (settings.GetPlatinum)
         {
@@ -53,8 +53,8 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
             // Historical data is not supported yet, so we can only get one day
             // Commenting out, will move to PriceCommand as ViewCommand inherits and
             // we can obviously query the database or cache file by date
-            //settings.StartDate = String.Empty;
-            //settings.EndDate = String.Empty;
+            settings.StartDate = String.Empty;
+            settings.EndDate = String.Empty;
         }
         else if (settings.GetGold)
         {

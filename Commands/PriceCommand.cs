@@ -135,10 +135,11 @@ public class PriceCommand : BasePriceCommand<PriceCommand.Settings>
                             if (settings.StartDate != String.Empty)
                                 url += $"/{date:yyyyMMdd}";
                             Update(70, () => table.AddRow($"[green]Calling {url}[/]"));
+
+                            /// TODO Need to add support for --fake calls
                             MetalPrice metalPrice = await GetPriceAsync(url, _apiServer.Token);
                             if (metalPrice != null)
                             {
-                                //metalPrice.Date = new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(metalPrice.Timestamp);
                                 Update(
                                     70,
                                     () =>
