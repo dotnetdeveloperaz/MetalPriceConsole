@@ -9,6 +9,7 @@ using MySqlConnector;
 using MetalPriceConsole.Commands;
 using MetalPriceConsole.Models;
 using System.Linq;
+using MetalPriceConsole.Commands.Settings;
 
 namespace MetalPriceConsole
 {
@@ -55,6 +56,7 @@ namespace MetalPriceConsole
                 sqlCommand.Parameters.AddWithValue("price", metalPrice.Price);
                 sqlCommand.Parameters.AddWithValue("prev_price", metalPrice.PrevClosePrice);
                 sqlCommand.Parameters.AddWithValue("ratedate", metalPrice.Date.ToString("yyyy/MM/dd"));
+                sqlCommand.Parameters.AddWithValue("unixtime", metalPrice.Timestamp);
                 sqlCommand.Parameters.AddWithValue("chg", metalPrice.Change);
                 sqlCommand.Parameters.AddWithValue("chg_pct", metalPrice.ChangePercent);
                 sqlCommand.Parameters.AddWithValue("price_gram_24k", metalPrice.PriceGram24k);
@@ -80,7 +82,7 @@ namespace MetalPriceConsole
             }
             return true;
         }
-        public static List<MetalPrice> GetData(string connectionString, string metal, ViewCommand.Settings settings)
+        public static List<MetalPrice> GetData(string connectionString, string metal, PriceCommandSettings settings)
         {
             MySqlConnection sqlConnection = new(connectionString);
             MySqlCommand sqlCommand = new("usp_GetMetalPrices", sqlConnection);

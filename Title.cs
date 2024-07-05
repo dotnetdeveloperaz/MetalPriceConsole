@@ -25,6 +25,9 @@ public class Title
         titleTable.Expand();
 
         AnsiConsole.Write(titleTable);
+
+        // So I might move this into a cache file class so that we can display various information
+        // related to issue #57 for specifying cache file, and displaying stats
         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         string file = Path.Combine(path, "MetalPrice.cache");
         if (File.Exists(file))

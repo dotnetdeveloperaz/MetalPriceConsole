@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using MetalPriceConsole.Commands.Settings;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.Logging;
 using Spectre.Console;
@@ -37,6 +38,8 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
                 return 0;
         }
+        // We will modify this to use the cache file switch. Going to make this a different issue.
+        //string file = Path.Combine("", settings.CacheFile);
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();

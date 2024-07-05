@@ -9,6 +9,7 @@ using MetalPriceConsole.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using MetalPriceConsole.Commands.Settings;
 
 namespace MetalPriceConsole.Commands;
 
