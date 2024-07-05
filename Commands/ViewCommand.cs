@@ -53,7 +53,7 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
         else
         {
             metalName = "[yellow]Gold[/] [silver]Silver[/] [grey]Palladium[/] [grey100]Platinum[/] ";
-            metal = _apiServer.Gold + _apiServer.Silver + _apiServer.Palladium + _apiServer.Platinum;
+            metal = _apiServer.Gold + "," + _apiServer.Silver + "," + _apiServer.Palladium + "," + _apiServer.Platinum;
         }
 
         _defaultDB = _connectionStrings.DefaultDB;
@@ -149,7 +149,7 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
                         70,
                         () =>
                             table.AddRow(
-                                $"[green bold italic]24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
+                                $"       [green bold italic]24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
                             )
                     );
                     // More rows than we can display on screen?
