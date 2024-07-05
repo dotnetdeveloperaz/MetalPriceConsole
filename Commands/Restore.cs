@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -9,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using MetalPriceConsole.Commands.Settings;
 using MetalPriceConsole.Models;
-using Microsoft.Extensions.Logging;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
