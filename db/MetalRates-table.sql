@@ -1,21 +1,20 @@
--- personal.metalprices definition
-
-CREATE TABLE `metalprices` (
+CREATE TABLE `MetalPrices` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `Metal` varchar(20) NOT NULL,
   `Currency` char(3) NOT NULL,
   `Price` double NOT NULL,
   `PrevPriceClose` double NOT NULL,
   `RateDate` date NOT NULL,
+  `Timestamp` timestamp NOT NULL DEFAULT from_unixtime(unix_timestamp(concat(`RateDate`,' 00:00:00'))),
   `Chg` double NOT NULL,
   `ChgPct` double NOT NULL,
   `AddDate` timestamp NOT NULL DEFAULT current_timestamp(),
-  `Last_Update` tinmestamp NOT NULL DEFAULT current_timestamp(),
-  `Price_Gram_24k` double DEFAULT NULL,
-  `Price_Gram_22k` double DEFAULT NULL,
-  `Price_Gram_21k` double DEFAULT NULL,
-  `Price_Gram_20k` double DEFAULT NULL,
-  `Price_Gram_18k` double DEFAULT NULL,
+  `Last_Update` timestamp NOT NULL DEFAULT current_timestamp(),
+  `Price_Gram_24k` double NOT NULL,
+  `Price_Gram_22k` double NOT NULL,
+  `Price_Gram_21k` double NOT NULL,
+  `Price_Gram_20k` double NOT NULL,
+  `Price_Gram_18k` double NOT NULL,
   PRIMARY KEY (`Id`),
-  UNIQUE KEY `MetalPrices_UN` (`RateDate`,`Metal`,`Currency`)
-) ENGINE=InnoDB AUTO_INCREMENT=1375 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  UNIQUE KEY `MetalPrices_UN` (`RateDate`, `Timestamp`, `Metal`,`Currency`)
+) ENGINE=InnoDB AUTO_INCREMENT=2941 DEFAULT CHARSET=utf8mb4;

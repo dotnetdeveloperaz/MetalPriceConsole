@@ -12,8 +12,6 @@ class Program
 {
     public static async Task Main(string[] args)
     {
-        Title.Print();
-
         // Configuration
         var config = new ConfigurationBuilder()
             .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
@@ -27,6 +25,7 @@ class Program
         var app = new CommandApp(registrar);
         app.Configure(configure => CommandApplication.Initialize(app));
 
+        Title.Print();
 
         try
         {

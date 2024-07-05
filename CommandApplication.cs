@@ -12,6 +12,7 @@ namespace MetalPriceConsole
             {
                 config.ValidateExamples();
 
+                /*
                 config
                     .AddCommand<MetalPriceCommand>("price")
                     .WithDescription("Get Metal Price")
@@ -32,6 +33,36 @@ namespace MetalPriceConsole
                             "--fake",
                             "--save",
                             "--cache",
+                            "--file",
+                            "<file>",
+                            "--debug",
+                            "--token",
+                            "<token>"
+                        }
+                     );
+                */
+                config
+                    .AddCommand<PriceCommand>("price")
+                    .WithDescription("Get Metal Price")
+                    .WithExample(
+                        new[]
+                        {
+                            "price",
+                            "--start",
+                            "YYYY-MM-DD",
+                            "--end",
+                            "YYYY-MM-DD",
+                            "--currency",
+                            "USD",
+                            "--gold",
+                            "--palladium",
+                            "--platinum",
+                            "--silver",
+                            "--fake",
+                            "--save",
+                            "--cache",
+                            "--cachefile",
+                            "<file>",
                             "--debug",
                             "--token",
                             "<token>"
@@ -57,6 +88,8 @@ namespace MetalPriceConsole
                             "--silver",
                             "--fake",
                             "--cache",
+                            "--cachefile",
+                            "<file>",
                             "--debug",
                             "--token",
                             "<token>"
