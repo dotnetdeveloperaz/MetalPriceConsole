@@ -1,4 +1,5 @@
-CREATE DEFINER=`root`@`%` PROCEDURE `personal`.`usp_AddMetalPrice`(
+DELIMITER //
+CREATE OR REPLACE PROCEDURE `Personal`.`usp_AddMetalPrice`(
 	IN metal varchar(20),
 	IN currency char(3),
 	IN price double, 
@@ -31,3 +32,4 @@ BEGIN
 		, Price_Gram_20k = price_gram_20k
 		, Price_Gram_18k = price_gram_18k;
 END;
+//

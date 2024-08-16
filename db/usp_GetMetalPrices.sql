@@ -1,4 +1,5 @@
-CREATE DEFINER=`root`@`%` PROCEDURE `Personal`.`usp_GetMetalPrices`(
+DELIMITER //
+CREATE OR REPLACE PROCEDURE `Personal`.`usp_GetMetalPrices`(
 	IN startDate varchar(10),
 	IN endDate varchar(10),
 	IN metalName varchar(15),
@@ -25,3 +26,4 @@ BEGIN
 	AND FIND_IN_SET(Metal, metalName) > 0
 	AND Currency = baseCurrency;
 END;
+//
