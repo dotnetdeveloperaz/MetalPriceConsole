@@ -115,10 +115,13 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
                 {
                     Update(70, () => table.AddRow($"[red bold]Retrieving {metalName}Metals Data From Database From {settings.StartDate} to {settings.EndDate}[/]"));
                     metalPrices = Database.GetData(_defaultDB, metal, settings);
-                    Update(70, () => table.AddRow($"[green bold]Finished Retrieving {metalPrices.Count} Rows Of Data[/]"));
                 }
                 if (metalPrices == null)
+                {
+                    Update(70, () => table.AddRow($"[red bold]No Rows Of Data Returned[/]"));
                     return;
+                }
+                Update(70, () => table.AddRow($"[green bold]Finished Retrieving {metalPrices.Count} Rows Of Data[/]"));
                 int rowCnt = 0;
                 Update(70, () => table.AddRow($"[red bold]Display {metalName}Prices In {settings.Currency} From {startDate.ToShortDateString()} to {endDate.ToShortDateString()}[/]"));
 /*
