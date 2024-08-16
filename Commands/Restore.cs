@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -26,11 +27,15 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
 
     public class Settings : BaseCommandSettings
     {
-        // There are no special settings for this command
-
+        [CommandOption("--cachefile")]
+        [Description("Cache File to Use - Override Default")]
+        [DefaultValue(null)]
+        public string CacheFile { get; set; } = null;
     }
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        settings.CacheFile ??= _apiServer.CacheFile;
+
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
