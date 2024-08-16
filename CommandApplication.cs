@@ -14,7 +14,13 @@ namespace MetalPriceConsole
 
                 config
                     .AddCommand<PriceCommand>("price")
-                    .WithDescription("Get Metal Price")
+                    .WithDescription(
+                        "Gets the specified Metal Price for the days specified. "
+                        + "Default is current day, and gold.\n"
+                        + "Does not save results. Use --save to save to configured database OR "
+                        + "--save --cache to save to configured cachefile. " 
+                        + "Use with --cachefile </path/filename to override.\n"
+                    )
                     .WithExample(
                         new[]
                         {
@@ -42,7 +48,11 @@ namespace MetalPriceConsole
 
                 config
                     .AddCommand<ViewCommand>("view")
-                    .WithDescription("Display From Cache File Or Database")
+                    .WithDescription(
+                        "Works like the Price command except it displays data from " 
+                        + "the configured database or from the configured cachefile with --cache. "
+                        + "Use with --cachefile </path/filename to override.\n"
+                    )
                     .WithExample(
                         new[]
                         {
@@ -68,9 +78,27 @@ namespace MetalPriceConsole
                      );
 
                 config
+                    .AddCommand<RestoreCommand>("restore")
+                    .WithDescription(
+                        "Restores cachefile to the configured database and deletes the cachefile.\n"
+                        + "To override configured cache file, use the --cachefile </path/filename> switch.\n"
+                        )
+                    .WithExample(new[] { "restore", "--cachefile", "<filename>", "--debug", "--hidden" });
+
+                config
+                    .AddCommand<CacheStatsCommand>("cachestats")
+                    .WithAlias("cstats")
+                    .WithDescription(
+                        "Displays the cachefile statistics, number of records for each metal, start and end dates.\n" 
+                        + "To override configured cache file, use the --cachefile </path/filename> switch.\n"
+                        )
+                    .WithExample(new[] { "cachestats", "--cachefile",  "<filename>" });
+                    //.WithExample(new[] { "cstats", "--cachefile", "<filename>" });
+
+                config
                     .AddCommand<AccountCommand>("account")
                     .WithAlias("acct")
-                    .WithDescription("Retrieves account information.")
+                    .WithDescription("Retrieves WebApi account information, such as number of calls made, etc.")
                     .WithExample(new[] { "account", "--fake", "--debug", "--hidden", "--token", "<token>" })
                     .WithExample(new[] { "acct", "--fake", "--debug", "--hidden", "--token", "<token>" });
 
@@ -80,20 +108,10 @@ namespace MetalPriceConsole
                     .WithExample(new[] { "status", "--debug", "--hidden", "--token", "<token>" });
 
                 config
-                    .AddCommand<RestoreCommand>("restore")
-                    .WithDescription("Restores Cache File.")
-                    .WithExample(new[] { "restore", "--debug", "--hidden" });
-
-                config
                     .AddCommand<TestDatabaseCommand>("testdb")
-                    .WithDescription("Tests The Database Connection.")
+                    .WithDescription("Tests the configured database connection.")
                     .WithExample(new[] { "testdb", "--debug", "--hidden" });
-                config
-                    .AddCommand<CacheStatsCommand>("cachestats")
-                    .WithAlias("cstats")
-                    .WithDescription("Gets Cache File Statistics")
-                    .WithExample(new[] { "cachestats", "--cachefile",  "<filename>" })
-                    .WithExample(new[] { "cstats", "--cachefile", "<filename>" });
+
 #if DEBUG
                 config.PropagateExceptions();
 #endif
