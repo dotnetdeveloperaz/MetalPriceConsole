@@ -66,6 +66,16 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
         // We could just leave the date after adding a day and the filter would work, but we display the date as well which
         // would show a day later than what the user specifies.
         DateTime endDate = settings.EndDate == string.Empty ? DateTime.MaxValue : DateTime.Parse(settings.EndDate).AddDays(1).AddSeconds(-1);
+
+        // Prompting if date range was not specified or is more than 180 days, although still much I think.
+        if (startDate.AddDays(180) < endDate)
+        {
+            if (!AnsiConsole.Confirm("[red bold italic]The amount of data that could be returned might be too much.\n" 
+                + "You might want to specify a shorter date range. Are you sure?[/] Continue?", false)
+                )
+                return -1;
+        }
+
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();
