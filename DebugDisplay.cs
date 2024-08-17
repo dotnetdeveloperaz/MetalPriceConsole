@@ -62,7 +62,7 @@ public class DebugDisplay
                     table.AddRow($"{property.Name}", $"{value}");
             }
             AnsiConsole.Write(table);
-            if (AnsiConsole.Confirm("Continue?"))
+            if (AnsiConsole.Confirm("Continue?", false))
                 Title.Print();
             else
                 return false;
