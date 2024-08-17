@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Text.Json;
@@ -33,7 +34,8 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
     }
     protected override async Task<int> ExecuteDerivedAsync(CommandContext context, PriceCommandSettings settings)
     {
-        string file = Path.Combine("", settings.CacheFile);
+        string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string file = Path.Combine(path, settings.CacheFile);
         // We want to support multiple metals for view, so let's not use base which is singular
         //string metalName = base.MetalName;
         //string metal = base.Metal;
