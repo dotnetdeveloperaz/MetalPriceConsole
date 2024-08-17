@@ -5,6 +5,8 @@ using System;
 using System.Threading.Tasks;
 using MetalPriceConsole.Models;
 using Microsoft.Extensions.DependencyInjection;
+using System.IO;
+using System.Reflection;
 
 namespace MetalPriceConsole;
 
@@ -41,15 +43,18 @@ class Program
     public static IServiceCollection ConfigureServices(IConfiguration config)
     {
         //var logging = config.GetSection("Logging");
+        string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        string file = Path.Combine(path, "MetalPrice.cache");
         var database = config.GetSection("ConnectionStrings");
         var apiServer = config.GetSection("ApiServer");
         var services = new ServiceCollection();
         services.AddSingleton(new ApiServer() { 
-            Token = apiServer["Token"], CacheFile = apiServer["CacheFile"], BaseUrl = apiServer["BaseUrl"], 
-            Gold = apiServer["Gold"], Palladium = apiServer["Palladium"], 
+            Token = apiServer["Token"], CacheFile = apiServer["CacheFile"], CacheFileExits = File.Exists(file),
+            BaseUrl = apiServer["BaseUrl"], Gold = apiServer["Gold"], Palladium = apiServer["Palladium"], 
             Platinum = apiServer["Platinum"], Silver = apiServer["Silver"],
             Currency= apiServer["Currency"], MonthlyAllowance = apiServer["MonthlyAllowance"] 
         });
+        
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
 /*
         services.AddLogging(loggingBuilder =>
