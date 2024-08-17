@@ -23,11 +23,15 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
 
     public class Settings : BaseCommandSettings
     {
-        // There are no special settings for this command
+        [CommandOption("--db")]
+        [Description("Override Configured DB For Testing")]
+        [DefaultValue(null)]
+        public string DBConnectionString { get; set; }
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
+        settings.DBConnectionString ??= _connectionString;
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A"))
@@ -66,7 +70,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                 }
 
                 Update(70, () => titleTable.AddRow($"[red bold] Testing Connection...[/]"));
-                var conn = new MySqlConnection(_connectionString);
+                var conn = new MySqlConnection(settings.DBConnectionString);
                 try
                 {
                     await conn.OpenAsync();

@@ -93,24 +93,26 @@ namespace MetalPriceConsole
                         + "To override configured cache file, use the --cachefile </path/filename> switch.\n"
                         )
                     .WithExample(new[] { "cachestats", "--cachefile",  "<filename>" });
-                    //.WithExample(new[] { "cstats", "--cachefile", "<filename>" });
+
+                config
+                    .AddCommand<TestDatabaseCommand>("testdb")
+                    .WithDescription(
+                        "Tests the configured database connection.\n"
+                        + "Use the --db \"<YourConnectionString>\" (Quotes Required!) to test connectionstrings for diagnosing.\n"
+                        + "This swtich is NOT available with any other command.\n"
+                        )
+                    .WithExample(new[] { "testdb", "--db", "'<YourDBConnectionString>'", "--debug", "--hidden" });
 
                 config
                     .AddCommand<AccountCommand>("account")
                     .WithAlias("acct")
                     .WithDescription("Retrieves WebApi account information, such as number of calls made, etc.")
-                    .WithExample(new[] { "account", "--fake", "--debug", "--hidden", "--token", "<token>" })
-                    .WithExample(new[] { "acct", "--fake", "--debug", "--hidden", "--token", "<token>" });
+                    .WithExample(new[] { "account", "--fake", "--debug", "--hidden", "--token", "<token>" });
 
                 config
                     .AddCommand<StatusCommand>("status")
                     .WithDescription("Retrieves WebApi Status.")
                     .WithExample(new[] { "status", "--debug", "--hidden", "--token", "<token>" });
-
-                config
-                    .AddCommand<TestDatabaseCommand>("testdb")
-                    .WithDescription("Tests the configured database connection.")
-                    .WithExample(new[] { "testdb", "--debug", "--hidden" });
 
 #if DEBUG
                 config.PropagateExceptions();
