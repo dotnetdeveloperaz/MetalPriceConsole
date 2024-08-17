@@ -41,8 +41,6 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
             if (!DebugDisplay.Print(settings, _apiServer, "N/A"))
                 return 0;
         }
-        // We will modify this to use the cache file switch. Going to make this a different issue.
-        //string file = Path.Combine("", settings.CacheFile);
         // Process Window
         var table = new Table().Centered();
         table.HideHeaders();
@@ -115,6 +113,16 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                                 )
                         );
                         saved++;
+                    }
+                    else
+                    {
+                        Update(
+                            70,
+                            () =>
+                                table.AddRow(
+                                    $"[red bold]Unable To Save Gold Price For {metalPrice.Date:yyyy-MM-dd}...[/]"
+                                )
+                        );
                     }
                     // More rows than we can display?
                     if (table.Rows.Count > Console.WindowHeight - 30)
