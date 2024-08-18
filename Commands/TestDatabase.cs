@@ -47,7 +47,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
         titleTable.AddColumn(
             new TableColumn(
                 new Markup(
-                    "[yellow bold]Running Database Connection Configuration Test[/]"
+                    "[yellow bold]Running Database Configuration Test[/]"
                 ).Centered()
             )
         );
