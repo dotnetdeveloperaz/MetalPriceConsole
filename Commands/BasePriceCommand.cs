@@ -72,6 +72,11 @@ public abstract class BasePriceCommand<TSettings> : AsyncCommand<PriceCommandSet
         // Derived classes provide their specific implementation
         return await ExecuteDerivedAsync(context, settings);
     }
+    protected Task BaseExecuteAsync(CommandContext context, BaseCommandSettings settings)
+    {
+        return Task.CompletedTask;
+    }
+
     public override ValidationResult Validate(CommandContext context, PriceCommandSettings settings)
     {
 
