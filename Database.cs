@@ -48,6 +48,7 @@ namespace MetalPriceConsole
             MySqlConnection sqlConnection = new(connectionString);
             MySqlCommand sqlCommand = new("usp_AddMetalPrice", sqlConnection);
             sqlCommand.CommandType = CommandType.StoredProcedure;
+            DateTime timeStamp = DateTimeOffset.FromUnixTimeMilliseconds(metalPrice.Timestamp).UtcDateTime;
             try
             {
                 sqlConnection.Open();
@@ -56,7 +57,7 @@ namespace MetalPriceConsole
                 sqlCommand.Parameters.AddWithValue("price", metalPrice.Price);
                 sqlCommand.Parameters.AddWithValue("prev_price", metalPrice.PrevClosePrice);
                 sqlCommand.Parameters.AddWithValue("ratedate", metalPrice.Date.ToString("yyyy/MM/dd"));
-                sqlCommand.Parameters.AddWithValue("unixtime", metalPrice.Timestamp);
+                sqlCommand.Parameters.AddWithValue("unixtime", timeStamp);
                 sqlCommand.Parameters.AddWithValue("chg", metalPrice.Change);
                 sqlCommand.Parameters.AddWithValue("chg_pct", metalPrice.ChangePercent);
                 sqlCommand.Parameters.AddWithValue("price_gram_24k", metalPrice.PriceGram24k);
