@@ -35,8 +35,8 @@ This application uses the following open source libraries.
 
 ## Status
 
-.NET 8
-[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml)
+.NET 9
+[![build](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/dotnet8.yml/badge.svg?branch=main)](https://github.com/dotnetdeveloperaz/metalPriceConsole/actions/workflows/build.yml)
 
 <a href="https://www.buymeacoffee.com/dotnetdev" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
@@ -46,9 +46,9 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Prerequisites
 
-1. .NET 6, .NET 7 or .NET 8.
+1. .NET 9. This will compile and run with .NET 5 through .NET 8 as well.
 2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 free (was 300 but they changed this in May 2023) api calls per month.
-3. MariaDB (or MySQL) if using the --save switch. This is optional.
+3. MariaDB (or MySQL) if using the --save switch without --cache and --cachefile. This is optional.
 4. Configure appsettings or user-secrets **(Token) (DefaultDB) keys**
 5. Set MonthlyAllowance if your account has a difference allowance amount.
 
