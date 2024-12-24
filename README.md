@@ -1,4 +1,4 @@
-# Metal Price Console v3.0
+# Metal Price Console v3.1
 
 ## **<span style="color: red;">Important Note:</span>**
 
@@ -12,7 +12,7 @@
 
 #### Update 8/23/2023 Got a response from one of the developers, and they confirmed that historical data is not currently supported in these two metals, but they are looking to add support for it. I will re-add support for specifying dates once they support it.
 
-#### As of Jan 1, 2024, Palladium and Platinum do NOT support historical data still. The current code does NOT account for this, as this went through a rewrite during New Years Eve.
+#### As of December 24, 2024, Palladium and Platinum do NOT support historical data still. Might fully remove support for those two metals.
 
 ## Table of Contents
 
@@ -46,13 +46,13 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Prerequisites
 
-1. .NET 9. This will compile and run with .NET 5 through .NET 8 as well.
+1. .NET 9 runtime or SDK.
 2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 free (was 300 but they changed this in May 2023) api calls per month.
 3. MariaDB (or MySQL) if using the --save switch without --cache and --cachefile. This is optional.
 4. Configure appsettings or user-secrets **(Token) (DefaultDB) keys**
 5. Set MonthlyAllowance if your account has a difference allowance amount.
 
-**Note: Setting this above your allowance will only make the API calls fail once you hit your limit.**
+**Note: Setting MonthlyAllowance above your allowance will only make the API calls fail once you hit your limit.**
 
 ```json
 "ApiServer": {
@@ -116,14 +116,14 @@ dotnet build
 To run a simple test, run the following.
 
 ```bash
-dotnet run acct
+dotnet run account
 ```
 
 You should see something similar to:
 
 ```bash
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                               Metal Price Console v3.0                                               │
+│                                               Metal Price Console v3.1                                               │
 │                                               Written By Scott Glasgow                                               │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -172,6 +172,10 @@ view
 - Dates are NOT checked for holiday or weekends since there would never be data for those dates stored in the cache or database.
 - if no metal switch is used (eg: --silver) the gold is the default just like when using the price command.
 view --start YYYY-MM-DD --end YYYY-MM-DD --silver
+
+missing
+
+- Will retrieve the dates that does not have any data that is not a weekend or holiday.
 
 ### Switches
 
