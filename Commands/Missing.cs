@@ -54,21 +54,21 @@ public class MissingCommand(ApiServer apiServer, ConnectionStrings ConnectionStr
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.DBConnectionString ??= _connectionString;
+        if (settings.GetSilver)
+        {
+            metal = "XAG";
+            metalName = "Silver";
+        }
+        else
+        {
+            metal = "XAU";
+            metalName = "Gold";
+        }
         if (settings.Debug)
         {
             if (!DebugDisplay.Print(settings, _apiServer, _connectionString, "N/A"))
                 return 0;
 
-        }
-        if (settings.GetGold)
-        {
-            metal = "XAU";
-            metalName = "Gold";
-        }
-        else if (settings.GetSilver)
-        {
-            metal = "XAG";
-            metalName = "Silver";
         }
 
         // Process Window

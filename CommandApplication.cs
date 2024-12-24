@@ -88,7 +88,7 @@ namespace MetalPriceConsole
 
                 config
                     .AddCommand<MissingCommand>("missing")
-                    .WithDescription("Reports the dates that have missing data.")
+                    .WithDescription("Reports the dates that have missing data for the specified metal. Default is Gold (XAU) if --silver not specified.")
                     .WithExample(new[] { "missing", "--debug", "--hidden" });
 
                 config
