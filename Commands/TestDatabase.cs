@@ -83,7 +83,7 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     Update(70, () => titleTable.AddRow($"[green bold]Connection Made Successfully...[/]"));
 
                     // Want to add tests to ensure table exists, and both stored procedures exist.
-                    string procs = "SELECT COUNT(*) FROM information_schema.ROUTINES WHERE ROUTINE_NAME LIKE 'usp_%MetalPrice%';";
+                    string procs = "SELECT COUNT(*) FROM information_schema.ROUTINES WHERE ROUTINE_NAME LIKE 'usp_%Metal%' or ROUTINE_NAME = 'fn_isHoliday';";
                     string table = "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_NAME = 'MetalPrices';";
                     string exec = $"SELECT COUNT(*) from information_schema.schema_Privileges where GRANTEE = \"" + user + "\" and PRIVILEGE_TYPE = 'EXECUTE';";
 
@@ -98,8 +98,8 @@ public class TestDatabaseCommand : AsyncCommand<TestDatabaseCommand.Settings>
                     sqlCommand.CommandText = procs;
                     recs = sqlCommand.ExecuteScalar();
 
-                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 2 Stored Procedures Exist...[/]"));
-                    if (recs.ToString() == "2")
+                    Update(70, () => titleTable.AddRow($"[blue bold]Verifying The 3 Stored Procedures And 1 Function Exists...[/]"));
+                    if (recs.ToString() == "4")
                         Update(70, () => titleTable.AddRow($"[green bold]Verified {recs} Stored Procedures Exist...[/]"));
                     else
                         Update(70, () => titleTable.AddRow($"[red bold]Both Stored Procedures DO NOT Exist, Count {recs}....[/]"));

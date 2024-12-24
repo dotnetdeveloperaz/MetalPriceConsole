@@ -1,5 +1,6 @@
 ﻿using MetalPriceConsole.Commands;
 using Spectre.Console.Cli;
+using System.IO.Enumeration;
 
 namespace MetalPriceConsole
 {
@@ -18,7 +19,7 @@ namespace MetalPriceConsole
                         "Gets the specified Metal Price for the days specified. "
                         + "Default is current day, and gold.\n"
                         + "Does not save results. Use --save to save to configured database OR "
-                        + "--save --cache to save to configured cachefile. " 
+                        + "--save --cache to save to configured cache file. "
                         + "Use with --cachefile </path/filename to override.\n"
                     )
                     .WithExample(
@@ -49,7 +50,7 @@ namespace MetalPriceConsole
                 config
                     .AddCommand<ViewCommand>("view")
                     .WithDescription(
-                        "Works like the Price command except it displays data from " 
+                        "Works like the Price command except it displays data from "
                         + "the configured database or from the configured cachefile with --cache. "
                         + "Use with --cachefile </path/filename to override.\n"
                     )
@@ -80,26 +81,31 @@ namespace MetalPriceConsole
                 config
                     .AddCommand<RestoreCommand>("restore")
                     .WithDescription(
-                        "Restores cachefile to the configured database and deletes the cachefile.\n"
+                        "Restores cachefile to the configured database and deletes the cache file.\n"
                         + "To override configured cache file, use the --cachefile </path/filename> switch.\n"
                         )
                     .WithExample(new[] { "restore", "--cachefile", "<filename>", "--debug", "--hidden" });
 
                 config
+                    .AddCommand<MissingCommand>("missing")
+                    .WithDescription("Reports the dates that have missing data for the specified metal. Default is Gold (XAU) if --silver not specified.")
+                    .WithExample(new[] { "missing", "--debug", "--hidden" });
+
+                config
                     .AddCommand<CacheStatsCommand>("cachestats")
                     .WithAlias("cstats")
                     .WithDescription(
-                        "Displays the cachefile statistics, number of records for each metal, start and end dates.\n" 
+                        "Displays the cache file statistics, number of records for each metal, start and end dates.\n"
                         + "To override configured cache file, use the --cachefile </path/filename> switch.\n"
                         )
-                    .WithExample(new[] { "cachestats", "--cachefile",  "<filename>" });
+                    .WithExample(new[] { "cachestats", "--cachefile", "<filename>" });
 
                 config
                     .AddCommand<TestDatabaseCommand>("testdb")
                     .WithDescription(
                         "Tests the configured database connection.\n"
-                        + "Use the --db \"<YourConnectionString>\" (Quotes Required!) to test connectionstrings for diagnosing.\n"
-                        + "This swtich is NOT available with any other command.\n"
+                        + "Use the --db \"<YourConnectionString>\" (Quotes Required!) to test connection strings for diagnosing.\n"
+                        + "This switch is NOT available with any other command.\n"
                         )
                     .WithExample(new[] { "testdb", "--db", "'<YourDBConnectionString>'", "--debug", "--hidden" });
 

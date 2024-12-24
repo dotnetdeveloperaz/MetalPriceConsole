@@ -103,7 +103,7 @@ public class RestoreCommand : AsyncCommand<RestoreCommand.Settings>
                                 $"           [green bold italic] 24k gram: {metalPrice.PriceGram24k:C} 22k gram: {metalPrice.PriceGram22k:C} 21k gram: {metalPrice.PriceGram21k:C} 20k gram: {metalPrice.PriceGram20k:C} 18k gram: {metalPrice.PriceGram18k:C}[/]"
                             )
                     );
-                    if (Database.Save(metalPrice, _connectionString, _apiServer.CacheFile))
+                    if (Database.Save(metalPrice, _connectionString))
                     {
                         Update(
                             70,

@@ -1,4 +1,4 @@
-# Metal Price Console v3.0
+# Metal Price Console v3.1
 
 ## **<span style="color: red;">Important Note:</span>**
 
@@ -12,7 +12,7 @@
 
 #### Update 8/23/2023 Got a response from one of the developers, and they confirmed that historical data is not currently supported in these two metals, but they are looking to add support for it. I will re-add support for specifying dates once they support it.
 
-#### As of Jan 1, 2024, Palladium and Platinum do NOT support historical data still. The current code does NOT account for this, as this went through a rewrite during New Years Eve.
+#### As of December 24, 2024, Palladium and Platinum do NOT support historical data still. Might fully remove support for those two metals.
 
 ## Table of Contents
 
@@ -46,13 +46,13 @@ These instructions will get you a copy of the project up and running on your loc
 
 ## Prerequisites
 
-1. .NET 9. This will compile and run with .NET 5 through .NET 8 as well.
+1. .NET 9 runtime or SDK.
 2. Account with [GoldApi.io](https://www.goldapi.io/) Free account gives you 100 free (was 300 but they changed this in May 2023) api calls per month.
 3. MariaDB (or MySQL) if using the --save switch without --cache and --cachefile. This is optional.
 4. Configure appsettings or user-secrets **(Token) (DefaultDB) keys**
 5. Set MonthlyAllowance if your account has a difference allowance amount.
 
-**Note: Setting this above your allowance will only make the API calls fail once you hit your limit.**
+**Note: Setting MonthlyAllowance above your allowance will only make the API calls fail once you hit your limit.**
 
 ```json
 "ApiServer": {
@@ -116,14 +116,14 @@ dotnet build
 To run a simple test, run the following.
 
 ```bash
-dotnet run acct
+dotnet run account
 ```
 
 You should see something similar to:
 
 ```bash
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                               Metal Price Console v3.0                                               │
+│                                               Metal Price Console v3.1                                               │
 │                                               Written By Scott Glasgow                                               │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -173,6 +173,12 @@ view
 - if no metal switch is used (eg: --silver) the gold is the default just like when using the price command.
 view --start YYYY-MM-DD --end YYYY-MM-DD --silver
 
+missing
+
+- Will retrieve the dates that does not have any data that is not a weekend or holiday. Use --silver for Silver or --gold for gold (default is Gold if no switch is supplied).
+- Does not support Palladium or Platinum as the third party API still does not support dates as of 2/24/2024.
+- ###### This command returns the dates that have no data from January 1st, 2013 to the current date. Date range using --start --end will be implemented at a later time. The stored procedure usp_GetMetalMissing.sql can be modified with a different start date if your data does not go back that far.
+
 ### Switches
 
 - --save writes the price data to the database on commands price and backtrack.
@@ -201,7 +207,7 @@ price --start 2023-07-31 --end 2023-06-21  Will get the gold rates from July 31s
 price --start 2023-07-31 --end 2023-06-21 --save  Will get the gold rates from July 31st, 2023 to June 21st, 2023 and save to the database.
 ```
 
-#### Base Currencies Supported
+#### Base Currencies Supported - See the third party API documentation for any new additions.
 ``` text
 USD - United States Dollar
 EUR - European Euro
@@ -240,32 +246,44 @@ Run the application with no commands (dotnet run) and you will get the following
 *NOTE: view command does not use --fake or --token and they are ignored.
 
 ```bash
-┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                                               Metal Price Console v3.0                                               │
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                               Metal Price Console v3.1                                               │
 │                                               Written By Scott Glasgow                                               │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 USAGE:
     MetalPriceConsole.dll [OPTIONS] <COMMAND>
 
 EXAMPLES:
     MetalPriceConsole.dll price --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum
---silver --fake --save --cache --debug --token <token>
+--silver --fake --save --cache --cachefile <file> --debug --token <token>
     MetalPriceConsole.dll view --start YYYY-MM-DD --end YYYY-MM-DD --currency USD --gold --palladium --platinum --silver
---fake --cache --debug --token <token>
-    MetalPriceConsole.dll account --fake --debug --hidden --token <token>
-    MetalPriceConsole.dll acct --fake --debug --hidden --token <token>
-    MetalPriceConsole.dll status --debug --hidden --token <token>
-    MetalPriceConsole.dll restore --debug --hidden
+--fake --cache --cachefile <file> --debug --token <token>
+    MetalPriceConsole.dll restore --cachefile <filename> --debug --hidden
+    MetalPriceConsole.dll missing --gold --silver --debug --hidden
+    MetalPriceConsole.dll cachestats --cachefile <filename>
 
 OPTIONS:
-    -h, --help       Prints help information
-    -v, --version    Prints version information
+    -h, --help    Prints help information
 
 COMMANDS:
-    price         Get Metal Price
-    view          Display From Cache File Or Database
-    account       Retrieves account information
+    price         Gets the specified Metal Price for the days specified. Default is current day, and gold.
+                  Does not save results. Use --save to save to configured database OR --save --cache to save to
+                  configured cache file. Use with --cachefile </path/filename to override.
+
+    view          Works like the Price command except it displays data from the configured database or from the
+                  configured cachefile with --cache. Use with --cachefile </path/filename to override.
+
+    restore       Restores cachefile to the configured database and deletes the cache file.
+                  To override configured cache file, use the --cachefile </path/filename> switch.
+
+    missing       Reports the dates that have missing data for the specified metal. Default is Gold (XAU) if --silver not specified.
+    cachestats    Displays the cache file statistics, number of records for each metal, start and end dates.
+                  To override configured cache file, use the --cachefile </path/filename> switch.
+
+    testdb        Tests the configured database connection.
+                  Use the --db "<YourConnectionString>" (Quotes Required!) to test connection strings for diagnosing.
+                  This switch is NOT available with any other command.
+
+    account       Retrieves WebApi account information, such as number of calls made, etc
     status        Retrieves WebApi Status
-    restore       Restores Cache File
-    testdb        Tests The Database Connection
 ```
