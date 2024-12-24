@@ -27,7 +27,7 @@ namespace MetalPriceConsole
             int success = 0;
             foreach (MetalPrice metalPrice in metalPrices)
             {
-                if (Save(metalPrice, connectionString, cacheFile))
+                if (Save(metalPrice, connectionString))
                     success++;
             }
             if (success != metalPrices.Count)
@@ -40,7 +40,7 @@ namespace MetalPriceConsole
         /// <param name="metalPrice">Type metalPrice</param>
         /// <param name="connectionString"Database connectionstring></param>
         /// <returns></returns>
-        public static bool Save(MetalPrice metalPrice, string connectionString, string cacheFile)
+        public static bool Save(MetalPrice metalPrice, string connectionString)
         {
             //metalPrice.Date = DateTimeOffset.Parse(metalPrice.Timestamp.ToString()).Date;
             if (metalPrice.Date.Year < 1900)

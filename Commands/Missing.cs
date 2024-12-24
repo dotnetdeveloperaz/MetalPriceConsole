@@ -13,19 +13,13 @@ using System.Runtime.Intrinsics.X86;
 
 namespace MetalPriceConsole.Commands;
 
-public class MissingCommand : AsyncCommand<MissingCommand.Settings>
+public class MissingCommand(ApiServer apiServer, ConnectionStrings ConnectionString) : AsyncCommand<MissingCommand.Settings>
 {
-    private readonly string _connectionString;
-    private readonly ApiServer _apiServer;
+    private readonly string _connectionString = ConnectionString.DefaultDB;
+    private readonly ApiServer _apiServer = apiServer;
     private string metal;
     private string metalName;
     private static readonly string[] columns = new[] { "" };
-
-    public MissingCommand(ApiServer apiServer, ConnectionStrings ConnectionString)
-    {
-        _apiServer = apiServer;
-        _connectionString = ConnectionString.DefaultDB;
-    }
 
     public class Settings : BaseCommandSettings
     {
@@ -111,10 +105,12 @@ public class MissingCommand : AsyncCommand<MissingCommand.Settings>
                 // Content
                 Update(70, () => table.Columns[0].Footer($"[green]Querying Database For Missing {metalName} Data....[/]"));
                 var conn = new MySqlConnection(settings.DBConnectionString);
-                var sqlCommand = new MySqlCommand();
-                sqlCommand.Connection = conn;
-                sqlCommand.CommandType = CommandType.StoredProcedure;
-                sqlCommand.CommandText = "usp_GetMetalMissing";
+                var sqlCommand = new MySqlCommand
+                {
+                    Connection = conn,
+                    CommandType = CommandType.StoredProcedure,
+                    CommandText = "usp_GetMetalMissing"
+                };
                 try
                 {
                     await conn.OpenAsync();
