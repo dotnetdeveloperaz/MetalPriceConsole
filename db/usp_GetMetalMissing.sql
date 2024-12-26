@@ -1,6 +1,8 @@
 DELIMITER //
 CREATE OR REPLACE PROCEDURE `Personal`.`usp_GetMetalMissing`(
-	IN metalName varchar(15)
+	IN startDate varchar(10),
+	IN endDate varchar(10),	
+    IN metalName varchar(15)
 )
 BEGIN
 WITH Calendar AS (
@@ -16,7 +18,9 @@ WITH Calendar AS (
         (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 
          UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) c
     WHERE
-        CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY >= '2013-01-01'
+        CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY >= startDate
+    AND
+        CURDATE() - INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY <= endDate
 )
 SELECT
     c.RateDate

@@ -19,6 +19,7 @@ public class ApiServer
     public string Platinum { get; set; }
     public string Silver { get; set; }
     public string Currency { get; set; }
+    public string HistoricalStartDate {  get; set; }
     public string MonthlyAllowance { get; set; }
 }
 
