@@ -38,31 +38,46 @@ public class MissingCommand(ApiServer apiServer, ConnectionStrings ConnectionStr
         [DefaultValue(false)]
         public bool GetSilver {  get; set; }
 
-/*  These two metals do not currently support historic data so disabling
-        [CommandOption("--palladium")]
-        [Description("Get Palladium Price")]
-        [DefaultValue(false)]
-        public bool GetPalladium { get; set; }
+        [CommandOption("--start <date>")]
+        [Description("Date Or Start Date To Get Price(s) For")]
+        [DefaultValue(null)]
+        public string StartDate { get; set; }
 
-        [CommandOption("--platinum")]
-        [Description("Get Platinum Price")]
-        [DefaultValue(false)]
-        public bool GetPlatinum { get; set; }
- */
+        [CommandOption("--end <date>")]
+        [Description("End Date To Get Price(s) For - Not Required For Single Day")]
+        [DefaultValue(null)]
+        public string EndDate { get; set; }
+
+        /*  These two metals do not currently support historic data so disabling
+                [CommandOption("--palladium")]
+                [Description("Get Palladium Price")]
+                [DefaultValue(false)]
+                public bool GetPalladium { get; set; }
+
+                [CommandOption("--platinum")]
+                [Description("Get Platinum Price")]
+                [DefaultValue(false)]
+                public bool GetPlatinum { get; set; }
+         */
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
         settings.DBConnectionString ??= _connectionString;
+        settings.StartDate ??= _apiServer.HistoricalStartDate;
+        settings.EndDate ??= DateTime.Now.ToString("yyyy-MM-dd");
+
         if (settings.GetSilver)
         {
             metal = "XAG";
             metalName = "Silver";
+            settings.GetGold = true;
         }
         else
         {
             metal = "XAU";
             metalName = "Gold";
+            settings.GetGold = true;
         }
         if (settings.Debug)
         {
@@ -115,6 +130,8 @@ public class MissingCommand(ApiServer apiServer, ConnectionStrings ConnectionStr
                 {
                     await conn.OpenAsync();
                     sqlCommand.Parameters.AddWithValue("metalName", metal);
+                    sqlCommand.Parameters.AddWithValue("startDate", settings.StartDate);
+                    sqlCommand.Parameters.AddWithValue("endDate", settings.EndDate);
                     var reader = await sqlCommand.ExecuteReaderAsync();
                     int cnt = 0;
                     while (reader.Read())
