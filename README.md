@@ -64,6 +64,7 @@ These instructions will get you a copy of the project up and running on your loc
     "Palladium": "XPD",
     "Platinum":  "XPT",
     "Currency": "USD",
+    "HistoricalStartDate": "2013-01-01",
     "MonthlyAllowance": "100"
   },
   "Logging": {
@@ -177,7 +178,7 @@ missing
 
 - Will retrieve the dates that does not have any data that is not a weekend or holiday. Use --silver for Silver or --gold for gold (default is Gold if no switch is supplied).
 - Does not support Palladium or Platinum as the third party API still does not support dates as of 2/24/2024.
-- ###### This command returns the dates that have no data from January 1st, 2013 to the current date. Date range using --start --end will be implemented at a later time. The stored procedure usp_GetMetalMissing.sql can be modified with a different start date if your data does not go back that far.
+- This command returns the dates that have no data from January 1st, 2013 to the current date. To specify a date range use --start YYYY-MM-DD --end YYYY-MM-DD if you want to specify the start and/or end date.
 
 ### Switches
 
