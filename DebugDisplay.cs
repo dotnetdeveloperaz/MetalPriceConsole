@@ -51,6 +51,7 @@ public class DebugDisplay
                 table.AddRow($"Token:", $"{server.Token}");
                 table.AddRow($"Url:", $"{Url}");
             }
+            table.AddRow($"MaxViewCount:", $"{server.MaxViewCount}");
             foreach (PropertyInfo property in properties)
             {
                 object value = property.GetValue(settings);

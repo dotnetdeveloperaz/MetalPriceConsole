@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -69,14 +70,16 @@ public class ViewCommand : BasePriceCommand<ViewCommand.Settings>
         int removeSize = 10;
         if (_apiServer.CacheFileExits)
             removeSize += 2;
-        // Prompting if date range was not specified or is more than 180 days, although still much I think.
-        if (startDate.AddDays(180) < endDate)
+        // Set MaxRecords to view
+        _ = int.TryParse(_apiServer.MaxViewCount, out int maxDays);
+        // Prompting if date range was not specified or is more than MaxViewCount set in appsettings.
+        if (startDate.AddDays(maxDays) < endDate)
         {
             removeSize += 2;
-            if (!AnsiConsole.Confirm("[red bold italic]The amount of data that could be returned might be too much.\n" 
-                + "You might want to specify a shorter date range. Are you sure?[/] Continue?", false)
+            if (!AnsiConsole.Confirm($"[red bold]The amount of data that could be returned exceeds configured MaxViewCount[/][yellow bold] ({_apiServer.MaxViewCount})[/].\n"
+                + "[green]\tYou might want to specify a shorter date range.[/]\n[red bold italic]Are you sure you want to Continue?[/]", false)
                 )
-                return -1;
+                return 1;
         }
 
         // Process Window
