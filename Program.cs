@@ -52,7 +52,8 @@ class Program
             Token = apiServer["Token"], CacheFile = apiServer["CacheFile"], CacheFileExits = File.Exists(file),
             BaseUrl = apiServer["BaseUrl"], Gold = apiServer["Gold"], Palladium = apiServer["Palladium"], 
             Platinum = apiServer["Platinum"], Silver = apiServer["Silver"], Currency= apiServer["Currency"], 
-            HistoricalStartDate = apiServer["HistoricalStartDate"], MonthlyAllowance = apiServer["MonthlyAllowance"] 
+            HistoricalStartDate = apiServer["HistoricalStartDate"], MaxViewCount = apiServer["MaxViewCount"],
+            MonthlyAllowance = apiServer["MonthlyAllowance"] 
         });
         
         services.AddSingleton(new ConnectionStrings() { DefaultDB = database["DefaultDB"] });
