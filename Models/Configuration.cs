@@ -20,6 +20,7 @@ public class ApiServer
     public string Silver { get; set; }
     public string Currency { get; set; }
     public string HistoricalStartDate {  get; set; }
+    public string MaxViewCount { get; set; }
     public string MonthlyAllowance { get; set; }
 }
 
